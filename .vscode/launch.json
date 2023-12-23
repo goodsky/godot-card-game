@@ -2,31 +2,31 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch",
+            "name": "Run Game",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${env:GODOT4}",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}\\game-client",
             "console": "internalConsole",
             "stopAtEntry": false,
             "args": [
                 "--path",
-                "${workspaceRoot}"
+                "${workspaceRoot}\\game-client"
             ]
         },
         {
-            "name": "Launch Editor",
+            "name": "Godot Editor",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${env:GODOT4}",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}\\game-client",
             "console": "internalConsole",
             "stopAtEntry": false,
             "args": [
                 "--path",
-                "${workspaceRoot}",
+                "${workspaceRoot}\\game-client",
                 "--editor"
             ]
         },
