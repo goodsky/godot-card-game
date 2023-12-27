@@ -1,6 +1,9 @@
-[gd_scene format=3 uid="uid://cy5tlsqssbnex"]
+[gd_scene load_steps=2 format=3 uid="uid://cy5tlsqssbnex"]
 
-[node name="CardGame" type="Node"]
+[ext_resource type="Script" path="res://Scenes/MainGame.cs" id="1_ywtuq"]
+
+[node name="MainGame" type="Node"]
+script = ExtResource("1_ywtuq")
 
 [node name="CenterContainer" type="CenterContainer" parent="."]
 anchors_preset = 15
@@ -11,4 +14,4 @@ grow_vertical = 2
 
 [node name="Label" type="Label" parent="CenterContainer"]
 layout_mode = 2
-text = "Hello Card Game!"
+text = "This is the MainScene"

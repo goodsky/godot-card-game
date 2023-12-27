@@ -7,6 +7,18 @@
             "type": "process",
             "args": [
                 "build",
+                "CardGame.sln",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary;ForceNoAlign"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "build-godot",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
                 "game-client\\Card Game.sln",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary;ForceNoAlign"
