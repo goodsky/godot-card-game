@@ -5,13 +5,94 @@
 [node name="MainGame" type="Node"]
 script = ExtResource("1_ywtuq")
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="GridContainer" type="GridContainer" parent="."]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+columns = 2
 
-[node name="Label" type="Label" parent="CenterContainer"]
+[node name="Child1" type="Control" parent="GridContainer"]
 layout_mode = 2
-text = "This is the MainScene"
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="GridContainer/Child1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 0, 0, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="GridContainer/Child1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="GridContainer/Child1/CenterContainer"]
+layout_mode = 2
+text = "Child 1"
+
+[node name="Child2" type="Control" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="GridContainer/Child2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 1, 0, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="GridContainer/Child2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="GridContainer/Child2/CenterContainer"]
+layout_mode = 2
+text = "Child 2"
+
+[node name="Child3" type="Control" parent="GridContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ColorRect" type="ColorRect" parent="GridContainer/Child3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 1, 1)
+
+[node name="CenterContainer" type="CenterContainer" parent="GridContainer/Child3"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="Label" type="Label" parent="GridContainer/Child3/CenterContainer"]
+layout_mode = 2
+text = "Child 3"
