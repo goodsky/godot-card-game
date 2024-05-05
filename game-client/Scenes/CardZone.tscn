@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5xhnpky0iypx"]
+
+[ext_resource type="Script" path="res://Scenes/CardZone.cs" id="1_2a4vl"]
+
+[node name="CardZone" type="Container"]
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_2a4vl")

@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://dwjxc1lj4dmrs"]
+
+[ext_resource type="Theme" uid="uid://7rjt8455okwr" path="res://Themes/card_default.tres" id="1_5keve"]
+[ext_resource type="Script" path="res://Scenes/Card.cs" id="1_7qw70"]
+
+[node name="Card" type="Panel"]
+offset_right = 250.0
+offset_bottom = 350.0
+theme = ExtResource("1_5keve")
+script = ExtResource("1_7qw70")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 37.0
+offset_top = 47.0
+offset_right = 208.0
+offset_bottom = 201.0
