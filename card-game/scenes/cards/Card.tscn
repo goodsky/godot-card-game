@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://c8fjvyjmrc1tf"]
+
+[ext_resource type="Script" path="res://scenes/cards/Card.cs" id="1_sfdhn"]
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_or4yo"]
+load_path = "res://.godot/imported/card-background.png-3078fcd59d37c2e7333760ce1e3c1508.ctex"
+
+[node name="Card" type="Node2D" node_paths=PackedStringArray("Sprite")]
+script = ExtResource("1_sfdhn")
+Sprite = NodePath("Sprite2D")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("CompressedTexture2D_or4yo")
