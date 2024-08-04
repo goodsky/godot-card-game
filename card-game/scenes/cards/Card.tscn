@@ -1,13 +1,20 @@
-[gd_scene load_steps=3 format=3 uid="uid://c8fjvyjmrc1tf"]
+[gd_scene load_steps=4 format=3 uid="uid://c8fjvyjmrc1tf"]
 
 [ext_resource type="Script" path="res://scenes/cards/Card.cs" id="1_sfdhn"]
+[ext_resource type="Texture2D" uid="uid://bvl2bulw6ldxu" path="res://assets/sprites/card-background.png" id="2_ucnkc"]
 
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_or4yo"]
-load_path = "res://.godot/imported/card-background.png-3078fcd59d37c2e7333760ce1e3c1508.ctex"
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_x8ohm"]
+size = Vector2(74, 98)
 
-[node name="Card" type="Node2D" node_paths=PackedStringArray("Sprite")]
+[node name="Card" type="Node2D"]
 script = ExtResource("1_sfdhn")
-Sprite = NodePath("Sprite2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = SubResource("CompressedTexture2D_or4yo")
+texture = ExtResource("2_ucnkc")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_x8ohm")
+
+[connection signal="input_event" from="Area2D" to="." method="_OnArea2DInputEvent"]

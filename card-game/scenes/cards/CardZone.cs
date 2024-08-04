@@ -2,7 +2,7 @@ using Godot;
 
 public partial class CardZone : Node2D
 {
-    private bool _isHoverOVer = false;
+    private bool _isMouseOver = false;
 
     [Export]
     public Sprite2D DefaultSprite { get; set; }
@@ -10,20 +10,27 @@ public partial class CardZone : Node2D
     [Export]
     public Sprite2D SelectedSprite { get; set; }
 
+    public override void _Ready()
+    {
+        SetProcessInput(false);
+    }
+
     public override void _Input(InputEvent inputEvent)
     {
-        if (_isHoverOVer &&
+        if (_isMouseOver &&
             inputEvent is InputEventMouseButton mouseButtonEvent &&
             mouseButtonEvent.ButtonIndex == MouseButton.Left &&
             !mouseButtonEvent.Pressed)
         {
-            this.HoverOut();
+            OnMouseExit();
         }
     }
 
-    public void HoverOver()
+    public void OnMouseEnter()
     {
-        _isHoverOVer = true;
+        _isMouseOver = true;
+        SetProcessInput(true);
+        AddToGroup(Constants.HoveredCardZoneGroup);
 
         if (DefaultSprite != null)
         {
@@ -36,9 +43,11 @@ public partial class CardZone : Node2D
         }
     }
 
-    public void HoverOut()
+    public void OnMouseExit()
     {
-        _isHoverOVer = false;
+        _isMouseOver = false;
+        SetProcessInput(false);
+        RemoveFromGroup(Constants.HoveredCardZoneGroup);
 
         if (DefaultSprite != null)
         {

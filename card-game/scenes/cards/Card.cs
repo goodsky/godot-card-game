@@ -1,92 +1,83 @@
 using Godot;
-using System;
+using System.Linq;
 
 public partial class Card : Node2D
 {
     private bool _isDragging = false;
-    private CardZone _hoveringCardZone = null;
-    
-    [Export]
-    public Sprite2D Sprite { get; set; }
+    private CardZone _activeCardZone = null;
 
     [Export]
     public CardZone CurrentZone { get; set; }
 
-    // Called when the node enters the scene tree for the first time.
     public override void _Ready()
     {
-        if (CurrentZone != null)
+        SetProcessInput(false);
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        if (_isDragging)
         {
-            Position = CurrentZone.Position;
+            GlobalPosition = GlobalPosition.Lerp(GetGlobalMousePosition(), 10f * (float)delta);
+        }
+        else 
+        {
+            GlobalPosition = GlobalPosition.Lerp(CurrentZone.GlobalPosition, 10f * (float)delta);
         }
     }
 
-    // Called every frame. 'delta' is the elapsed time since the previous frame.
-    public override void _Process(double delta)
+    public void _OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shape_idx)
     {
+        if (inputEvent.IsActionPressed("click"))
+        {
+            SetDragging(true);
+        }
     }
 
     public override void _Input(InputEvent inputEvent)
     {
-        if (inputEvent is InputEventMouseButton mouseButtonEvent && Utils.IsPointInSprite(Sprite, mouseButtonEvent.GlobalPosition))
+        if (_isDragging && inputEvent is InputEventMouseButton mouseButtonEvent)
         {
-            if (mouseButtonEvent.ButtonIndex == MouseButton.Left)
+            if (!mouseButtonEvent.Pressed)
             {
-                if (_isDragging && !mouseButtonEvent.Pressed)
-                {
-                    OnMouseRelease();
-                }
-
-                _isDragging = mouseButtonEvent.Pressed;
+                SetDragging(false);
             }
         }
 
         if (_isDragging && inputEvent is InputEventMouseMotion mouseMotionEvent)
         {
-            GlobalPosition = mouseMotionEvent.Position;
+            var activeCardZones = GetTree()
+                .GetNodesInGroup(Constants.HoveredCardZoneGroup)
+                .Where(node => node is CardZone)
+                .Select(node => node as CardZone)
+                .ToArray();
 
-            var curHoveringCardZone = GetMouseOverCardZone();
-            if (_hoveringCardZone != null && curHoveringCardZone != _hoveringCardZone)
+            if (activeCardZones.Length == 0)
             {
-                _hoveringCardZone.HoverOut();
+                _activeCardZone = null;
             }
-
-            if (curHoveringCardZone != null && _hoveringCardZone == null)
+            else if (activeCardZones.Length == 1)
             {
-                curHoveringCardZone.HoverOver();
+                _activeCardZone = activeCardZones[0];
             }
-
-            _hoveringCardZone = curHoveringCardZone;
+            else if (activeCardZones.Length > 1)
+            {
+                // TODO: Will this ever happen?
+                GD.Print("Multiple Active Card Zones: ", activeCardZones.Select(node => node.Name));
+                _activeCardZone = activeCardZones[0];
+            }
         }
     }
 
-    private CardZone GetMouseOverCardZone()
+    private void SetDragging(bool isDragging)
     {
-        var cardZones = GetTree().GetNodesInGroup(Constants.CardZoneGroup);
-        foreach (var node in cardZones)
+        if (_isDragging && !isDragging && _activeCardZone != null)
         {
-            if (node is CardZone cardZone)
-            {
-                GD.Print("CardZone Rect:", cardZone.DefaultSprite.GetRect());
-                GD.Print("LocalMouse:", GetGlobalMousePosition());
-                if (Utils.IsPointInSprite(cardZone.DefaultSprite, GetGlobalMousePosition()))
-                {
-                    return cardZone;
-                }
-            }
+            CurrentZone = _activeCardZone;
+            _activeCardZone = null;
         }
 
-        return null;
-    }
-
-    private void OnMouseRelease()
-    {
-        if (_hoveringCardZone != null)
-        {
-            _hoveringCardZone.HoverOut();
-            CurrentZone = _hoveringCardZone;
-        }
-
-        Position = CurrentZone.Position;
+        _isDragging = isDragging;
+        SetProcessInput(isDragging);
     }
 }
