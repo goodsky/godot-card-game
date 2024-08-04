@@ -4,10 +4,12 @@ using System.Linq;
 public partial class Card : Node2D
 {
     private bool _isDragging = false;
-    private CardZone _activeCardZone = null;
 
-    [Export]
-    public CardZone CurrentZone { get; set; }
+    // While dragging, this tracks if there is an active card slot available for a drop.
+    private CardSlot _activeCardSlot = null;
+
+    // When not dragging, the target slot for this card to live at.
+    private CardSlot _homeCardSlot { get; set; }
 
     public override void _Ready()
     {
@@ -18,66 +20,73 @@ public partial class Card : Node2D
     {
         if (_isDragging)
         {
-            GlobalPosition = GlobalPosition.Lerp(GetGlobalMousePosition(), 10f * (float)delta);
+            GlobalPosition = GlobalPosition.Lerp(GetGlobalMousePosition(), 15f * (float)delta);
         }
-        else 
+        else if (_homeCardSlot != null)
         {
-            GlobalPosition = GlobalPosition.Lerp(CurrentZone.GlobalPosition, 10f * (float)delta);
-        }
-    }
-
-    public void _OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shape_idx)
-    {
-        if (inputEvent.IsActionPressed("click"))
-        {
-            SetDragging(true);
+            GlobalPosition = GlobalPosition.Lerp(_homeCardSlot.GlobalPosition, 10f * (float)delta);
         }
     }
 
     public override void _Input(InputEvent inputEvent)
     {
-        if (_isDragging && inputEvent is InputEventMouseButton mouseButtonEvent)
+        if (_isDragging && inputEvent is InputEventMouseButton mouseButtonEvent &&
+            !mouseButtonEvent.Pressed)
         {
-            if (!mouseButtonEvent.Pressed)
-            {
-                SetDragging(false);
-            }
+            StopDragging();
         }
 
         if (_isDragging && inputEvent is InputEventMouseMotion mouseMotionEvent)
         {
-            var activeCardZones = GetTree()
-                .GetNodesInGroup(Constants.HoveredCardZoneGroup)
-                .Where(node => node is CardZone)
-                .Select(node => node as CardZone)
+            var activeCardSlots = GetTree()
+                .GetNodesInGroup(Constants.ActiveCardSlotGroup)
+                .Where(node => node is CardSlot)
+                .Select(node => node as CardSlot)
                 .ToArray();
 
-            if (activeCardZones.Length == 0)
+            if (activeCardSlots.Length == 0)
             {
-                _activeCardZone = null;
+                _activeCardSlot = null;
             }
-            else if (activeCardZones.Length == 1)
+            else if (activeCardSlots.Length == 1)
             {
-                _activeCardZone = activeCardZones[0];
+                _activeCardSlot = activeCardSlots[0];
             }
-            else if (activeCardZones.Length > 1)
+            else if (activeCardSlots.Length > 1)
             {
                 // TODO: Will this ever happen?
-                GD.Print("Multiple Active Card Zones: ", activeCardZones.Select(node => node.Name));
-                _activeCardZone = activeCardZones[0];
+                GD.Print("Multiple Active Card Slots: ", activeCardSlots.Select(node => node.Name));
+                _activeCardSlot = activeCardSlots[0];
             }
         }
     }
 
-    private void SetDragging(bool isDragging)
+    public void SetCardSlot(CardSlot cardSlot)
     {
-        if (_isDragging && !isDragging && _activeCardZone != null)
+        _homeCardSlot = cardSlot;
+    }
+
+    public void StartDragging()
+    {
+        _isDragging = true;
+        SetProcessInput(true);
+    }
+
+    public void StopDragging()
+    {
+        if (_activeCardSlot != null)
         {
-            CurrentZone = _activeCardZone;
-            _activeCardZone = null;
+            if (_homeCardSlot != null)
+            {
+                _homeCardSlot.Card = null;
+            }
+
+            _homeCardSlot = _activeCardSlot;
+            _homeCardSlot.Card = this;
+            _activeCardSlot = null;
         }
 
-        _isDragging = isDragging;
-        SetProcessInput(isDragging);
+        _isDragging = false;
+        SetProcess(false);
     }
 }

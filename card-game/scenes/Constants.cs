@@ -1,6 +1,4 @@
 public static class Constants
 {
-    public const string CardZoneGroup = "CardZone";
-
-    public const string HoveredCardZoneGroup = "HoveringCardZone";
+    public const string ActiveCardSlotGroup = "ActiveCardSlot";
 }

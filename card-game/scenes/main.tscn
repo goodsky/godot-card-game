@@ -2,7 +2,7 @@
 
 [ext_resource type="Texture2D" uid="uid://c78pxrxjmo8eg" path="res://assets/sprites/play-area.png" id="1_e24lr"]
 [ext_resource type="PackedScene" uid="uid://c8fjvyjmrc1tf" path="res://scenes/cards/Card.tscn" id="1_mb4sq"]
-[ext_resource type="PackedScene" uid="uid://begvnfhg5bew6" path="res://scenes/cards/CardZone.tscn" id="2_3cyok"]
+[ext_resource type="PackedScene" uid="uid://begvnfhg5bew6" path="res://scenes/cards/PlayArea.tscn" id="2_3cyok"]
 
 [node name="Main" type="Node2D"]
 
@@ -10,18 +10,18 @@
 texture = ExtResource("1_e24lr")
 centered = false
 
-[node name="Card" parent="." node_paths=PackedStringArray("CurrentZone") instance=ExtResource("1_mb4sq")]
-position = Vector2(395, 276)
-CurrentZone = NodePath("../CardZone2")
+[node name="Card" parent="." instance=ExtResource("1_mb4sq")]
+position = Vector2(84, 529)
 
-[node name="CardZone1" parent="." instance=ExtResource("2_3cyok")]
+[node name="PlayArea1" parent="." node_paths=PackedStringArray("Card") instance=ExtResource("2_3cyok")]
 position = Vector2(89, 350)
+Card = NodePath("../Card")
 
-[node name="CardZone2" parent="." instance=ExtResource("2_3cyok")]
+[node name="PlayArea2" parent="." instance=ExtResource("2_3cyok")]
 position = Vector2(237, 350)
 
-[node name="CardZone3" parent="." instance=ExtResource("2_3cyok")]
+[node name="PlayArea3" parent="." instance=ExtResource("2_3cyok")]
 position = Vector2(377, 350)
 
-[node name="CardZone4" parent="." instance=ExtResource("2_3cyok")]
+[node name="PlayArea4" parent="." instance=ExtResource("2_3cyok")]
 position = Vector2(524, 350)
