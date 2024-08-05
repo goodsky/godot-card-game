@@ -1,23 +1,23 @@
-[gd_scene load_steps=5 format=3 uid="uid://begvnfhg5bew6"]
+[gd_scene load_steps=5 format=3 uid="uid://bkytbde6pf5y4"]
 
-[ext_resource type="Texture2D" uid="uid://blxyc80lexyi0" path="res://assets/sprites/card-zone.png" id="1_636je"]
-[ext_resource type="Script" path="res://scenes/cards/PlayArea.cs" id="1_n37aw"]
-[ext_resource type="Texture2D" uid="uid://bejsxy57xctgo" path="res://assets/sprites/card-zone-0.png" id="3_kx6c8"]
+[ext_resource type="Script" path="res://scenes/PlayArea.cs" id="1_yk72u"]
+[ext_resource type="Texture2D" uid="uid://blxyc80lexyi0" path="res://assets/sprites/card-zone.png" id="2_to46n"]
+[ext_resource type="Texture2D" uid="uid://bejsxy57xctgo" path="res://assets/sprites/card-zone-0.png" id="3_gnenr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8b1l8"]
 size = Vector2(101, 126)
 
 [node name="PlayArea" type="Node2D" node_paths=PackedStringArray("DefaultSprite", "SelectedSprite") groups=["CardZone"]]
-script = ExtResource("1_n37aw")
+script = ExtResource("1_yk72u")
 DefaultSprite = NodePath("DefaultSprite")
 SelectedSprite = NodePath("SelectedSprite")
 
 [node name="DefaultSprite" type="Sprite2D" parent="."]
-texture = ExtResource("1_636je")
+texture = ExtResource("2_to46n")
 
 [node name="SelectedSprite" type="Sprite2D" parent="."]
 visible = false
-texture = ExtResource("3_kx6c8")
+texture = ExtResource("3_gnenr")
 
 [node name="Area2D" type="Area2D" parent="."]
 
