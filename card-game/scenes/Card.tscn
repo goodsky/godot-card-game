@@ -1,10 +1,19 @@
-[gd_scene load_steps=3 format=3 uid="uid://c7jfumswj5p4k"]
+[gd_scene load_steps=4 format=3 uid="uid://c7jfumswj5p4k"]
 
 [ext_resource type="Script" path="res://scenes/Card.cs" id="1_g252h"]
 [ext_resource type="Texture2D" uid="uid://bvl2bulw6ldxu" path="res://assets/sprites/card-background.png" id="2_636mv"]
 
-[node name="Card" type="Node2D"]
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_fbrmm"]
+size = Vector2(75, 100)
+
+[node name="Card" type="Node2D" node_paths=PackedStringArray("Area")]
 script = ExtResource("1_g252h")
+Area = NodePath("Area2D")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_636mv")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_fbrmm")

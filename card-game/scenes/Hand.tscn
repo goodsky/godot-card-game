@@ -3,12 +3,17 @@
 [ext_resource type="Script" path="res://scenes/Hand.cs" id="1_0ltkp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0j34p"]
-size = Vector2(500, 100)
+size = Vector2(600, 100)
 
-[node name="Hand" type="Node2D"]
+[node name="Hand" type="Node2D" node_paths=PackedStringArray("DebugCards")]
 script = ExtResource("1_0ltkp")
+HandSize = 12
+DebugCards = []
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_0j34p")
+
+[connection signal="mouse_entered" from="Area2D" to="." method="HoverOver"]
+[connection signal="mouse_exited" from="Area2D" to="." method="HoverOut"]

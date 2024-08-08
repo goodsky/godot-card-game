@@ -1,52 +1,74 @@
+using System;
+using System.Linq;
 using Godot;
 
-public partial class PlayArea : CardSlot
+public partial class PlayArea : CardDrop
 {
-    private bool _isHoverOver = false;
+	private Vector2 _area;
+	private bool _isHoverOver = false;
 
-    [Export]
-    public Sprite2D DefaultSprite { get; set; }
+	[Export]
+	public bool SupportsPickUp { get; set; }
 
-    [Export]
-    public Sprite2D SelectedSprite { get; set; }
+	[Export]
+	public Area2D Area { get; set; }
 
-    public void OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shape_idx)
-    {
-        if (Card != null && inputEvent.IsActionPressed("click"))
-        {
-            Card.StartDragging();
-        }
-    }
+    protected override int MaxCards => 1;
 
-    public void HoverOver()
-    {
-        _isHoverOver = true;
-        AddToGroup(Constants.ActiveCardSlotGroup);
+    public override void _Ready()
+	{
+		var rect = Area.GetNode<CollisionShape2D>("CollisionShape2D").Shape as RectangleShape2D;
+		_area = rect.Size;
+	}
 
-        if (DefaultSprite != null)
-        {
-            DefaultSprite.Visible = false;
-        }
+	public override void _Draw()
+	{
+		DrawRect(new Rect2(-_area.X / 2, -_area.Y / 2, _area.X, _area.Y), _isHoverOver ? Colors.White : Colors.Gray, false, 2.0f);
+	}
 
-        if (SelectedSprite != null)
-        {
-            SelectedSprite.Visible = true;
-        }
-    }
+	public override bool TryAddCard(Card card)
+	{
+		if (base.TryAddCard(card))
+		{
+			card.TargetPosition = GlobalPosition;
+			return true;
+		}
+		return false;
+	}
 
-    public void HoverOut()
-    {
-        _isHoverOver = false;
-        RemoveFromGroup(Constants.ActiveCardSlotGroup);
+	public override bool TryRemoveCard(Card card)
+	{
+		return base.TryRemoveCard(card);
+	}
 
-        if (DefaultSprite != null)
-        {
-            DefaultSprite.Visible = true;
-        }
+	public void OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shape_idx)
+	{
+		if (SupportsPickUp && inputEvent.IsActionPressed("click"))
+		{
+			Card card = GetChildCard();
+			if (card != null)
+			{
+				card.StartDragging();
+			}
+		}
+	}
 
-        if (SelectedSprite != null)
-        {
-            SelectedSprite.Visible = false;
-        }
-    }
+	public void HoverOver()
+	{
+		_isHoverOver = true;
+		AddToGroup(Constants.ActiveCardDropGroup);
+		QueueRedraw();
+	}
+
+	public void HoverOut()
+	{
+		_isHoverOver = false;
+		RemoveFromGroup(Constants.ActiveCardDropGroup);
+		QueueRedraw();
+	}
+
+	private Card GetChildCard()
+	{
+		return GetChildCards().FirstOrDefault();
+	}
 }
