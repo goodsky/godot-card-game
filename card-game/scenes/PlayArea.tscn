@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" uid="uid://bejsxy57xctgo" path="res://assets/sprites/card-zone-0.png" id="3_gnenr"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8b1l8"]
-size = Vector2(75, 105)
+size = Vector2(80, 105)
 
 [node name="PlayArea" type="Node2D" node_paths=PackedStringArray("Area", "DebugCards") groups=["CardZone"]]
 script = ExtResource("1_yk72u")

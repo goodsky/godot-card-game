@@ -5,9 +5,10 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0j34p"]
 size = Vector2(600, 100)
 
-[node name="Hand" type="Node2D" node_paths=PackedStringArray("DebugCards")]
+[node name="Hand" type="Node2D" node_paths=PackedStringArray("Area", "DebugCards")]
 script = ExtResource("1_0ltkp")
 HandSize = 12
+Area = NodePath("Area2D")
 DebugCards = []
 
 [node name="Area2D" type="Area2D" parent="."]

@@ -17,18 +17,20 @@ public partial class PlayArea : CardDrop
 
     public override void _Ready()
 	{
+		base._Ready();
+
 		var rect = Area.GetNode<CollisionShape2D>("CollisionShape2D").Shape as RectangleShape2D;
 		_area = rect.Size;
 	}
 
 	public override void _Draw()
 	{
-		DrawRect(new Rect2(-_area.X / 2, -_area.Y / 2, _area.X, _area.Y), _isHoverOver ? Colors.White : Colors.Gray, false, 2.0f);
+		DrawRect(new Rect2(-_area.X / 2, -_area.Y / 2, _area.X, _area.Y), _isHoverOver ? Colors.Yellow : Colors.Gray, false, 2.0f);
 	}
 
-	public override bool TryAddCard(Card card)
+	public override bool TryAddCard(Card card, Vector2? globalPosition)
 	{
-		if (base.TryAddCard(card))
+		if (base.TryAddCard(card, globalPosition))
 		{
 			card.TargetPosition = GlobalPosition;
 			return true;

@@ -4,6 +4,7 @@ using System.Linq;
 public partial class Card : Node2D
 {
 	private bool _isDragging = false;
+	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
 
 	// While dragging, this tracks if there is an active card node available for a drop.
 	private CardDrop _activeCardDrop = null;
@@ -20,6 +21,10 @@ public partial class Card : Node2D
 	public override void _Ready()
 	{
 		SetProcessInput(false);
+		
+		// For debugging
+		Sprite2D sprite = GetNode<Sprite2D>("Sprite2D");
+		sprite.Modulate = new Color(Rand.Randf(), Rand.Randf(), Rand.Randf());
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -67,8 +72,20 @@ public partial class Card : Node2D
 
 	public void SetCardDrop(CardDrop cardDrop)
 	{
+		if (!cardDrop.CanDropCard())
+		{
+			GD.Print($"Cannot drop card onto {_activeCardDrop.Name}");
+			return;
+		}
+
+		Vector2 globalPosition = GlobalPosition;
+		if (_homeCardDrop != null)
+		{
+			_homeCardDrop.TryRemoveCard(this);
+		}
+			
+		cardDrop.TryAddCard(this, globalPosition);
 		_homeCardDrop = cardDrop;
-		cardDrop.TryAddCard(this);
 	}
 
 	public void StartDragging()
@@ -82,11 +99,6 @@ public partial class Card : Node2D
 	{
 		if (_activeCardDrop != null)
 		{
-			if (_homeCardDrop != null)
-			{
-				_homeCardDrop.TryRemoveCard(this);
-			}
-
 			SetCardDrop(_activeCardDrop);
 			_activeCardDrop = null;
 		}
