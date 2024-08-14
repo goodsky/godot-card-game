@@ -32,7 +32,7 @@ public partial class Hand : CardDrop
 		if (base.TryAddCard(card, globalPosition))
 		{
 			int cardIndex = GetCardIndex(card, CardCount);
-			GD.Print($"Placing card in hand: GlobalPosition: {card.GlobalPosition}; LocalPosition: {ToLocal(card.GlobalPosition)}; CardCount: {CardCount}; HandIndex: {cardIndex};");
+			// GD.Print($"Placing card in hand: GlobalPosition: {card.GlobalPosition}; LocalPosition: {ToLocal(card.GlobalPosition)}; CardCount: {CardCount}; HandIndex: {cardIndex};");
 			CardsNode.MoveChild(card, cardIndex);
 
 			_cardCallbacks[card] = (Node viewport, InputEvent inputEvent, long shape_idx) => Card_OnArea2DInputEvent(card, inputEvent);
@@ -57,28 +57,15 @@ public partial class Hand : CardDrop
 
     public override void _Process(double delta)
     {
-        if (_isHoverOver)
+        if (_isHoverOver && CardManager.DraggingCard != null)
 		{
-			Card draggingCard = GetTree()
-				.GetNodesInGroup(Constants.DraggingCardGroup)
-				.Where(node => node is Card)
-				.Select(node => node as Card)
-				.FirstOrDefault();
-
-			if (draggingCard != null)
-			{
-				_hasGhostCard = true;
-				UpdateCardPositions(draggingCard);
-			}
+			_hasGhostCard = true;
+			UpdateCardPositions(CardManager.DraggingCard);
 		}
-		else
+		else if (_hasGhostCard)
 		{
-			if (_hasGhostCard)
-			{
-				_hasGhostCard = false;
-				GD.Print("RESET HAND POSITIONS");
-				UpdateCardPositions();
-			}
+			_hasGhostCard = false;
+			UpdateCardPositions();
 		}
     }
 
@@ -86,20 +73,20 @@ public partial class Hand : CardDrop
 	{
 		if (inputEvent.IsActionPressed("click"))
 		{
-			card.StartDragging();
+			CardManager.StartDragging(card);
 		}
 	}
 
 	public void HoverOver()
 	{
 		_isHoverOver = true;
-		AddToGroup(Constants.ActiveCardDropGroup);
+		CardManager.ActivateCardDrop(this);
 	}
 
 	public void HoverOut()
 	{
 		_isHoverOver = false;
-		RemoveFromGroup(Constants.ActiveCardDropGroup);
+		CardManager.DeactivateCardDrop(this);
 	}
 
 	private static int DrawnCardCount = 0;
@@ -110,7 +97,7 @@ public partial class Hand : CardDrop
 		card.GlobalPosition = GlobalPosition + new Vector2(300, 0);
 
 		GD.Print($"Drawing card {card.Name}");
-		card.SetCardDrop(this);
+		CardManager.SetCardDrop(card, this);
 	}
 
 	private void UpdateCardPositions(Card ghostCard = null)

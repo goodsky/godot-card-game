@@ -50,7 +50,7 @@ public partial class PlayArea : CardDrop
 			Card card = GetChildCard();
 			if (card != null)
 			{
-				card.StartDragging();
+				CardManager.StartDragging(card);
 			}
 		}
 	}
@@ -58,14 +58,14 @@ public partial class PlayArea : CardDrop
 	public void HoverOver()
 	{
 		_isHoverOver = true;
-		AddToGroup(Constants.ActiveCardDropGroup);
+		CardManager.ActivateCardDrop(this);
 		QueueRedraw();
 	}
 
 	public void HoverOut()
 	{
 		_isHoverOver = false;
-		RemoveFromGroup(Constants.ActiveCardDropGroup);
+		CardManager.DeactivateCardDrop(this);
 		QueueRedraw();
 	}
 
