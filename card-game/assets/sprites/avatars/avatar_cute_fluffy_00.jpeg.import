@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bejsxy57xctgo"
-path="res://.godot/imported/card-zone-0.png-e468ae2a08349e5b882e39984e745088.ctex"
+uid="uid://17ebcjy8us6t"
+path="res://.godot/imported/avatar_cute_fluffy_00.jpeg-414170755f0dd77977384a042d6a09d6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/card-zone-0.png"
-dest_files=["res://.godot/imported/card-zone-0.png-e468ae2a08349e5b882e39984e745088.ctex"]
+source_file="res://assets/sprites/avatars/avatar_cute_fluffy_00.jpeg"
+dest_files=["res://.godot/imported/avatar_cute_fluffy_00.jpeg-414170755f0dd77977384a042d6a09d6.ctex"]
 
 [params]
 

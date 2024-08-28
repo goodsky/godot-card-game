@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/Hand.cs" id="1_0ltkp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0j34p"]
-size = Vector2(600, 100)
+size = Vector2(600, 150)
 
 [node name="Hand" type="Node2D" node_paths=PackedStringArray("Area", "DebugCards")]
 script = ExtResource("1_0ltkp")
@@ -15,6 +15,7 @@ DebugCards = []
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 shape = SubResource("RectangleShape2D_0j34p")
+debug_color = Color(1, 1, 1, 0.105882)
 
 [connection signal="mouse_entered" from="Area2D" to="." method="HoverOver"]
 [connection signal="mouse_exited" from="Area2D" to="." method="HoverOut"]

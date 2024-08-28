@@ -45,6 +45,7 @@ public class CardManager
 			GD.Print($"Can't activate card drop. {ActiveCardDrop.Name} is already active.");
 			return;
 		}
+		GD.Print($"Activated card drop: {cardDrop.Name}");
 		ActiveCardDrop = cardDrop;
 	}
 
@@ -55,12 +56,13 @@ public class CardManager
 			GD.Print($"Cannot deactivate card drop {cardDrop.Name}. Active card drop = {ActiveCardDrop?.Name}");
 			return;
 		}
+		GD.Print($"Deactivated card drop: {cardDrop.Name}");
 		ActiveCardDrop = null;
 	}
 
 	public void SetCardDrop(Card card, CardDrop cardDrop)
 	{
-		if (!cardDrop.CanDropCard())
+		if (cardDrop != null && !cardDrop.CanDropCard())
 		{
 			GD.Print($"Can't drop card {card.Name} onto {cardDrop.Name}.");
 			return;
@@ -73,10 +75,10 @@ public class CardManager
 		}
 
 		card.HomeCardDrop = cardDrop;
-		cardDrop.TryAddCard(card, cardGlobalPosition);
+		cardDrop?.TryAddCard(card, cardGlobalPosition);
 	}
 
-	public void StartDragging(Card card)
+	public void SetDraggingCard(Card card)
 	{
 		if (DraggingCard != null)
 		{
@@ -85,10 +87,9 @@ public class CardManager
 		}
 
 		DraggingCard = card;
-		card.StartDragging();
 	}
 
-	public void StopDragging(Card card)
+	public void ClearDraggingCard(Card card)
 	{
 		if (DraggingCard != card)
 		{
@@ -102,6 +103,5 @@ public class CardManager
 		}
 
 		DraggingCard = null;
-		card.StopDragging();
 	}
 }

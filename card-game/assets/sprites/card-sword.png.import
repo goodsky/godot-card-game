@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c78pxrxjmo8eg"
-path="res://.godot/imported/play-area.png-56a6063af5cb0196ee0f62909fcc2492.ctex"
+uid="uid://g1tvugg8g4fv"
+path="res://.godot/imported/card-sword.png-d16f3198e59a8fc848b0cffcc32e2df6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/play-area.png"
-dest_files=["res://.godot/imported/play-area.png-56a6063af5cb0196ee0f62909fcc2492.ctex"]
+source_file="res://assets/sprites/card-sword.png"
+dest_files=["res://.godot/imported/card-sword.png-d16f3198e59a8fc848b0cffcc32e2df6.ctex"]
 
 [params]
 

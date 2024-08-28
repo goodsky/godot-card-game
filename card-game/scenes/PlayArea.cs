@@ -4,14 +4,14 @@ using Godot;
 
 public partial class PlayArea : CardDrop
 {
-	private Vector2 _area;
+	private Vector2 _size;
 	private bool _isHoverOver = false;
 
 	[Export]
 	public bool SupportsPickUp { get; set; }
 
 	[Export]
-	public Area2D Area { get; set; }
+	public ClickableArea Area { get; set; }
 
     protected override int MaxCards => 1;
 
@@ -19,13 +19,12 @@ public partial class PlayArea : CardDrop
 	{
 		base._Ready();
 
-		var rect = Area.GetNode<CollisionShape2D>("CollisionShape2D").Shape as RectangleShape2D;
-		_area = rect.Size;
+		_size = Area.GetRectangleShape().Size;
 	}
 
 	public override void _Draw()
 	{
-		DrawRect(new Rect2(-_area.X / 2, -_area.Y / 2, _area.X, _area.Y), _isHoverOver ? Colors.Yellow : Colors.Gray, false, 2.0f);
+		DrawRect(new Rect2(-_size.X / 2, -_size.Y / 2, _size.X, _size.Y), _isHoverOver ? Colors.Yellow : Colors.Gray, false, 2.0f);
 	}
 
 	public override bool TryAddCard(Card card, Vector2? globalPosition)
@@ -33,6 +32,13 @@ public partial class PlayArea : CardDrop
 		if (base.TryAddCard(card, globalPosition))
 		{
 			card.TargetPosition = GlobalPosition;
+
+			if (SupportsPickUp)
+			{
+				card.Area.AreaStartDragging += card.StartDragging;
+				card.Area.AreaStopDragging += card.StopDragging;
+			}
+			
 			return true;
 		}
 		return false;
@@ -40,19 +46,13 @@ public partial class PlayArea : CardDrop
 
 	public override bool TryRemoveCard(Card card)
 	{
-		return base.TryRemoveCard(card);
-	}
-
-	public void OnArea2DInputEvent(Node viewport, InputEvent inputEvent, int shape_idx)
-	{
-		if (SupportsPickUp && inputEvent.IsActionPressed("click"))
+		if  (base.TryRemoveCard(card))
 		{
-			Card card = GetChildCard();
-			if (card != null)
-			{
-				CardManager.StartDragging(card);
-			}
+			card.Area.AreaStartDragging -= card.StartDragging;
+			card.Area.AreaStopDragging -= card.StopDragging;
+			return true;
 		}
+		return false;
 	}
 
 	public void HoverOver()
@@ -67,10 +67,5 @@ public partial class PlayArea : CardDrop
 		_isHoverOver = false;
 		CardManager.DeactivateCardDrop(this);
 		QueueRedraw();
-	}
-
-	private Card GetChildCard()
-	{
-		return GetChildCards().FirstOrDefault();
 	}
 }

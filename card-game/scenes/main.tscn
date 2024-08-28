@@ -1,40 +1,102 @@
-[gd_scene load_steps=4 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=7 format=3 uid="uid://cdq0smiv61oi3"]
 
-[ext_resource type="Texture2D" uid="uid://c78pxrxjmo8eg" path="res://assets/sprites/play-area.png" id="1_e24lr"]
+[ext_resource type="Texture2D" uid="uid://cfa3c0s3dl784" path="res://assets/sprites/info-area.jpeg" id="1_wr0v1"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_3cyok"]
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="2_ctxqn"]
+[ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="2_sdxti"]
+[ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_31qvx"]
+
+[sub_resource type="Theme" id="Theme_1ly1u"]
 
 [node name="Main" type="Node2D"]
 
-[node name="GameBoard" type="Sprite2D" parent="."]
-texture = ExtResource("1_e24lr")
+[node name="PlayArea" type="Node2D" parent="."]
+script = ExtResource("2_sdxti")
+Size = Vector2(600, 450)
+
+[node name="PlayArea1" parent="PlayArea" instance=ExtResource("2_3cyok")]
+position = Vector2(100, 365)
+SupportsPickUp = true
+
+[node name="PlayArea2" parent="PlayArea" instance=ExtResource("2_3cyok")]
+position = Vector2(233, 365)
+SupportsPickUp = true
+
+[node name="PlayArea3" parent="PlayArea" instance=ExtResource("2_3cyok")]
+position = Vector2(367, 365)
+SupportsPickUp = true
+
+[node name="PlayArea4" parent="PlayArea" instance=ExtResource("2_3cyok")]
+position = Vector2(500, 365)
+SupportsPickUp = true
+
+[node name="PlayArea5" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(100, 215)
+SupportsPickUp = true
+Area = NodePath("../PlayArea1/ClickableArea")
+
+[node name="PlayArea6" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(233, 215)
+SupportsPickUp = true
+Area = NodePath("../PlayArea2/ClickableArea")
+
+[node name="PlayArea7" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(367, 215)
+SupportsPickUp = true
+Area = NodePath("../PlayArea3/ClickableArea")
+
+[node name="PlayArea8" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(500, 215)
+SupportsPickUp = true
+Area = NodePath("../PlayArea4/ClickableArea")
+
+[node name="PlayArea9" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(100, 75)
+SupportsPickUp = true
+Area = NodePath("../PlayArea1/ClickableArea")
+
+[node name="PlayArea10" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(233, 75)
+SupportsPickUp = true
+Area = NodePath("../PlayArea2/ClickableArea")
+
+[node name="PlayArea11" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(367, 75)
+SupportsPickUp = true
+Area = NodePath("../PlayArea3/ClickableArea")
+
+[node name="PlayArea12" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+position = Vector2(500, 75)
+SupportsPickUp = true
+Area = NodePath("../PlayArea4/ClickableArea")
+
+[node name="HandArea" type="Sprite2D" parent="."]
+position = Vector2(0, 449)
+texture = ExtResource("3_31qvx")
 centered = false
 
-[node name="Button" type="Button" parent="."]
-offset_left = 642.0
-offset_top = 475.0
-offset_right = 751.0
-offset_bottom = 529.0
+[node name="Hand" parent="HandArea" instance=ExtResource("2_ctxqn")]
+position = Vector2(300, 75)
+
+[node name="InfoArea" type="Sprite2D" parent="."]
+position = Vector2(698, 300)
+texture = ExtResource("1_wr0v1")
+
+[node name="Button" type="Button" parent="InfoArea"]
+offset_left = -55.0
+offset_top = 160.0
+offset_right = 54.0
+offset_bottom = 214.0
 text = "Draw
 Card"
 
-[node name="PlayArea1" parent="." instance=ExtResource("2_3cyok")]
-position = Vector2(100, 350)
-SupportsPickUp = true
+[node name="ResetButton" type="Button" parent="InfoArea"]
+offset_left = -56.0
+offset_top = 240.0
+offset_right = 53.0
+offset_bottom = 294.0
+theme = SubResource("Theme_1ly1u")
+text = "Clear Cards"
 
-[node name="PlayArea2" parent="." instance=ExtResource("2_3cyok")]
-position = Vector2(230, 350)
-SupportsPickUp = true
-
-[node name="PlayArea3" parent="." instance=ExtResource("2_3cyok")]
-position = Vector2(370, 350)
-SupportsPickUp = true
-
-[node name="PlayArea4" parent="." instance=ExtResource("2_3cyok")]
-position = Vector2(500, 350)
-SupportsPickUp = true
-
-[node name="Hand" parent="." instance=ExtResource("2_ctxqn")]
-position = Vector2(300, 525)
-
-[connection signal="pressed" from="Button" to="Hand" method="Debug_DrawCard"]
+[connection signal="pressed" from="InfoArea/Button" to="HandArea/Hand" method="Debug_DrawCard"]
+[connection signal="pressed" from="InfoArea/ResetButton" to="HandArea/Hand" method="Debug_ClearCards"]

@@ -1,5 +1,16 @@
 using Godot;
 
+public struct CardInfo
+{
+	public string Name { get; set; }
+
+	public int Attack { get; set; }
+
+	public int Defense { get; set; }
+
+	public int BloodCost { get; set; }
+}
+
 public partial class Card : Node2D
 {
 	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
@@ -14,17 +25,39 @@ public partial class Card : Node2D
 	// When not dragging, the target location for this card to live at.
 	public Vector2? TargetPosition { get; set; }
 
+	// Optional offset for things like hovering over or wiggling.
+	public Vector2? TargetPositionOffset { get; set; }
+
+	public CardInfo CardInfo { get; set; }
+
 	[Export]
-	public Area2D Area { get; set; }
+	public Sprite2D Background { get; set; }
+
+	[Export]
+	public Sprite2D Avatar { get; set; }
+
+	[Export]
+	public Sprite2D[] BloodCostIcons { get; set; }
+
+	[Export]
+	public CanvasText NameLabel { get; set;}
+
+	[Export]
+	public CanvasText AttackLabel { get; set; }
+
+	[Export]
+	public CanvasText DefenseLabel { get; set; }
+
+	[Export]
+	public ClickableArea Area { get; set; }
 
 	public override void _Ready()
 	{
 		CardManager = this.GetCardManager();
 
-		SetProcessInput(false);
-
-		Sprite2D sprite = GetNode<Sprite2D>("Sprite2D");
-		sprite.Modulate = new Color(Rand.Randf(), Rand.Randf(), Rand.Randf());
+		// DEBUG: just for now
+		Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
+		UpdateVisuals(CardInfo);
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -35,28 +68,40 @@ public partial class Card : Node2D
 		}
 		else if (TargetPosition.HasValue)
 		{
-			GlobalPosition = GlobalPosition.Lerp(TargetPosition.Value, 10f * (float)delta);
-		}
-	}
+			Vector2 targetPosition = TargetPosition.Value;
+			if (TargetPositionOffset.HasValue) {
+				targetPosition += TargetPositionOffset.Value;
+			}
 
-	public override void _Input(InputEvent inputEvent)
-	{
-		if (_isDragging && inputEvent is InputEventMouseButton mouseButtonEvent &&
-			!mouseButtonEvent.Pressed)
-		{
-			CardManager.StopDragging(this);
+			GlobalPosition = GlobalPosition.Lerp(targetPosition, 10f * (float)delta);
 		}
 	}
 
 	public void StartDragging()
 	{
 		_isDragging = true;
-		SetProcessInput(true);
+		CardManager.SetDraggingCard(this);
+
+		ZIndex = 10;
 	}
 
 	public void StopDragging()
 	{
 		_isDragging = false;
-		SetProcess(false);
+		CardManager.ClearDraggingCard(this);
+
+		ZIndex = 0;
+	}
+
+	private void UpdateVisuals(CardInfo info)
+	{
+		NameLabel.Text = info.Name;
+		AttackLabel.Text = info.Attack.ToString();
+		DefenseLabel.Text = info.Defense.ToString();
+
+		for (int i = 0; i < BloodCostIcons.Length; i++)
+		{
+			BloodCostIcons[i].Visible = (i < info.BloodCost);
+		}
 	}
 }

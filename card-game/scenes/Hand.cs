@@ -1,15 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
 public partial class Hand : CardDrop
 {
-	private static readonly int DefaultCardSpacing = 85;
+	private static readonly int DefaultCardSpacing = 110;
 	private Vector2 _area;
 	private bool _isHoverOver = false;
 	private bool _hasGhostCard = false;
-	private Dictionary<Card, CollisionObject2D.InputEventEventHandler> _cardCallbacks = new Dictionary<Card, CollisionObject2D.InputEventEventHandler>(); 
+	private Dictionary<Card, HandCardCallbacks> _cardCallbacks = new Dictionary<Card, HandCardCallbacks>(); 
 
 	[Export]
 	public int HandSize { get; set; }
@@ -35,8 +34,9 @@ public partial class Hand : CardDrop
 			// GD.Print($"Placing card in hand: GlobalPosition: {card.GlobalPosition}; LocalPosition: {ToLocal(card.GlobalPosition)}; CardCount: {CardCount}; HandIndex: {cardIndex};");
 			CardsNode.MoveChild(card, cardIndex);
 
-			_cardCallbacks[card] = (Node viewport, InputEvent inputEvent, long shape_idx) => Card_OnArea2DInputEvent(card, inputEvent);
-			card.Area.InputEvent += _cardCallbacks[card];
+			_cardCallbacks.Add(card, new HandCardCallbacks(card, this));
+			_cardCallbacks[card].AddCallbacks();
+
 			UpdateCardPositions();
 			return true;
 		}
@@ -47,8 +47,9 @@ public partial class Hand : CardDrop
 	{
 		if (base.TryRemoveCard(card))
 		{
-			card.Area.InputEvent -= _cardCallbacks[card];
+			_cardCallbacks[card]?.RemoveCallbacks();
 			_cardCallbacks.Remove(card);
+
 			UpdateCardPositions();
 			return true;
 		}
@@ -69,14 +70,6 @@ public partial class Hand : CardDrop
 		}
     }
 
-    public void Card_OnArea2DInputEvent(Card card, InputEvent inputEvent)
-	{
-		if (inputEvent.IsActionPressed("click"))
-		{
-			CardManager.StartDragging(card);
-		}
-	}
-
 	public void HoverOver()
 	{
 		_isHoverOver = true;
@@ -93,14 +86,32 @@ public partial class Hand : CardDrop
 	public void Debug_DrawCard()
 	{
 		var card = Constants.CardScene.Instantiate<Card>();
+		card.AddToGroup("DebugCard");
 		card.Name = $"Card_{DrawnCardCount++}";
 		card.GlobalPosition = GlobalPosition + new Vector2(300, 0);
+		card.CardInfo = new CardInfo()
+		{
+			Name = "FooBar the Great!",
+			Attack = Random.Shared.Next(1, 6),
+			Defense = Random.Shared.Next(1, 11),
+			BloodCost = Random.Shared.Next(1, 4),
+		};
 
 		GD.Print($"Drawing card {card.Name}");
 		CardManager.SetCardDrop(card, this);
 	}
 
-	private void UpdateCardPositions(Card ghostCard = null)
+	public void Debug_ClearCards()
+	{
+		var debugCards = GetTree().GetNodesInGroup("DebugCard");
+		foreach (var card in debugCards)
+		{
+			CardManager.SetCardDrop(card as Card, null);
+			card.QueueFree();
+		}
+	}
+
+	protected void UpdateCardPositions(Card ghostCard = null)
 	{
 		Card[] cards = GetChildCards();
 		int handSize = cards.Length;
@@ -115,21 +126,7 @@ public partial class Hand : CardDrop
 				// Move the existing hand cards around to make space for the dragging card.
 				int currentCardIndex = ghostCard.GetIndex();
 				int reorderCardIndex = GetCardIndex(ghostCard, handSize);
-				if (currentCardIndex < reorderCardIndex)
-				{
-					for (int i = currentCardIndex; i < reorderCardIndex; i++)
-					{
-						cards[i] = cards[i + 1];
-					}
-				}
-				else if (reorderCardIndex < currentCardIndex)
-				{
-					for (int i = currentCardIndex; i > reorderCardIndex; i--)
-					{
-						cards[i] = cards[i - 1];
-					}
-				}
-				cards[reorderCardIndex] = ghostCard;
+				ReorderCardInHand(cards, currentCardIndex, reorderCardIndex);
 			}
 			else
 			{
@@ -172,5 +169,95 @@ public partial class Hand : CardDrop
 		Vector2 localPosition = ToLocal(card.GlobalPosition);
 		int index = Mathf.FloorToInt((localPosition.X + (spacePerCard * handSize / 2)) / spacePerCard);
 		return Math.Max(0, Math.Min(handSize - 1, index));
+	}
+
+	private void ReorderCardInHand(Card[] cards, int sourceIndex, int targetIndex)
+	{
+		Card reorderingCard = cards[sourceIndex];
+		if (sourceIndex < targetIndex)
+		{
+			for (int i = sourceIndex; i < targetIndex; i++)
+			{
+				cards[i] = cards[i + 1];
+			}
+		}
+		else if (targetIndex < sourceIndex)
+		{
+			for (int i = sourceIndex; i > targetIndex; i--)
+			{
+				cards[i] = cards[i - 1];
+			}
+		}
+		cards[targetIndex] = reorderingCard;
+	}
+
+	private class HandCardCallbacks
+	{
+		// public static Card <-- keep track of which card is hovered over
+
+		private static readonly float HoverOverOffset = 25f;
+		private CollisionShape2D _areaShape;
+		private Vector2 _defaultAreaSize;
+
+		private Card _card;
+		private Hand _hand;
+		private CardManager _cardManager;
+
+		public HandCardCallbacks(Card card, Hand hand)
+		{
+			_areaShape = card.Area.GetCollisionShape();
+			_defaultAreaSize = card.Area.GetRectangleShape().Size;
+
+			_card = card;
+			_hand = hand;
+			_cardManager = hand.CardManager;
+		}
+
+		public void AddCallbacks()
+		{
+			_card.Area.AreaStartDragging += StartDragging;
+			_card.Area.AreaStopDragging += StopDragging;
+			_card.Area.AreaMouseOver += StartHovering;
+			_card.Area.AreaMouseOut += StopHovering;
+		}
+
+		public void RemoveCallbacks()
+		{
+			_card.Area.AreaStartDragging -= StartDragging;
+			_card.Area.AreaStopDragging -= StopDragging;
+			_card.Area.AreaMouseOver -= StartHovering;
+			_card.Area.AreaMouseOut -= StopHovering;
+
+			StopHovering();
+		}
+
+		public void StartDragging()
+		{
+			StopHovering();
+			_card.StartDragging();
+		}
+
+		public void StopDragging()
+		{
+			_card.StopDragging();
+		}
+
+		private void StartHovering()
+		{
+			_card.ZIndex = 9;
+			_card.TargetPositionOffset = new Vector2(0, -HoverOverOffset); // negative to hover up
+			var areaRect = _areaShape.Shape as RectangleShape2D;
+			areaRect.Size = _defaultAreaSize + new Vector2(0, HoverOverOffset); // positive to increase area size
+			_areaShape.Position = new Vector2(0, HoverOverOffset / 2); // the rectangle is centered, so move the center halfway
+		}
+
+		private void StopHovering()
+		{
+			_card.ZIndex = 0;
+			_card.TargetPositionOffset = null;
+			var areaRect = _areaShape.Shape as RectangleShape2D;
+			areaRect.Size = _defaultAreaSize;
+			_areaShape.Position = new Vector2(0, 0);
+		}
 	}
 }
