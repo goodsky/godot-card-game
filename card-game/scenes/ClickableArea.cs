@@ -29,6 +29,8 @@ public partial class ClickableArea : Node2D
 	[Signal]
 	public delegate void AreaMouseOutEventHandler();
 
+	public bool IsMouseOver => _isMouseOver;
+
 	public CollisionShape2D GetCollisionShape()
 	{
 		return _area.GetNode<CollisionShape2D>("CollisionShape2D");
@@ -63,7 +65,7 @@ public partial class ClickableArea : Node2D
 	{
 		if (inputEvent.IsActionReleased(Constants.ClickEventName))
 		{
-			GD.Print($"Unclick: mouseDown = {_isMouseDown}; dragging = {_isDragging};");
+			// GD.Print($"Unclick: mouseDown = {_isMouseDown}; dragging = {_isDragging};");
 			if (_isDragging)
 			{
 				EmitSignal(SignalName.AreaStopDragging);
@@ -87,7 +89,7 @@ public partial class ClickableArea : Node2D
 			Vector2 clickDelta = inputMouseMotionEvent.GlobalPosition - _clickGlobalPosition.Value;
 			if (clickDelta.Length() > DragDistanceThreshold)
 			{
-				GD.Print($"Dragging on {this.GetParent().Name}. delta = {clickDelta}; length = {clickDelta.Length()}");
+				// GD.Print($"Dragging on {this.GetParent().Name}. delta = {clickDelta}; length = {clickDelta.Length()}");
 				_isDragging = true;
 				EmitSignal(SignalName.AreaStartDragging);
 			}
@@ -95,7 +97,7 @@ public partial class ClickableArea : Node2D
 
 		if (inputEvent.IsActionPressed(Constants.ClickEventName))
 		{
-			GD.Print($"Click on {this.GetParent().Name}");
+			// GD.Print($"Click on {this.GetParent().Name}");
 			SetProcessInput(true);
 			_isMouseDown = true;
 			_clickGlobalPosition = GetGlobalMousePosition();

@@ -40,12 +40,12 @@ public class CardManager
 
 	public void ActivateCardDrop(CardDrop cardDrop)
 	{
-		if (ActiveCardDrop != null)
-		{
-			GD.Print($"Can't activate card drop. {ActiveCardDrop.Name} is already active.");
-			return;
-		}
-		GD.Print($"Activated card drop: {cardDrop.Name}");
+		// if (ActiveCardDrop != null)
+		// {
+		// 	GD.Print($"Can't activate card drop {cardDrop.Name}. {ActiveCardDrop.Name} is already active.");
+		// 	return;
+		// }
+
 		ActiveCardDrop = cardDrop;
 	}
 
@@ -53,10 +53,10 @@ public class CardManager
 	{
 		if (ActiveCardDrop != cardDrop)
 		{
-			GD.Print($"Cannot deactivate card drop {cardDrop.Name}. Active card drop = {ActiveCardDrop?.Name}");
+			// GD.Print($"Skipping deactivate card drop {cardDrop.Name}. Active card drop = {ActiveCardDrop?.Name}");
 			return;
 		}
-		GD.Print($"Deactivated card drop: {cardDrop.Name}");
+
 		ActiveCardDrop = null;
 	}
 

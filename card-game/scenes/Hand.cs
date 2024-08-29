@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 
 public partial class Hand : CardDrop
@@ -8,7 +9,7 @@ public partial class Hand : CardDrop
 	private Vector2 _area;
 	private bool _isHoverOver = false;
 	private bool _hasGhostCard = false;
-	private Dictionary<Card, HandCardCallbacks> _cardCallbacks = new Dictionary<Card, HandCardCallbacks>(); 
+	private Dictionary<Card, HandCardCallbacks> _cardCallbacks = new Dictionary<Card, HandCardCallbacks>();
 
 	[Export]
 	public int HandSize { get; set; }
@@ -193,15 +194,37 @@ public partial class Hand : CardDrop
 
 	private class HandCardCallbacks
 	{
-		// public static Card <-- keep track of which card is hovered over
+		// Keep track of which cards are hovered over, since when cards overlap in the hand it could be multiple.
+		private static readonly List<HandCardCallbacks> HoveredOverCards = new List<HandCardCallbacks>();
+		private static HandCardCallbacks GetTopCardFromList(List<HandCardCallbacks> callbacks)
+		{
+			if (callbacks.Count == 0) return null;
+			if (callbacks.Count == 1) return callbacks[0];
+
+			Hand hand = callbacks[0]._hand;
+			Card[] childCards = hand.GetChildCards();
+
+			int maxIndex = -1;
+			HandCardCallbacks topCardCallbacks = null;
+			foreach (HandCardCallbacks callback in callbacks)
+			{
+				int cardIndex = Array.IndexOf(childCards, callback._card);
+				if (cardIndex > maxIndex)
+				{
+					maxIndex = cardIndex;
+					topCardCallbacks = callback;
+				}
+			}
+
+			return topCardCallbacks;
+		}
 
 		private static readonly float HoverOverOffset = 25f;
 		private CollisionShape2D _areaShape;
 		private Vector2 _defaultAreaSize;
-
-		private Card _card;
-		private Hand _hand;
 		private CardManager _cardManager;
+		protected Hand _hand;
+		protected Card _card;
 
 		public HandCardCallbacks(Card card, Hand hand)
 		{
@@ -233,27 +256,75 @@ public partial class Hand : CardDrop
 
 		public void StartDragging()
 		{
-			StopHovering();
+			if (_cardManager.DraggingCard != null)
+			{
+				Card[] childCards = _hand.GetChildCards();
+				int draggingCardIndex = Array.IndexOf(childCards, _cardManager.DraggingCard);
+				int myCardIndex = Array.IndexOf(childCards, _card);
+
+				// GD.Print($"Already dragging card {_cardManager.DraggingCard.Name}({draggingCardIndex}) while starting drag on {_card.Name}({myCardIndex})");
+				if (draggingCardIndex > myCardIndex)
+				{
+					return;
+				}
+				else
+				{
+					_cardManager.DraggingCard.StopDragging();
+				}
+			}
+
+			HoverDown();
 			_card.StartDragging();
 		}
 
 		public void StopDragging()
 		{
-			_card.StopDragging();
+			if (_cardManager.DraggingCard == _card)
+			{
+				_card.StopDragging();
+			}
 		}
 
-		private void StartHovering()
+		public void StartHovering()
 		{
-			_card.ZIndex = 9;
+			foreach (var callbacks in HoveredOverCards)
+			{
+				callbacks.HoverDown();
+			}
+
+			HoveredOverCards.Add(this);
+			if (_cardManager.DraggingCard == null)
+			{
+				GetTopCardFromList(HoveredOverCards)?.HoverUp();
+			}
+		}
+
+		public void StopHovering()
+		{
+			foreach (var callbacks in HoveredOverCards)
+			{
+				callbacks.HoverDown();
+			}
+
+			HoveredOverCards.RemoveAll((callback) => callback == this);
+			if (_cardManager.DraggingCard == null)
+			{
+				GetTopCardFromList(HoveredOverCards)?.HoverUp();
+			}
+		}
+
+		private void HoverUp()
+		{
+			if (_card.ZIndex == 0) _card.ZIndex = 9; // make sure we don't affect the ZIndex of the dragging card (which will be 10)
 			_card.TargetPositionOffset = new Vector2(0, -HoverOverOffset); // negative to hover up
 			var areaRect = _areaShape.Shape as RectangleShape2D;
 			areaRect.Size = _defaultAreaSize + new Vector2(0, HoverOverOffset); // positive to increase area size
 			_areaShape.Position = new Vector2(0, HoverOverOffset / 2); // the rectangle is centered, so move the center halfway
 		}
 
-		private void StopHovering()
+		private void HoverDown()
 		{
-			_card.ZIndex = 0;
+			if (_card.ZIndex == 9) _card.ZIndex = 0; // make sure we don't affect the ZIndex of the dragging card (which will be 10)
 			_card.TargetPositionOffset = null;
 			var areaRect = _areaShape.Shape as RectangleShape2D;
 			areaRect.Size = _defaultAreaSize;
