@@ -1,10 +1,14 @@
-[gd_scene load_steps=7 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=11 format=3 uid="uid://cdq0smiv61oi3"]
 
 [ext_resource type="Texture2D" uid="uid://cfa3c0s3dl784" path="res://assets/sprites/info-area.jpeg" id="1_wr0v1"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_3cyok"]
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="2_ctxqn"]
 [ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="2_sdxti"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_31qvx"]
+[ext_resource type="Texture2D" uid="uid://c8l63ndnd58hb" path="res://assets/sprites/health-bar.jpeg" id="6_u6xyq"]
+[ext_resource type="Script" path="res://scenes/HealthBar.cs" id="7_mv0gw"]
+[ext_resource type="Texture2D" uid="uid://dd2hkuns5x2qv" path="res://assets/sprites/health-bar-pip.png" id="8_jai3u"]
+[ext_resource type="Texture2D" uid="uid://doyxve2lksbnp" path="res://assets/sprites/health-bar-marker.png" id="9_c4snb"]
 
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
@@ -15,58 +19,58 @@ script = ExtResource("2_sdxti")
 Size = Vector2(600, 450)
 
 [node name="PlayArea1" parent="PlayArea" instance=ExtResource("2_3cyok")]
-position = Vector2(100, 365)
+position = Vector2(84, 365)
 SupportsPickUp = true
 
 [node name="PlayArea2" parent="PlayArea" instance=ExtResource("2_3cyok")]
-position = Vector2(233, 365)
+position = Vector2(219, 365)
 SupportsPickUp = true
 
 [node name="PlayArea3" parent="PlayArea" instance=ExtResource("2_3cyok")]
-position = Vector2(367, 365)
+position = Vector2(353, 365)
 SupportsPickUp = true
 
 [node name="PlayArea4" parent="PlayArea" instance=ExtResource("2_3cyok")]
-position = Vector2(500, 365)
+position = Vector2(488, 365)
 SupportsPickUp = true
 
 [node name="PlayArea5" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(100, 215)
+position = Vector2(84, 215)
 SupportsPickUp = true
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea6" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(233, 215)
+position = Vector2(219, 215)
 SupportsPickUp = true
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea7" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(367, 215)
+position = Vector2(353, 215)
 SupportsPickUp = true
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea8" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(500, 215)
+position = Vector2(488, 215)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
 [node name="PlayArea9" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(100, 75)
+position = Vector2(84, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea10" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(233, 75)
+position = Vector2(219, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea11" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(367, 75)
+position = Vector2(353, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea12" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
-position = Vector2(500, 75)
+position = Vector2(488, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
@@ -97,6 +101,18 @@ offset_right = 53.0
 offset_bottom = 294.0
 theme = SubResource("Theme_1ly1u")
 text = "Clear Cards"
+
+[node name="HealthBar" type="Sprite2D" parent="." node_paths=PackedStringArray("Marker")]
+position = Vector2(572, 0)
+texture = ExtResource("6_u6xyq")
+centered = false
+script = ExtResource("7_mv0gw")
+Marker = NodePath("Marker")
+PipTexture = ExtResource("8_jai3u")
+
+[node name="Marker" type="Sprite2D" parent="HealthBar"]
+position = Vector2(13, 221)
+texture = ExtResource("9_c4snb")
 
 [connection signal="pressed" from="InfoArea/Button" to="HandArea/Hand" method="Debug_DrawCard"]
 [connection signal="pressed" from="InfoArea/ResetButton" to="HandArea/Hand" method="Debug_ClearCards"]

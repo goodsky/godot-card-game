@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://btkkhgkubjwj1"]
+[gd_scene load_steps=11 format=3 uid="uid://btkkhgkubjwj1"]
 
 [ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="1_d472e"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_77sy5"]
@@ -6,16 +6,21 @@
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="4_wiasx"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xci7l"]
-bg_color = Color(0.0533333, 0.8, 0, 1)
+bg_color = Color(0.862745, 0.862745, 0.862745, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pi0m1"]
-bg_color = Color(0.05, 0.75, 0, 1)
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e271m"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi54p"]
-bg_color = Color(0.85098, 0, 0, 1)
+bg_color = Color(0.137255, 0.137255, 0.8, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a6pfy"]
-bg_color = Color(0.75, 0, 0, 1)
+bg_color = Color(0.264, 0.264, 0.8, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmdlw"]
+bg_color = Color(0.490196, 0.737255, 1, 1)
 
 [node name="Main" type="Node2D"]
 
@@ -123,8 +128,13 @@ offset_left = 667.75
 offset_top = 460.0
 offset_right = 776.75
 offset_bottom = 514.0
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
 theme_override_styles/normal = SubResource("StyleBoxFlat_xci7l")
 theme_override_styles/hover = SubResource("StyleBoxFlat_pi0m1")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_e271m")
 text = "Draw
 Card"
 
@@ -135,6 +145,7 @@ offset_right = 776.0
 offset_bottom = 594.0
 theme_override_styles/normal = SubResource("StyleBoxFlat_xi54p")
 theme_override_styles/hover = SubResource("StyleBoxFlat_a6pfy")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_cmdlw")
 text = "Clear Cards"
 
 [connection signal="pressed" from="Button" to="Hand" method="Debug_DrawCard"]
