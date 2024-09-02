@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://17ebcjy8us6t"
-path="res://.godot/imported/avatar_cute_fluffy_00.jpeg-414170755f0dd77977384a042d6a09d6.ctex"
+uid="uid://v2ms0qbupggw"
+path="res://.godot/imported/gear-icon-1.png-f897e0cab0205af7a3aafd3fac2c2c7a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/avatars/avatar_cute_fluffy_00.jpeg"
-dest_files=["res://.godot/imported/avatar_cute_fluffy_00.jpeg-414170755f0dd77977384a042d6a09d6.ctex"]
+source_file="res://assets/sprites/gear-icon-1.png"
+dest_files=["res://.godot/imported/gear-icon-1.png-f897e0cab0205af7a3aafd3fac2c2c7a.ctex"]
 
 [params]
 

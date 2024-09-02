@@ -98,6 +98,9 @@ public partial class Hand : CardDrop
 			BloodCost = Random.Shared.Next(1, 4),
 		};
 
+		Texture2D avatar = Constants.CardAvatars[Random.Shared.Next(Constants.CardAvatars.Length)];
+		card.Avatar.Texture = avatar;
+
 		GD.Print($"Drawing card {card.Name}");
 		CardManager.SetCardDrop(card, this);
 	}

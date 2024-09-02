@@ -1,14 +1,19 @@
-[gd_scene load_steps=11 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=16 format=3 uid="uid://cdq0smiv61oi3"]
 
 [ext_resource type="Texture2D" uid="uid://cfa3c0s3dl784" path="res://assets/sprites/info-area.jpeg" id="1_wr0v1"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_3cyok"]
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="2_ctxqn"]
 [ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="2_sdxti"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_31qvx"]
+[ext_resource type="Script" path="res://scenes/InfoArea.cs" id="6_b5hku"]
 [ext_resource type="Texture2D" uid="uid://c8l63ndnd58hb" path="res://assets/sprites/health-bar.jpeg" id="6_u6xyq"]
+[ext_resource type="Theme" uid="uid://b7xgdtjl247li" path="res://assets/ui_theme.tres" id="7_1if2p"]
 [ext_resource type="Script" path="res://scenes/HealthBar.cs" id="7_mv0gw"]
 [ext_resource type="Texture2D" uid="uid://dd2hkuns5x2qv" path="res://assets/sprites/health-bar-pip.png" id="8_jai3u"]
 [ext_resource type="Texture2D" uid="uid://doyxve2lksbnp" path="res://assets/sprites/health-bar-marker.png" id="9_c4snb"]
+[ext_resource type="Texture2D" uid="uid://uapu8y7tnbo7" path="res://assets/sprites/gear-icon-2.png" id="9_m2mek"]
+[ext_resource type="Texture2D" uid="uid://v2ms0qbupggw" path="res://assets/sprites/gear-icon-1.png" id="10_prk4d"]
+[ext_resource type="Texture2D" uid="uid://b6cr0akqd7xco" path="res://assets/sprites/gear-icon.png" id="12_ub2cg"]
 
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
@@ -17,6 +22,7 @@
 [node name="PlayArea" type="Node2D" parent="."]
 script = ExtResource("2_sdxti")
 Size = Vector2(600, 450)
+Color = Color(0.835294, 0.894118, 0.992157, 1)
 
 [node name="PlayArea1" parent="PlayArea" instance=ExtResource("2_3cyok")]
 position = Vector2(84, 365)
@@ -82,25 +88,86 @@ centered = false
 [node name="Hand" parent="HandArea" instance=ExtResource("2_ctxqn")]
 position = Vector2(300, 75)
 
-[node name="InfoArea" type="Sprite2D" parent="."]
+[node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "GameStateLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton")]
 position = Vector2(698, 300)
 texture = ExtResource("1_wr0v1")
+script = ExtResource("6_b5hku")
+InfoLabel = NodePath("ThemeContainer/Tooltip/RichTextLabel")
+GameStateLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnLabel")
+GameStateDescriptionLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnDescription")
+DrawFromDeckButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton")
+DrawFromSacrificeButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton")
 
-[node name="Button" type="Button" parent="InfoArea"]
-offset_left = -55.0
-offset_top = 160.0
-offset_right = 54.0
-offset_bottom = 214.0
-text = "Draw
-Card"
+[node name="ThemeContainer" type="Control" parent="InfoArea"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+theme = ExtResource("7_1if2p")
 
-[node name="ResetButton" type="Button" parent="InfoArea"]
-offset_left = -56.0
-offset_top = 240.0
-offset_right = 53.0
-offset_bottom = 294.0
+[node name="Tooltip" type="PanelContainer" parent="InfoArea/ThemeContainer"]
+layout_mode = 0
+offset_left = -90.0
+offset_top = -262.0
+offset_right = 90.0
+offset_bottom = 94.0
+
+[node name="RichTextLabel" type="RichTextLabel" parent="InfoArea/ThemeContainer/Tooltip"]
+layout_mode = 2
+bbcode_enabled = true
+text = "
+
+
+
+
+
+
+
+
+[center][font_size=16][i]Hover over things to get helpful tips[/i][/font_size][/center]"
+
+[node name="StatePrompts" type="PanelContainer" parent="InfoArea/ThemeContainer"]
+layout_mode = 0
+offset_left = -90.0
+offset_top = 150.0
+offset_right = 90.0
+offset_bottom = 290.0
+
+[node name="DrawCardContainer" type="VBoxContainer" parent="InfoArea/ThemeContainer/StatePrompts"]
+layout_mode = 2
+
+[node name="TurnLabel" type="Label" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Your Turn"
+horizontal_alignment = 1
+text_overrun_behavior = 1
+
+[node name="TurnDescription" type="Label" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+layout_mode = 2
+text = "Select a card"
+horizontal_alignment = 1
+text_overrun_behavior = 1
+
+[node name="DrawDeckButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+layout_mode = 2
+text = "Draw from Deck"
+
+[node name="DrawSacrificeButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+layout_mode = 2
 theme = SubResource("Theme_1ly1u")
-text = "Clear Cards"
+text = "Draw Sacrifice"
+
+[node name="GearButton" type="TextureButton" parent="InfoArea/ThemeContainer"]
+layout_mode = 0
+offset_left = 59.0
+offset_top = -295.0
+offset_right = 91.0
+offset_bottom = -263.0
+texture_normal = ExtResource("12_ub2cg")
+texture_pressed = ExtResource("9_m2mek")
+texture_hover = ExtResource("10_prk4d")
+texture_focused = ExtResource("12_ub2cg")
 
 [node name="HealthBar" type="Sprite2D" parent="." node_paths=PackedStringArray("Marker")]
 position = Vector2(572, 0)
@@ -111,8 +178,14 @@ Marker = NodePath("Marker")
 PipTexture = ExtResource("8_jai3u")
 
 [node name="Marker" type="Sprite2D" parent="HealthBar"]
-position = Vector2(13, 221)
+z_index = 5
+position = Vector2(12.5, 225)
 texture = ExtResource("9_c4snb")
 
-[connection signal="pressed" from="InfoArea/Button" to="HandArea/Hand" method="Debug_DrawCard"]
-[connection signal="pressed" from="InfoArea/ResetButton" to="HandArea/Hand" method="Debug_ClearCards"]
+[connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseEntered_DrawFromDeckButton"]
+[connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseExited_ResetInfo"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="HandArea/Hand" method="Debug_DrawCard"]
+[connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseEntered_DrawSacrificeButton"]
+[connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseExited_ResetInfo"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="HandArea/Hand" method="Debug_ClearCards"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/GearButton" to="InfoArea" method="Click_MenuBar"]

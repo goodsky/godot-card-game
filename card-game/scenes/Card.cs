@@ -1,3 +1,4 @@
+using System.Text;
 using Godot;
 
 public struct CardInfo
@@ -58,6 +59,9 @@ public partial class Card : Node2D
 		// DEBUG: just for now
 		Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
 		UpdateVisuals(CardInfo);
+
+		Area.AreaMouseOver += HoverOver;
+		Area.AreaMouseOut += HoverOut;
 	}
 
 	public override void _PhysicsProcess(double delta)
@@ -100,6 +104,22 @@ public partial class Card : Node2D
 		CardManager.ClearDraggingCard(this);
 
 		ZIndex = 0;
+	}
+
+	private void HoverOver()
+	{
+		var cardInfo = new StringBuilder();
+		cardInfo.AppendLine($"[center][font_size=16]${CardInfo.Name}[/font_size][/center]");
+		cardInfo.AppendLine("");
+		cardInfo.AppendLine($"Attack: ${CardInfo.Attack}");
+		cardInfo.AppendLine($"Defense: ${CardInfo.Defense}");
+
+		InfoArea.Instance.SetInfoBar(cardInfo.ToString());
+	}
+
+	private void HoverOut()
+	{
+		InfoArea.Instance.ResetInfoBar();
 	}
 
 	private void UpdateVisuals(CardInfo info)
