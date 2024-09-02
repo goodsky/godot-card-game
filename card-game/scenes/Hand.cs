@@ -59,10 +59,10 @@ public partial class Hand : CardDrop
 
     public override void _Process(double delta)
     {
-        if (_isHoverOver && CardManager.DraggingCard != null)
+        if (_isHoverOver && CardManager.Instance.DraggingCard != null)
 		{
 			_hasGhostCard = true;
-			UpdateCardPositions(CardManager.DraggingCard);
+			UpdateCardPositions(CardManager.Instance.DraggingCard);
 		}
 		else if (_hasGhostCard)
 		{
@@ -74,45 +74,13 @@ public partial class Hand : CardDrop
 	public void HoverOver()
 	{
 		_isHoverOver = true;
-		CardManager.ActivateCardDrop(this);
+		CardManager.Instance.ActivateCardDrop(this);
 	}
 
 	public void HoverOut()
 	{
 		_isHoverOver = false;
-		CardManager.DeactivateCardDrop(this);
-	}
-
-	private static int DrawnCardCount = 0;
-	public void Debug_DrawCard()
-	{
-		var card = Constants.CardScene.Instantiate<Card>();
-		card.AddToGroup("DebugCard");
-		card.Name = $"Card_{DrawnCardCount++}";
-		card.GlobalPosition = GlobalPosition + new Vector2(300, 0);
-		card.CardInfo = new CardInfo()
-		{
-			Name = "FooBar the Great!",
-			Attack = Random.Shared.Next(1, 6),
-			Defense = Random.Shared.Next(1, 11),
-			BloodCost = Random.Shared.Next(1, 4),
-		};
-
-		Texture2D avatar = Constants.CardAvatars[Random.Shared.Next(Constants.CardAvatars.Length)];
-		card.Avatar.Texture = avatar;
-
-		GD.Print($"Drawing card {card.Name}");
-		CardManager.SetCardDrop(card, this);
-	}
-
-	public void Debug_ClearCards()
-	{
-		var debugCards = GetTree().GetNodesInGroup("DebugCard");
-		foreach (var card in debugCards)
-		{
-			CardManager.SetCardDrop(card as Card, null);
-			card.QueueFree();
-		}
+		CardManager.Instance.DeactivateCardDrop(this);
 	}
 
 	protected void UpdateCardPositions(Card ghostCard = null)
@@ -225,7 +193,6 @@ public partial class Hand : CardDrop
 		private static readonly float HoverOverOffset = 25f;
 		private CollisionShape2D _areaShape;
 		private Vector2 _defaultAreaSize;
-		private CardManager _cardManager;
 		protected Hand _hand;
 		protected Card _card;
 
@@ -236,7 +203,6 @@ public partial class Hand : CardDrop
 
 			_card = card;
 			_hand = hand;
-			_cardManager = hand.CardManager;
 		}
 
 		public void AddCallbacks()
@@ -259,20 +225,20 @@ public partial class Hand : CardDrop
 
 		public void StartDragging()
 		{
-			if (_cardManager.DraggingCard != null)
+			if (CardManager.Instance.DraggingCard != null)
 			{
 				Card[] childCards = _hand.GetChildCards();
-				int draggingCardIndex = Array.IndexOf(childCards, _cardManager.DraggingCard);
+				int draggingCardIndex = Array.IndexOf(childCards, CardManager.Instance.DraggingCard);
 				int myCardIndex = Array.IndexOf(childCards, _card);
 
-				// GD.Print($"Already dragging card {_cardManager.DraggingCard.Name}({draggingCardIndex}) while starting drag on {_card.Name}({myCardIndex})");
+				// GD.Print($"Already dragging card {CardManager.Instance.DraggingCard.Name}({draggingCardIndex}) while starting drag on {_card.Name}({myCardIndex})");
 				if (draggingCardIndex > myCardIndex)
 				{
 					return;
 				}
 				else
 				{
-					_cardManager.DraggingCard.StopDragging();
+					CardManager.Instance.DraggingCard.StopDragging();
 				}
 			}
 
@@ -282,7 +248,7 @@ public partial class Hand : CardDrop
 
 		public void StopDragging()
 		{
-			if (_cardManager.DraggingCard == _card)
+			if (CardManager.Instance.DraggingCard == _card)
 			{
 				_card.StopDragging();
 			}
@@ -296,7 +262,7 @@ public partial class Hand : CardDrop
 			}
 
 			HoveredOverCards.Add(this);
-			if (_cardManager.DraggingCard == null)
+			if (CardManager.Instance.DraggingCard == null)
 			{
 				GetTopCardFromList(HoveredOverCards)?.HoverUp();
 			}
@@ -310,7 +276,7 @@ public partial class Hand : CardDrop
 			}
 
 			HoveredOverCards.RemoveAll((callback) => callback == this);
-			if (_cardManager.DraggingCard == null)
+			if (CardManager.Instance.DraggingCard == null)
 			{
 				GetTopCardFromList(HoveredOverCards)?.HoverUp();
 			}

@@ -1,7 +1,9 @@
-[gd_scene load_steps=16 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=18 format=3 uid="uid://cdq0smiv61oi3"]
 
+[ext_resource type="Script" path="res://scenes/Main.cs" id="1_do0r1"]
 [ext_resource type="Texture2D" uid="uid://cfa3c0s3dl784" path="res://assets/sprites/info-area.jpeg" id="1_wr0v1"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_3cyok"]
+[ext_resource type="Script" path="res://scenes/CardManager.cs" id="2_6ngww"]
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="2_ctxqn"]
 [ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="2_sdxti"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_31qvx"]
@@ -18,6 +20,10 @@
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
 [node name="Main" type="Node2D"]
+script = ExtResource("1_do0r1")
+
+[node name="CardManager" type="Node2D" parent="."]
+script = ExtResource("2_6ngww")
 
 [node name="PlayArea" type="Node2D" parent="."]
 script = ExtResource("2_sdxti")
@@ -43,41 +49,49 @@ SupportsPickUp = true
 [node name="PlayArea5" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(84, 215)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea6" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(219, 215)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea7" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(353, 215)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea8" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(488, 215)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
 
 [node name="PlayArea9" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(84, 75)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea10" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(219, 75)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea11" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(353, 75)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea12" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(488, 75)
 SupportsPickUp = true
+SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
 
 [node name="HandArea" type="Sprite2D" parent="."]
@@ -88,12 +102,11 @@ centered = false
 [node name="Hand" parent="HandArea" instance=ExtResource("2_ctxqn")]
 position = Vector2(300, 75)
 
-[node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "GameStateLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton")]
+[node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton")]
 position = Vector2(698, 300)
 texture = ExtResource("1_wr0v1")
 script = ExtResource("6_b5hku")
 InfoLabel = NodePath("ThemeContainer/Tooltip/RichTextLabel")
-GameStateLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnLabel")
 GameStateDescriptionLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnDescription")
 DrawFromDeckButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton")
 DrawFromSacrificeButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton")
@@ -158,6 +171,12 @@ layout_mode = 2
 theme = SubResource("Theme_1ly1u")
 text = "Draw Sacrifice"
 
+[node name="EndTurnButtin" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+visible = false
+layout_mode = 2
+theme = SubResource("Theme_1ly1u")
+text = "End Turn"
+
 [node name="GearButton" type="TextureButton" parent="InfoArea/ThemeContainer"]
 layout_mode = 0
 offset_left = 59.0
@@ -184,8 +203,11 @@ texture = ExtResource("9_c4snb")
 
 [connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseEntered_DrawFromDeckButton"]
 [connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseExited_ResetInfo"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="HandArea/Hand" method="Debug_DrawCard"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="." method="DrawCardFromDeck"]
 [connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseEntered_DrawSacrificeButton"]
 [connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseExited_ResetInfo"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="HandArea/Hand" method="Debug_ClearCards"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="." method="DrawCardFromSacrificeDeck"]
+[connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseEntered_EndTurnButton"]
+[connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseExited_ResetInfo"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="." method="EndTurn"]
 [connection signal="pressed" from="InfoArea/ThemeContainer/GearButton" to="InfoArea" method="Click_MenuBar"]

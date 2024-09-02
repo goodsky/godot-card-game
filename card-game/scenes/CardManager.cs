@@ -1,31 +1,8 @@
-using System.Collections.Generic;
 using Godot;
 
-public static class CardManagerExtension
+public partial class CardManager : Node2D
 {
-	private static CardManager _instance;
-	private static object _instanceLock = new object();
-	public static CardManager GetCardManager(this Node node)
-	{
-		if (_instance != null)
-		{
-			return _instance;
-		}
-
-		lock (_instanceLock)
-		{
-			if (_instance == null)
-			{
-				_instance = new CardManager(node.GetTree().Root);
-			}
-			return _instance;
-		}
-	}
-}
-
-public class CardManager
-{
-	private Node _rootNode;
+	public static CardManager Instance { get; private set; } 
 
 	public Card DraggingCard { get; private set; } = null;
 
@@ -33,12 +10,12 @@ public class CardManager
 
 	public CardDrop ActiveCardDrop { get; private set; } = null;
 
-	public CardManager(Node rootNode)
-	{
-		_rootNode = rootNode;
-	}
+    public override void _Ready()
+    {
+        Instance = this;
+    }
 
-	public void ActivateCardDrop(CardDrop cardDrop)
+    public void ActivateCardDrop(CardDrop cardDrop)
 	{
 		// if (ActiveCardDrop != null)
 		// {

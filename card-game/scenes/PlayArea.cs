@@ -11,6 +11,9 @@ public partial class PlayArea : CardDrop
 	public bool SupportsPickUp { get; set; }
 
 	[Export]
+	public bool SupportsDrop { get; set; } = true;
+
+	[Export]
 	public ClickableArea Area { get; set; }
 
     protected override int MaxCards => 1;
@@ -57,15 +60,19 @@ public partial class PlayArea : CardDrop
 
 	public void HoverOver()
 	{
+		if (!SupportsDrop) return;
+
 		_isHoverOver = true;
-		CardManager.ActivateCardDrop(this);
+		CardManager.Instance.ActivateCardDrop(this);
 		QueueRedraw();
 	}
 
 	public void HoverOut()
 	{
+		if (!SupportsDrop) return;
+
 		_isHoverOver = false;
-		CardManager.DeactivateCardDrop(this);
+		CardManager.Instance.DeactivateCardDrop(this);
 		QueueRedraw();
 	}
 }

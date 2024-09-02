@@ -18,8 +18,6 @@ public partial class Card : Node2D
 	
 	private bool _isDragging = false;
 
-	protected CardManager CardManager;
-
 	// When not dragging, the home drop node for this card to live at.
 	public CardDrop HomeCardDrop { get; set; }
 
@@ -54,8 +52,6 @@ public partial class Card : Node2D
 
 	public override void _Ready()
 	{
-		CardManager = this.GetCardManager();
-
 		// DEBUG: just for now
 		Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
 		UpdateVisuals(CardInfo);
@@ -84,7 +80,7 @@ public partial class Card : Node2D
 	public void StartDragging()
 	{
 		_isDragging = true;
-		CardManager.SetDraggingCard(this);
+		CardManager.Instance.SetDraggingCard(this);
 
 		// When using touch screens - sometimes the global mouse position does not match card position
 		float mouseToCardDelta = GlobalPosition.DistanceTo(GetGlobalMousePosition());
@@ -101,7 +97,7 @@ public partial class Card : Node2D
 	public void StopDragging()
 	{
 		_isDragging = false;
-		CardManager.ClearDraggingCard(this);
+		CardManager.Instance.ClearDraggingCard(this);
 
 		ZIndex = 0;
 	}
@@ -109,17 +105,18 @@ public partial class Card : Node2D
 	private void HoverOver()
 	{
 		var cardInfo = new StringBuilder();
-		cardInfo.AppendLine($"[center][font_size=16]${CardInfo.Name}[/font_size][/center]");
+		cardInfo.Append("\n\n\n\n\n");
+		cardInfo.AppendLine($"[center][font_size=16]{CardInfo.Name}[/font_size][/center]");
 		cardInfo.AppendLine("");
-		cardInfo.AppendLine($"Attack: ${CardInfo.Attack}");
-		cardInfo.AppendLine($"Defense: ${CardInfo.Defense}");
+		cardInfo.AppendLine($"Attack: {CardInfo.Attack}");
+		cardInfo.AppendLine($"Defense: {CardInfo.Defense}");
 
-		InfoArea.Instance.SetInfoBar(cardInfo.ToString());
+		InfoArea.Instance.SetInfoBar(cardInfo.ToString(), this);
 	}
 
 	private void HoverOut()
 	{
-		InfoArea.Instance.ResetInfoBar();
+		InfoArea.Instance.ResetInfoBar(this);
 	}
 
 	private void UpdateVisuals(CardInfo info)

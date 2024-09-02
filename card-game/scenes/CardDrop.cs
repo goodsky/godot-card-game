@@ -11,16 +11,12 @@ public abstract partial class CardDrop : Node2D
 
 	protected Node CardsNode;
 
-	protected CardManager CardManager;
-
 	protected int CardCount => GetChildCards().Length;
 
 	protected abstract int MaxCards { get; }
 
 	public override void _Ready()
 	{
-		CardManager = this.GetCardManager();
-
 		CardsNode = new Node2D();
 		CardsNode.Name = "CardDrop";
 		AddChild(CardsNode);

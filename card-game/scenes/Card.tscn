@@ -5,13 +5,11 @@
 [ext_resource type="PackedScene" uid="uid://demt8xneeboij" path="res://scenes/CanvasText.tscn" id="3_exfcv"]
 [ext_resource type="Script" path="res://scenes/ClickableArea.cs" id="3_yne0g"]
 [ext_resource type="FontFile" uid="uid://b8q0q4js1pbjq" path="res://assets/fonts/Poco.ttf" id="4_nhbcd"]
+[ext_resource type="Texture2D" uid="uid://cvxf0itnk118u" path="res://assets/sprites/avatars/avatar_blue_monster_00.jpeg" id="5_um02m"]
 [ext_resource type="Script" path="res://scenes/SpriteBorder.cs" id="6_lhuuc"]
 [ext_resource type="Texture2D" uid="uid://g1tvugg8g4fv" path="res://assets/sprites/card-sword.png" id="7_er1au"]
 [ext_resource type="Texture2D" uid="uid://c5jtcc338pomu" path="res://assets/sprites/card-shield.png" id="8_yjxb0"]
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="9_bj6c8"]
-
-[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_fyr8i"]
-load_path = "res://.godot/imported/avatar_cute_fluffy_00.jpeg-414170755f0dd77977384a042d6a09d6.ctex"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fbrmm"]
 size = Vector2(100, 130)
@@ -38,7 +36,7 @@ Font = ExtResource("4_nhbcd")
 
 [node name="Avatar" type="Sprite2D" parent="Background"]
 position = Vector2(0, -18)
-texture = SubResource("CompressedTexture2D_fyr8i")
+texture = ExtResource("5_um02m")
 script = ExtResource("6_lhuuc")
 
 [node name="Card-sword" type="Sprite2D" parent="Background"]
