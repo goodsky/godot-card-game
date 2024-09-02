@@ -29,6 +29,9 @@ public partial class InfoArea : Node2D
 	[Export]
 	public Button DrawFromSacrificeButton { get; set; }
 
+	[Export]
+	public Button EndTurnButton { get; set; }
+
 	public override void _Ready()
 	{
 		Instance = this;
@@ -42,6 +45,10 @@ public partial class InfoArea : Node2D
 				DrawFromDeckButton.Visible = false;
 				DrawFromSacrificeButton.Visible = false;
 				break;
+			
+			case GameState.PlayCard_SelectCard:
+				EndTurnButton.Visible = false;
+				break;
 		}
 
 		switch(nextState)
@@ -53,9 +60,15 @@ public partial class InfoArea : Node2D
 				DrawFromSacrificeButton.Visible = true;
 				break;
 
-			case GameState.PlayCard_SelectLocation:
+			case GameState.PlayCard_SelectCard:
 				TurnLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Play a Card\nor\nEnd your Turn";
+				EndTurnButton.Visible = true;
+				break;
+
+			case GameState.PlayCard_SelectLocation:
+				TurnLabel.Text = "Your Turn";
+				GameStateDescriptionLabel.Text = "Where do you want to place that card?";
 				break;
 		}
 	}

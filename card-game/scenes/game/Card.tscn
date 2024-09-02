@@ -1,12 +1,12 @@
 [gd_scene load_steps=12 format=3 uid="uid://c7jfumswj5p4k"]
 
-[ext_resource type="Script" path="res://scenes/Card.cs" id="1_g252h"]
+[ext_resource type="Script" path="res://scenes/game/Card.cs" id="1_g252h"]
 [ext_resource type="Texture2D" uid="uid://bvl2bulw6ldxu" path="res://assets/sprites/card-background.png" id="2_636mv"]
-[ext_resource type="PackedScene" uid="uid://demt8xneeboij" path="res://scenes/CanvasText.tscn" id="3_exfcv"]
-[ext_resource type="Script" path="res://scenes/ClickableArea.cs" id="3_yne0g"]
+[ext_resource type="PackedScene" uid="uid://demt8xneeboij" path="res://scenes/game/CanvasText.tscn" id="3_exfcv"]
+[ext_resource type="Script" path="res://scenes/game/ClickableArea.cs" id="3_yne0g"]
 [ext_resource type="FontFile" uid="uid://b8q0q4js1pbjq" path="res://assets/fonts/Poco.ttf" id="4_nhbcd"]
 [ext_resource type="Texture2D" uid="uid://cvxf0itnk118u" path="res://assets/sprites/avatars/avatar_blue_monster_00.jpeg" id="5_um02m"]
-[ext_resource type="Script" path="res://scenes/SpriteBorder.cs" id="6_lhuuc"]
+[ext_resource type="Script" path="res://scenes/game/SpriteBorder.cs" id="6_lhuuc"]
 [ext_resource type="Texture2D" uid="uid://g1tvugg8g4fv" path="res://assets/sprites/card-sword.png" id="7_er1au"]
 [ext_resource type="Texture2D" uid="uid://c5jtcc338pomu" path="res://assets/sprites/card-shield.png" id="8_yjxb0"]
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="9_bj6c8"]
@@ -18,7 +18,7 @@ size = Vector2(100, 130)
 script = ExtResource("1_g252h")
 Background = NodePath("Background")
 Avatar = NodePath("Background/Avatar")
-BloodCostIcons = [NodePath("Background/Card-cost-1"), NodePath("Background/Card-cost-2"), NodePath("Background/Card-cost-3")]
+BloodCostIcons = []
 NameLabel = NodePath("Background/CardTitle")
 AttackLabel = NodePath("Background/AttackStat")
 DefenseLabel = NodePath("Background/DefenseStat")

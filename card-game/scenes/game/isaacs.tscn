@@ -1,12 +1,12 @@
 [gd_scene load_steps=14 format=3 uid="uid://btkkhgkubjwj1"]
 
-[ext_resource type="Script" path="res://scenes/Main.cs" id="1_32l42"]
-[ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="1_d472e"]
-[ext_resource type="Script" path="res://scenes/CardManager.cs" id="1_e8g3v"]
-[ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_77sy5"]
+[ext_resource type="Script" path="res://scenes/game/Main.cs" id="1_32l42"]
+[ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="1_d472e"]
+[ext_resource type="Script" path="res://scenes/game/CardManager.cs" id="1_e8g3v"]
+[ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="2_77sy5"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_e8sjc"]
-[ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="4_wiasx"]
-[ext_resource type="Script" path="res://scenes/InfoArea.cs" id="5_sd7tc"]
+[ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/game/Hand.tscn" id="4_wiasx"]
+[ext_resource type="Script" path="res://scenes/game/InfoArea.cs" id="5_sd7tc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xci7l"]
 bg_color = Color(0.862745, 0.862745, 0.862745, 1)

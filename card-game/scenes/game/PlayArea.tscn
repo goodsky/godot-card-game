@@ -1,7 +1,7 @@
 [gd_scene load_steps=4 format=3 uid="uid://bkytbde6pf5y4"]
 
-[ext_resource type="Script" path="res://scenes/PlayArea.cs" id="1_yk72u"]
-[ext_resource type="Script" path="res://scenes/ClickableArea.cs" id="4_cfi8i"]
+[ext_resource type="Script" path="res://scenes/game/PlayArea.cs" id="1_yk72u"]
+[ext_resource type="Script" path="res://scenes/game/ClickableArea.cs" id="4_cfi8i"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_8b1l8"]
 size = Vector2(105, 135)

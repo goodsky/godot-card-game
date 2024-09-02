@@ -1,16 +1,17 @@
-[gd_scene load_steps=18 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=19 format=3 uid="uid://cdq0smiv61oi3"]
 
-[ext_resource type="Script" path="res://scenes/Main.cs" id="1_do0r1"]
+[ext_resource type="Script" path="res://scenes/game/Main.cs" id="1_do0r1"]
 [ext_resource type="Texture2D" uid="uid://cfa3c0s3dl784" path="res://assets/sprites/info-area.jpeg" id="1_wr0v1"]
-[ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/PlayArea.tscn" id="2_3cyok"]
-[ext_resource type="Script" path="res://scenes/CardManager.cs" id="2_6ngww"]
-[ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/Hand.tscn" id="2_ctxqn"]
-[ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="2_sdxti"]
+[ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="2_3cyok"]
+[ext_resource type="Script" path="res://scenes/game/CardManager.cs" id="2_6ngww"]
+[ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/game/Hand.tscn" id="2_ctxqn"]
+[ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="2_sdxti"]
+[ext_resource type="Script" path="res://scenes/game/GameBoard.cs" id="3_8o5d3"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_31qvx"]
-[ext_resource type="Script" path="res://scenes/InfoArea.cs" id="6_b5hku"]
+[ext_resource type="Script" path="res://scenes/game/InfoArea.cs" id="6_b5hku"]
 [ext_resource type="Texture2D" uid="uid://c8l63ndnd58hb" path="res://assets/sprites/health-bar.jpeg" id="6_u6xyq"]
 [ext_resource type="Theme" uid="uid://b7xgdtjl247li" path="res://assets/ui_theme.tres" id="7_1if2p"]
-[ext_resource type="Script" path="res://scenes/HealthBar.cs" id="7_mv0gw"]
+[ext_resource type="Script" path="res://scenes/game/HealthBar.cs" id="7_mv0gw"]
 [ext_resource type="Texture2D" uid="uid://dd2hkuns5x2qv" path="res://assets/sprites/health-bar-pip.png" id="8_jai3u"]
 [ext_resource type="Texture2D" uid="uid://doyxve2lksbnp" path="res://assets/sprites/health-bar-marker.png" id="9_c4snb"]
 [ext_resource type="Texture2D" uid="uid://uapu8y7tnbo7" path="res://assets/sprites/gear-icon-2.png" id="9_m2mek"]
@@ -19,76 +20,86 @@
 
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("Board", "Hand", "HealthBar")]
 script = ExtResource("1_do0r1")
+Board = NodePath("GameBoard")
+Hand = NodePath("HandArea/Hand")
+HealthBar = NodePath("HealthBar")
 
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("2_6ngww")
 
-[node name="PlayArea" type="Node2D" parent="."]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3")]
+script = ExtResource("3_8o5d3")
+Lane0 = [NodePath("PlayArea1"), NodePath("PlayArea5"), NodePath("PlayArea9")]
+Lane1 = [NodePath("PlayArea2"), NodePath("PlayArea6"), NodePath("PlayArea10")]
+Lane2 = [NodePath("PlayArea3"), NodePath("PlayArea7"), NodePath("PlayArea11")]
+Lane3 = [NodePath("PlayArea4"), NodePath("PlayArea8"), NodePath("PlayArea12")]
+
+[node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("2_sdxti")
 Size = Vector2(600, 450)
 Color = Color(0.835294, 0.894118, 0.992157, 1)
 
-[node name="PlayArea1" parent="PlayArea" instance=ExtResource("2_3cyok")]
+[node name="PlayArea1" parent="GameBoard" instance=ExtResource("2_3cyok")]
 position = Vector2(84, 365)
 SupportsPickUp = true
 
-[node name="PlayArea2" parent="PlayArea" instance=ExtResource("2_3cyok")]
+[node name="PlayArea2" parent="GameBoard" instance=ExtResource("2_3cyok")]
 position = Vector2(219, 365)
 SupportsPickUp = true
 
-[node name="PlayArea3" parent="PlayArea" instance=ExtResource("2_3cyok")]
+[node name="PlayArea3" parent="GameBoard" instance=ExtResource("2_3cyok")]
 position = Vector2(353, 365)
 SupportsPickUp = true
 
-[node name="PlayArea4" parent="PlayArea" instance=ExtResource("2_3cyok")]
+[node name="PlayArea4" parent="GameBoard" instance=ExtResource("2_3cyok")]
 position = Vector2(488, 365)
 SupportsPickUp = true
 
-[node name="PlayArea5" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea5" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(84, 215)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
-[node name="PlayArea6" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea6" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(219, 215)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
-[node name="PlayArea7" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea7" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(353, 215)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
-[node name="PlayArea8" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea8" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(488, 215)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea9" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea9" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(84, 75)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
-[node name="PlayArea10" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea10" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(219, 75)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
-[node name="PlayArea11" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea11" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(353, 75)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
-[node name="PlayArea12" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
+[node name="PlayArea12" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_3cyok")]
 position = Vector2(488, 75)
 SupportsPickUp = true
 SupportsDrop = false
@@ -102,14 +113,16 @@ centered = false
 [node name="Hand" parent="HandArea" instance=ExtResource("2_ctxqn")]
 position = Vector2(300, 75)
 
-[node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton")]
+[node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "TurnLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton", "EndTurnButton")]
 position = Vector2(698, 300)
 texture = ExtResource("1_wr0v1")
 script = ExtResource("6_b5hku")
 InfoLabel = NodePath("ThemeContainer/Tooltip/RichTextLabel")
+TurnLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnLabel")
 GameStateDescriptionLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnDescription")
 DrawFromDeckButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton")
 DrawFromSacrificeButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton")
+EndTurnButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin")
 
 [node name="ThemeContainer" type="Control" parent="InfoArea"]
 layout_mode = 3
@@ -117,6 +130,17 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 theme = ExtResource("7_1if2p")
+
+[node name="GearButton" type="TextureButton" parent="InfoArea/ThemeContainer"]
+layout_mode = 0
+offset_left = 59.0
+offset_top = -295.0
+offset_right = 91.0
+offset_bottom = -263.0
+texture_normal = ExtResource("12_ub2cg")
+texture_pressed = ExtResource("9_m2mek")
+texture_hover = ExtResource("10_prk4d")
+texture_focused = ExtResource("12_ub2cg")
 
 [node name="Tooltip" type="PanelContainer" parent="InfoArea/ThemeContainer"]
 layout_mode = 0
@@ -142,9 +166,9 @@ text = "
 [node name="StatePrompts" type="PanelContainer" parent="InfoArea/ThemeContainer"]
 layout_mode = 0
 offset_left = -90.0
-offset_top = 150.0
+offset_top = 108.0
 offset_right = 90.0
-offset_bottom = 290.0
+offset_bottom = 298.0
 
 [node name="DrawCardContainer" type="VBoxContainer" parent="InfoArea/ThemeContainer/StatePrompts"]
 layout_mode = 2
@@ -157,10 +181,11 @@ horizontal_alignment = 1
 text_overrun_behavior = 1
 
 [node name="TurnDescription" type="Label" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
-text = "Select a card"
+text = "Details"
 horizontal_alignment = 1
-text_overrun_behavior = 1
+autowrap_mode = 3
 
 [node name="DrawDeckButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
 layout_mode = 2
@@ -177,17 +202,6 @@ layout_mode = 2
 theme = SubResource("Theme_1ly1u")
 text = "End Turn"
 
-[node name="GearButton" type="TextureButton" parent="InfoArea/ThemeContainer"]
-layout_mode = 0
-offset_left = 59.0
-offset_top = -295.0
-offset_right = 91.0
-offset_bottom = -263.0
-texture_normal = ExtResource("12_ub2cg")
-texture_pressed = ExtResource("9_m2mek")
-texture_hover = ExtResource("10_prk4d")
-texture_focused = ExtResource("12_ub2cg")
-
 [node name="HealthBar" type="Sprite2D" parent="." node_paths=PackedStringArray("Marker")]
 position = Vector2(572, 0)
 texture = ExtResource("6_u6xyq")
@@ -201,6 +215,10 @@ z_index = 5
 position = Vector2(12.5, 225)
 texture = ExtResource("9_c4snb")
 
+[connection signal="OnStateTransition" from="." to="GameBoard" method="OnGameStateTransition"]
+[connection signal="OnStateTransition" from="." to="HandArea/Hand" method="OnGameStateTransition"]
+[connection signal="OnStateTransition" from="." to="InfoArea" method="OnGameStateTransition"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/GearButton" to="InfoArea" method="Click_MenuBar"]
 [connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseEntered_DrawFromDeckButton"]
 [connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseExited_ResetInfo"]
 [connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="." method="DrawCardFromDeck"]
@@ -210,4 +228,3 @@ texture = ExtResource("9_c4snb")
 [connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseEntered_EndTurnButton"]
 [connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseExited_ResetInfo"]
 [connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="." method="EndTurn"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/GearButton" to="InfoArea" method="Click_MenuBar"]

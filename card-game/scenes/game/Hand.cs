@@ -27,6 +27,11 @@ public partial class Hand : CardDrop
 		_area = rect.Size;
     }
 
+	public void OnGameStateTransition(GameState nextState, GameState lastState)
+	{
+		
+	}
+
     public override bool TryAddCard(Card card, Vector2? globalPosition)
 	{
 		if (base.TryAddCard(card, globalPosition))

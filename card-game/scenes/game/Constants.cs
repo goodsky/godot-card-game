@@ -4,7 +4,7 @@ public static class Constants
 {
 	public static readonly string ClickEventName = "click";
 
-	public static readonly PackedScene CardScene = GD.Load<PackedScene>("res://scenes/Card.tscn");
+	public static readonly PackedScene CardScene = GD.Load<PackedScene>("res://scenes/game/Card.tscn");
 
 	public static readonly Texture2D[] CardAvatars = new Texture2D[]
 	{
