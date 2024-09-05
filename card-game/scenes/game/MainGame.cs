@@ -20,9 +20,9 @@ public enum GameState
 	EnemyStageCard,
 }
 
-public partial class Main : Node2D
+public partial class MainGame : Node2D
 {
-	public static Main Instance { get; private set; }
+	public static MainGame Instance { get; private set; }
 
 	public GameState CurrentState { get; private set; } = GameState.Initializing;
 

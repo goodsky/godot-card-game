@@ -1,0 +1,81 @@
+[gd_scene load_steps=6 format=3 uid="uid://dshe8g5x8nfjy"]
+
+[ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="1_4t1mi"]
+[ext_resource type="Script" path="res://scenes/menu/MainMenu.cs" id="2_pm4uq"]
+[ext_resource type="Shader" path="res://scenes/menu/MainMenu.gdshader" id="3_un4i4"]
+[ext_resource type="Texture2D" uid="uid://clxskd1sucmmh" path="res://assets/sprites/menu-background.png" id="4_ya88u"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7470t"]
+shader = ExtResource("3_un4i4")
+
+[node name="MainMenu" type="Control"]
+custom_minimum_size = Vector2(800, 600)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_4t1mi")
+script = ExtResource("2_pm4uq")
+
+[node name="Background" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="."]
+material = SubResource("ShaderMaterial_7470t")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_ya88u")
+stretch_mode = 1
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Label" type="Label" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+text = "Card Game"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BuildDeckButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+disabled = true
+text = "Build a Deck"
+
+[node name="PlayGameButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Play Game"
+
+[node name="ExitGameButton" type="Button" parent="CenterContainer/VBoxContainer"]
+layout_mode = 2
+focus_mode = 0
+text = "Quit"
+
+[connection signal="pressed" from="CenterContainer/VBoxContainer/BuildDeckButton" to="." method="Click_BuildADeck"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/PlayGameButton" to="." method="Click_PlayGame"]
+[connection signal="pressed" from="CenterContainer/VBoxContainer/ExitGameButton" to="." method="Click_Quit"]
