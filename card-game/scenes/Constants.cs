@@ -4,6 +4,8 @@ public static class Constants
 {
 	public static readonly string ClickEventName = "click";
 
+	public static readonly string StarterDeckResourcePath = "res://decks/starter.deck.json";
+
 	public static readonly PackedScene CardScene = GD.Load<PackedScene>("res://scenes/game/Card.tscn");
 	public static readonly PackedScene MainGameScene = GD.Load<PackedScene>("res://scenes/game/MainGame.tscn");
 	public static readonly PackedScene MainMenuScene = GD.Load<PackedScene>("res://scenes/menu/MainMenu.tscn");

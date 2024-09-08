@@ -30,6 +30,9 @@ public partial class MainGame : Node2D
 	public delegate void OnStateTransitionEventHandler(GameState nextState, GameState prevState);
 
 	[Export]
+	public bool IsaacMode { get; set; } = false;
+
+	[Export]
 	public GameBoard Board { get; set; }
 
 	[Export]
@@ -37,6 +40,8 @@ public partial class MainGame : Node2D
 
 	[Export]
 	public HealthBar HealthBar { get; set; }
+
+	public Deck Deck { get; set; }
 
 	public override void _Ready()
 	{
@@ -88,7 +93,28 @@ public partial class MainGame : Node2D
 
 	private async void InitializeGame()
 	{
-		const int StartingHandSize = 5;
+		if (IsaacMode)
+		{
+			for (int i = 0; i < 3; i++)
+			{
+				Debug_DrawCard();
+			}
+			
+			return;
+		}
+
+		if (OS.IsDebugBuild())
+		{
+			DeckLoader.Debug_TestEndToEnd(deckSize: 20);
+		}
+		
+		if (Deck == null)
+		{
+			GD.PushError("No Deck set! Initializing to the Starter Deck.");
+			Deck = DeckLoader.LoadDeck(Constants.StarterDeckResourcePath);
+		}
+
+		const int StartingHandSize = 3;
 
 		TransitionToState(GameState.DrawCard);
 		await ToSignal(GetTree().CreateTimer(0.20f), "timeout");
@@ -98,17 +124,10 @@ public partial class MainGame : Node2D
 			var card = Constants.CardScene.Instantiate<Card>();
 			card.Name = $"Card_{DrawnCardCount++}";
 			card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
-			card.CardInfo = new CardInfo()
-			{
-				Name = $"Blue Monster #{DrawnCardCount}",
-				Attack = Random.Shared.Next(1, 6),
-				Defense = Random.Shared.Next(1, 11),
-				BloodCost = Random.Shared.Next(1, 4),
-			};
 
-			Texture2D avatar = Constants.CardAvatars[Random.Shared.Next(Constants.CardAvatars.Length)];
-			card.Avatar.Texture = avatar;
+			var drawnCardInfo = Deck.DrawFromTop();
 
+			card.SetCardInfo(drawnCardInfo);
 			CardManager.Instance.SetCardDrop(card, Hand);
 
 			await ToSignal(GetTree().CreateTimer(0.234f), "timeout");
@@ -123,16 +142,21 @@ public partial class MainGame : Node2D
 		card.AddToGroup("DebugCard");
 		card.Name = $"Card_{DrawnCardCount++}";
 		card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
-		card.CardInfo = new CardInfo()
+
+		var blueMonsterAvatars = new[] {
+			"res://assets/sprites/avatars/avatar_blue_monster_00.jpeg",
+			"res://assets/sprites/avatars/avatar_blue_monster_01.jpeg",
+			"res://assets/sprites/avatars/avatar_blue_monster_02.jpeg",
+		};
+		
+		card.SetCardInfo(new CardInfo()
 		{
 			Name = $"Blue Monster #{DrawnCardCount}",
+			AvatarResource = blueMonsterAvatars[Random.Shared.Next(blueMonsterAvatars.Length)],
 			Attack = Random.Shared.Next(1, 6),
 			Defense = Random.Shared.Next(1, 11),
 			BloodCost = Random.Shared.Next(1, 4),
-		};
-
-		Texture2D avatar = Constants.CardAvatars[Random.Shared.Next(Constants.CardAvatars.Length)];
-		card.Avatar.Texture = avatar;
+		});
 
 		GD.Print($"Drawing card {card.Name}");
 		CardManager.Instance.SetCardDrop(card, Hand);

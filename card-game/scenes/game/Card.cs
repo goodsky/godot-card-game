@@ -5,6 +5,8 @@ public struct CardInfo
 {
 	public string Name { get; set; }
 
+	public string AvatarResource { get; set; }
+
 	public int Attack { get; set; }
 
 	public int Defense { get; set; }
@@ -27,7 +29,7 @@ public partial class Card : Node2D
 	// Optional offset for things like hovering over or wiggling.
 	public Vector2? TargetPositionOffset { get; set; }
 
-	public CardInfo CardInfo { get; set; }
+	public CardInfo CardInfo { get; private set; }
 
 	[Export]
 	public Sprite2D Background { get; set; }
@@ -75,6 +77,12 @@ public partial class Card : Node2D
 
 			GlobalPosition = GlobalPosition.Lerp(targetPosition, 10f * (float)delta);
 		}
+	}
+
+	public void SetCardInfo(CardInfo cardInfo)
+	{
+		CardInfo = cardInfo;
+		Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
 	}
 
 	public void StartDragging()

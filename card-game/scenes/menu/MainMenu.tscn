@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dshe8g5x8nfjy"]
+[gd_scene load_steps=9 format=3 uid="uid://dshe8g5x8nfjy"]
 
 [ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="1_4t1mi"]
 [ext_resource type="Script" path="res://scenes/menu/MainMenu.cs" id="2_pm4uq"]
@@ -8,7 +8,40 @@
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7470t"]
 shader = ExtResource("3_un4i4")
 
-[node name="MainMenu" type="Control"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8ic22"]
+content_margin_bottom = 16.0
+bg_color = Color(0.494118, 0.494118, 0.494118, 1)
+border_width_left = 3
+border_width_right = 3
+border_color = Color(0.25098, 0.25098, 0.25098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wbibi"]
+content_margin_bottom = 16.0
+bg_color = Color(0.674815, 0.674815, 0.674815, 1)
+border_width_left = 3
+border_width_right = 3
+border_color = Color(0.25098, 0.25098, 0.25098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lfn0t"]
+content_margin_bottom = 16.0
+bg_color = Color(0.819608, 0.807843, 0.819608, 1)
+border_width_left = 3
+border_width_right = 3
+border_color = Color(0.25098, 0.25098, 0.25098, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("MainButtons", "SelectDeck")]
 custom_minimum_size = Vector2(800, 600)
 layout_mode = 3
 anchors_preset = 15
@@ -20,6 +53,8 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = ExtResource("1_4t1mi")
 script = ExtResource("2_pm4uq")
+MainButtons = NodePath("CenterContainer/MainButtonsBox")
+SelectDeck = NodePath("CenterContainer/SelectDeckBox")
 
 [node name="Background" type="ColorRect" parent="."]
 visible = false
@@ -49,33 +84,71 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
+[node name="MainButtonsBox" type="VBoxContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(350, 0)
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Label" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="Label" type="Label" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 text = "Card Game"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BuildDeckButton" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="BuildDeckButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 focus_mode = 0
 disabled = true
 text = "Build a Deck"
 
-[node name="PlayGameButton" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="PlayGameButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 focus_mode = 0
 text = "Play Game"
 
-[node name="ExitGameButton" type="Button" parent="CenterContainer/VBoxContainer"]
+[node name="ExitGameButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 focus_mode = 0
 text = "Quit"
 
-[connection signal="pressed" from="CenterContainer/VBoxContainer/BuildDeckButton" to="." method="Click_BuildADeck"]
-[connection signal="pressed" from="CenterContainer/VBoxContainer/PlayGameButton" to="." method="Click_PlayGame"]
-[connection signal="pressed" from="CenterContainer/VBoxContainer/ExitGameButton" to="." method="Click_Quit"]
+[node name="SelectDeckBox" type="VBoxContainer" parent="CenterContainer"]
+visible = false
+custom_minimum_size = Vector2(350, 0)
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Label" type="Label" parent="CenterContainer/SelectDeckBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "Choose a Deck"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ItemList" type="ItemList" parent="CenterContainer/SelectDeckBox"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+focus_mode = 0
+same_column_width = true
+
+[node name="StartGameButton" type="Button" parent="CenterContainer/SelectDeckBox"]
+layout_mode = 2
+focus_mode = 0
+disabled = true
+text = "Start Game"
+
+[node name="CancelButton" type="Button" parent="CenterContainer/SelectDeckBox"]
+layout_mode = 2
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_8ic22")
+theme_override_styles/hover = SubResource("StyleBoxFlat_wbibi")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_lfn0t")
+text = "Cancel"
+
+[connection signal="pressed" from="CenterContainer/MainButtonsBox/BuildDeckButton" to="." method="Click_BuildADeck"]
+[connection signal="pressed" from="CenterContainer/MainButtonsBox/PlayGameButton" to="." method="Click_PlayGame"]
+[connection signal="pressed" from="CenterContainer/MainButtonsBox/ExitGameButton" to="." method="Click_Quit"]
+[connection signal="item_selected" from="CenterContainer/SelectDeckBox/ItemList" to="." method="Click_DeckListItem"]
+[connection signal="pressed" from="CenterContainer/SelectDeckBox/StartGameButton" to="." method="Click_StartGame"]
+[connection signal="pressed" from="CenterContainer/SelectDeckBox/CancelButton" to="." method="Click_Cancel"]

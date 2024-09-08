@@ -27,6 +27,7 @@ bg_color = Color(0.490196, 0.737255, 1, 1)
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("Hand")]
 script = ExtResource("1_32l42")
+IsaacMode = true
 Hand = NodePath("Hand")
 
 [node name="CardManager" type="Node2D" parent="."]
