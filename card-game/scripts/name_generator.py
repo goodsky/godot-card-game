@@ -1,7 +1,7 @@
 import random
 
-adjectives_file = "../decks/generator_adj.txt"
-nouns_file = "../decks/generator_noun.txt"
+adjectives_file = "../decks/generator/adjectives.txt"
+nouns_file = "../decks/generator/nouns.txt"
 
 def dedupe_and_sort(file_name) -> list[str]:
     with open(file_name, 'r') as file:

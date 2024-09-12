@@ -132,8 +132,8 @@ public static class DeckLoader
 	// Test code to validate the end to end serialization and deserialization of decks
 	public static void Debug_TestEndToEnd(int deckSize)
 	{
-		var adjectivesPath = Path.Combine(GameDeckDirectory, "generator_adj.txt");
-		var nounsPath = Path.Combine(GameDeckDirectory, "generator_noun.txt");
+		var adjectivesPath = Path.Combine(GameDeckDirectory, "generator/adjectives.txt");
+		var nounsPath = Path.Combine(GameDeckDirectory, "generator/nouns.txt");
 
 		var adjectives = Godot.FileAccess.GetFileAsString(adjectivesPath).Split("\n").Select(s => s.Trim()).ToArray();
 		var nouns = Godot.FileAccess.GetFileAsString(nounsPath).Split("\n").Select(s => s.Trim()).ToArray();

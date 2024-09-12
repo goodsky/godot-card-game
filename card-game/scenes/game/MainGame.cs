@@ -55,6 +55,8 @@ public partial class MainGame : Node2D
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
+				var drawnCardInfo = Deck.DrawFromTop();
+				InstantiateCardInHand(drawnCardInfo);
 				TransitionToState(GameState.PlayCard_SelectCard);
 				break;
 
@@ -99,7 +101,7 @@ public partial class MainGame : Node2D
 			{
 				Debug_DrawCard();
 			}
-			
+
 			return;
 		}
 
@@ -115,51 +117,63 @@ public partial class MainGame : Node2D
 		}
 
 		const int StartingHandSize = 3;
-
-		TransitionToState(GameState.DrawCard);
 		await ToSignal(GetTree().CreateTimer(0.20f), "timeout");
 
 		for (int i = 0; i < StartingHandSize; i++)
 		{
-			var card = Constants.CardScene.Instantiate<Card>();
-			card.Name = $"Card_{DrawnCardCount++}";
-			card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
-
 			var drawnCardInfo = Deck.DrawFromTop();
-
-			card.SetCardInfo(drawnCardInfo);
-			CardManager.Instance.SetCardDrop(card, Hand);
+			InstantiateCardInHand(drawnCardInfo);
 
 			await ToSignal(GetTree().CreateTimer(0.234f), "timeout");
 		}
+
+		TransitionToState(GameState.DrawCard);
 	}
 
-	/** Isaac Mode! */
+	private void TransitionToState(GameState nextState)
+	{
+		GD.Print($"State Transition: {CurrentState} -> {nextState}");
+
+		// Godot requires enums be converted to int - so they are valid variants.
+		EmitSignal(SignalName.OnStateTransition, (int)nextState, (int)CurrentState);
+		CurrentState = nextState;
+	}
+
 	private static int DrawnCardCount = 0;
-	public void Debug_DrawCard()
+	private Card InstantiateCardInHand(CardInfo cardInfo)
 	{
 		var card = Constants.CardScene.Instantiate<Card>();
-		card.AddToGroup("DebugCard");
 		card.Name = $"Card_{DrawnCardCount++}";
 		card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
 
+		card.SetCardInfo(cardInfo);
+		CardManager.Instance.SetCardDrop(card, Hand);
+
+		return card;
+	}
+
+	/** Isaac Mode! */
+	public void Debug_DrawCard()
+	{
 		var blueMonsterAvatars = new[] {
 			"res://assets/sprites/avatars/avatar_blue_monster_00.jpeg",
 			"res://assets/sprites/avatars/avatar_blue_monster_01.jpeg",
 			"res://assets/sprites/avatars/avatar_blue_monster_02.jpeg",
 		};
 		
-		card.SetCardInfo(new CardInfo()
+		var blueMonsterCard = new CardInfo()
 		{
 			Name = $"Blue Monster #{DrawnCardCount}",
 			AvatarResource = blueMonsterAvatars[Random.Shared.Next(blueMonsterAvatars.Length)],
 			Attack = Random.Shared.Next(1, 6),
 			Defense = Random.Shared.Next(1, 11),
 			BloodCost = Random.Shared.Next(1, 4),
-		});
+		};
 
-		GD.Print($"Drawing card {card.Name}");
-		CardManager.Instance.SetCardDrop(card, Hand);
+		var card = InstantiateCardInHand(blueMonsterCard);
+		card.AddToGroup("DebugCard");
+
+		GD.Print($"Drawing card {blueMonsterCard.Name}");
 	}
 
 	public void Debug_ClearCards()
@@ -172,15 +186,6 @@ public partial class MainGame : Node2D
 		}
 	}
 	/** END Isaac Mode! */
-
-	private void TransitionToState(GameState nextState)
-	{
-		GD.Print($"State Transition: {CurrentState} -> {nextState}");
-
-		// Godot requires enums be converted to int - so they are valid variants.
-		EmitSignal(SignalName.OnStateTransition, (int)nextState, (int)CurrentState);
-		CurrentState = nextState;
-	}
 }
 
 public class StateMachineException : Exception

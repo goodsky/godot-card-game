@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://cvxf0itnk118u" path="res://assets/sprites/avatars/avatar_blue_monster_00.jpeg" id="5_um02m"]
 [ext_resource type="Script" path="res://scenes/game/SpriteBorder.cs" id="6_lhuuc"]
 [ext_resource type="Texture2D" uid="uid://g1tvugg8g4fv" path="res://assets/sprites/card-sword.png" id="7_er1au"]
-[ext_resource type="Texture2D" uid="uid://c5jtcc338pomu" path="res://assets/sprites/card-shield.png" id="8_yjxb0"]
+[ext_resource type="Texture2D" uid="uid://uelkx1cuv43c" path="res://assets/sprites/card-heart.png" id="8_0re76"]
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="9_bj6c8"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fbrmm"]
@@ -53,7 +53,7 @@ Color = Color(1, 0, 0, 1)
 
 [node name="Card-shield" type="Sprite2D" parent="Background"]
 position = Vector2(40, 45)
-texture = ExtResource("8_yjxb0")
+texture = ExtResource("8_0re76")
 
 [node name="DefenseStat" parent="Background" instance=ExtResource("3_exfcv")]
 position = Vector2(2, 25)
