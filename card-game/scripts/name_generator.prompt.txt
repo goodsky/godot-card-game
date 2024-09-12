@@ -1,0 +1,8 @@
+You are creating a random name generator for creatures in a fantasy-themed game. You will create a separate list of adjectives and nouns that will combine to create the random names. The lists will be further split into groups for NOOB LEVEL, LOW LEVEL, MEDIUM LEVEL, HIGH LEVEL, and EPIC LEVEL creatures.
+
+# RULES
+   * The output format must be a valid JSON object with a single list element.
+   * Capitalize the names of the creature names as if they are proper titles.
+   * Do not provide adjectives in the noun list.
+   * Do not provide nouns in the adjective list.
+   * Make each list as long as possible and alphabetical.
