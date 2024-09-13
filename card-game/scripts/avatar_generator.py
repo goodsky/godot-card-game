@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from openai import OpenAI
 from PIL import Image
+import argparse
 import os
 import base64
 
@@ -17,6 +18,19 @@ def get_unique_path(path: str) -> str:
         path = f"{root}_{num}{ext}"
         num += 1
     return path
+
+
+def format_name_for_filepath(name: str) -> str:
+    filename = name.lower()
+    filename = filename.replace(' ', '_')
+    return filename + ".png"
+
+
+def generate_pixel_art_avatar(creature: str, output_dir: str) -> list[str]:
+    filename = format_name_for_filepath(creature)
+    prompt = f"Video game avatar of a {creature}. GameBoy low-resolution pixel art."
+
+    return generate_image(prompt, output_dir, filename)
 
 
 def generate_image(prompt: str, output_dir: str, filename: str) -> list[str]:
@@ -70,11 +84,12 @@ def format_image(image_path: str, output_dir: str) -> str:
 
 
 if __name__ == "__main__":
-    prompt = "Video game avatar of a common squirrel. GameBoy low-resolution pixel art."
-    filename = "squirrel"
+    parser = argparse.ArgumentParser(description="Generate card game avatars")
+    parser.add_argument("creature", type=str)
+    args = parser.parse_args()
 
-    raw_dir = "../assets/sprites/avatars/raw"
-    avatar_dir = "../assets/sprites/avatars"
-    img_paths = generate_image(prompt, raw_dir, filename)
+    raw_img_dir = "../assets/sprites/avatars/raw"
+    avatar_img_dir = "../assets/sprites/avatars"
+    img_paths = generate_pixel_art_avatar(args.creature)
     for img_path in img_paths:
-        format_image(img_path, avatar_dir)
+        format_image(img_path, avatar_img_dir)

@@ -8,7 +8,6 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 prompt_path = "./name_generator.prompt.txt"
-data_path = "../decks/generator/data.json"
 
 
 def get_assistant_response(messages):
@@ -34,18 +33,16 @@ def get_json_list_from_message(assistant_message) -> list[str]:
     return content_json[content_keys[0]]
 
 
-def generate_lists() -> dict:
+def generate_lists(types = ["nouns", "adjectives"], levels = ["NOOB LEVEL", "LOW LEVEL", "MEDIUM LEVEL", "HIGH LEVEL", "EPIC LEVEL"]) -> dict:
     with open(prompt_path, "r") as file:
         nouns_prompt = file.read()
 
-    levels = ["NOOB LEVEL", "LOW LEVEL", "MEDIUM LEVEL", "HIGH LEVEL", "EPIC LEVEL"]
-    list_types = ["nouns", "adjectives"]
-    data = {x: {} for x in list_types}
+    data = {x: {} for x in types}
 
     messages = [{"role": "system", "content": nouns_prompt}]
 
     for level in levels:
-        for list_type in list_types:
+        for list_type in types:
             messages.append(
                 {
                     "role": "user",
@@ -59,12 +56,9 @@ def generate_lists() -> dict:
 
             data[list_type][level] = get_json_list_from_message(assistant_response)
 
-    print(json.dumps(data, indent=3))
     return data
 
 
 if __name__ == "__main__":
     data = generate_lists()
-    with open(data_path, "w") as file:
-        file.write(json.dumps(data, indent=3))
-    print(f'Wrote data to "{data_path}"')
+    print(json.dumps(data, indent=3))
