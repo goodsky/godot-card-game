@@ -1,6 +1,20 @@
 using System.Text;
 using Godot;
 
+public enum CardBloodCost {
+	Zero = 0,
+	One = 1,
+	Two = 2,
+	Three = 3,
+}
+
+public enum CardRarity {
+	Sacrifice = 0,
+	Common = 1,
+	Uncommon = 2,
+	Rare = 3,
+}
+
 public struct CardInfo
 {
 	public string Name { get; set; }
@@ -9,9 +23,11 @@ public struct CardInfo
 
 	public int Attack { get; set; }
 
-	public int Defense { get; set; }
+	public int Health { get; set; }
 
-	public int BloodCost { get; set; }
+	public CardBloodCost BloodCost { get; set; }
+
+	public CardRarity Rarity { get; set; }
 }
 
 public partial class Card : Node2D
@@ -54,8 +70,25 @@ public partial class Card : Node2D
 
 	public override void _Ready()
 	{
-		// DEBUG: just for now
-		Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
+		switch (CardInfo.Rarity)
+		{
+			case CardRarity.Sacrifice:
+				Background.SelfModulate = new Color("88615f");
+				break;
+			
+			case CardRarity.Common:
+				Background.SelfModulate = new Color("777168");
+				break;
+
+			case CardRarity.Uncommon:
+				Background.SelfModulate = new Color("5659ae");
+				break;
+
+			case CardRarity.Rare:
+				Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
+				break;
+		}
+		
 		UpdateVisuals(CardInfo);
 
 		Area.AreaMouseOver += HoverOver;
@@ -117,7 +150,7 @@ public partial class Card : Node2D
 		cardInfo.AppendLine($"[center][font_size=16]{CardInfo.Name}[/font_size][/center]");
 		cardInfo.AppendLine("");
 		cardInfo.AppendLine($"Attack: {CardInfo.Attack}");
-		cardInfo.AppendLine($"Defense: {CardInfo.Defense}");
+		cardInfo.AppendLine($"Defense: {CardInfo.Health}");
 
 		InfoArea.Instance.SetInfoBar(cardInfo.ToString(), this);
 	}
@@ -131,11 +164,11 @@ public partial class Card : Node2D
 	{
 		NameLabel.Text = info.Name;
 		AttackLabel.Text = info.Attack.ToString();
-		DefenseLabel.Text = info.Defense.ToString();
+		DefenseLabel.Text = info.Health.ToString();
 
 		for (int i = 0; i < BloodCostIcons.Length; i++)
 		{
-			BloodCostIcons[i].Visible = (i < info.BloodCost);
+			BloodCostIcons[i].Visible = (i < (int)info.BloodCost);
 		}
 	}
 }

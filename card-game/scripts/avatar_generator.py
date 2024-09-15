@@ -1,9 +1,10 @@
 from dotenv import load_dotenv
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 from PIL import Image
 import argparse
 import os
 import base64
+import time
 
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -26,26 +27,38 @@ def format_name_for_filepath(name: str) -> str:
     return filename + ".png"
 
 
-def generate_pixel_art_avatar(creature: str, output_dir: str) -> list[str]:
+def generate_pixel_art_avatar(creature: str, output_dir: str, n: int = 4) -> list[str]:
     filename = format_name_for_filepath(creature)
-    prompt = f"Video game avatar of a {creature}. GameBoy low-resolution pixel art."
+    prompt = f"Cute video game avatar of a {creature} showing the full body. GameBoy low-resolution pixel art."
 
-    return generate_image(prompt, output_dir, filename)
+    return generate_image(prompt, output_dir, filename, n)
 
 
-def generate_image(prompt: str, output_dir: str, filename: str) -> list[str]:
+def generate_image(prompt: str, output_dir: str, filename: str, n: int = 4) -> list[str]:
     print(f'Generating image for "{prompt}"')
 
     if not filename.endswith(".png"):
         filename = filename + ".png"
 
-    response = client.images.generate(
-        model="dall-e-2",
-        prompt=prompt,
-        response_format="b64_json",
-        size="256x256",
-        n=4,
-    )
+    RETRY_COUNT = 3
+    retry = 0
+    while retry < RETRY_COUNT:
+        try:
+            response = client.images.generate(
+                model="dall-e-2",
+                prompt=prompt,
+                response_format="b64_json",
+                size="256x256",
+                n=n,
+            )
+            break
+        except RateLimitError as e:
+            print("Rate Limit Exceeded! Waiting 60 seconds and then trying again.")
+            retry += 1
+            if retry >= RETRY_COUNT:
+                raise e
+            time.sleep(60)
+
 
     image_paths = []
     for img_data in response.data:

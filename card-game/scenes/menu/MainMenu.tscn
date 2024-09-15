@@ -41,7 +41,7 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[node name="MainMenu" type="Control" node_paths=PackedStringArray("MainButtons", "SelectDeck")]
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("MainButtons", "SelectCards")]
 custom_minimum_size = Vector2(800, 600)
 layout_mode = 3
 anchors_preset = 15
@@ -54,7 +54,7 @@ size_flags_vertical = 3
 theme = ExtResource("1_4t1mi")
 script = ExtResource("2_pm4uq")
 MainButtons = NodePath("CenterContainer/MainButtonsBox")
-SelectDeck = NodePath("CenterContainer/SelectDeckBox")
+SelectCards = NodePath("CenterContainer/SelectCardsBox")
 
 [node name="Background" type="ColorRect" parent="."]
 visible = false
@@ -96,11 +96,11 @@ text = "Card Game"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="BuildDeckButton" type="Button" parent="CenterContainer/MainButtonsBox"]
+[node name="BuildCardsButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 focus_mode = 0
 disabled = true
-text = "Build a Deck"
+text = "Build Cards"
 
 [node name="PlayGameButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
@@ -112,33 +112,33 @@ layout_mode = 2
 focus_mode = 0
 text = "Quit"
 
-[node name="SelectDeckBox" type="VBoxContainer" parent="CenterContainer"]
+[node name="SelectCardsBox" type="VBoxContainer" parent="CenterContainer"]
 visible = false
 custom_minimum_size = Vector2(350, 0)
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Label" type="Label" parent="CenterContainer/SelectDeckBox"]
+[node name="Label" type="Label" parent="CenterContainer/SelectCardsBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 36
 text = "Choose a Deck"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ItemList" type="ItemList" parent="CenterContainer/SelectDeckBox"]
+[node name="ItemList" type="ItemList" parent="CenterContainer/SelectCardsBox"]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 focus_mode = 0
 same_column_width = true
 
-[node name="StartGameButton" type="Button" parent="CenterContainer/SelectDeckBox"]
+[node name="StartGameButton" type="Button" parent="CenterContainer/SelectCardsBox"]
 layout_mode = 2
 focus_mode = 0
 disabled = true
 text = "Start Game"
 
-[node name="CancelButton" type="Button" parent="CenterContainer/SelectDeckBox"]
+[node name="CancelButton" type="Button" parent="CenterContainer/SelectCardsBox"]
 layout_mode = 2
 focus_mode = 0
 theme_override_styles/normal = SubResource("StyleBoxFlat_8ic22")
@@ -146,9 +146,9 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_wbibi")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lfn0t")
 text = "Cancel"
 
-[connection signal="pressed" from="CenterContainer/MainButtonsBox/BuildDeckButton" to="." method="Click_BuildADeck"]
+[connection signal="pressed" from="CenterContainer/MainButtonsBox/BuildCardsButton" to="." method="Click_BuildADeck"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/PlayGameButton" to="." method="Click_PlayGame"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/ExitGameButton" to="." method="Click_Quit"]
-[connection signal="item_selected" from="CenterContainer/SelectDeckBox/ItemList" to="." method="Click_DeckListItem"]
-[connection signal="pressed" from="CenterContainer/SelectDeckBox/StartGameButton" to="." method="Click_StartGame"]
-[connection signal="pressed" from="CenterContainer/SelectDeckBox/CancelButton" to="." method="Click_Cancel"]
+[connection signal="item_selected" from="CenterContainer/SelectCardsBox/ItemList" to="." method="Click_DeckListItem"]
+[connection signal="pressed" from="CenterContainer/SelectCardsBox/StartGameButton" to="." method="Click_StartGame"]
+[connection signal="pressed" from="CenterContainer/SelectCardsBox/CancelButton" to="." method="Click_Cancel"]

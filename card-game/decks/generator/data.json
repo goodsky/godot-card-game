@@ -1,133 +1,424 @@
 {
+   "stats": {
+      "ability_costs": {
+         "attack": 2,
+         "health": 1
+      },
+      "point_limits": [
+         {
+            "cost": 0,
+            "rarity": 0,
+            "limit": 0
+         },
+         {
+            "cost": 0,
+            "rarity": 1,
+            "limit": 2
+         },
+         {
+            "cost": 0,
+            "rarity": 2,
+            "limit": 3
+         },
+         {
+            "cost": 0,
+            "rarity": 3,
+            "limit": 4
+         },
+         {
+            "cost": 1,
+            "rarity": 1,
+            "limit": 4
+         },
+         {
+            "cost": 1,
+            "rarity": 2,
+            "limit": 5
+         },
+         {
+            "cost": 1,
+            "rarity": 3,
+            "limit": 6
+         },
+         {
+            "cost": 2,
+            "rarity": 1,
+            "limit": 6
+         },
+         {
+            "cost": 2,
+            "rarity": 2,
+            "limit": 7
+         },
+         {
+            "cost": 2,
+            "rarity": 3,
+            "limit": 8
+         },
+         {
+            "cost": 3,
+            "rarity": 1,
+            "limit": 10
+         },
+         {
+            "cost": 3,
+            "rarity": 2,
+            "limit": 12
+         },
+         {
+            "cost": 3,
+            "rarity": 3,
+            "limit": 14
+         }
+      ]
+   },
    "nouns": {
       "Bug": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_bug_2.png",
+            "res://assets/sprites/avatars/avatar_bug_3.png",
+            "res://assets/sprites/avatars/avatar_bug_4.png",
+            "res://assets/sprites/avatars/avatar_bug_5.png",
+            "res://assets/sprites/avatars/avatar_bug_6.png"
+         ]
       },
       "Cat": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_cat_1.png",
+            "res://assets/sprites/avatars/avatar_cat_2.png",
+            "res://assets/sprites/avatars/avatar_cat_3.png"
+         ]
       },
       "Frog": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_frog_1.png",
+            "res://assets/sprites/avatars/avatar_frog_2.png",
+            "res://assets/sprites/avatars/avatar_frog_3.png"
+         ]
       },
       "Goat": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_goat_0.png",
+            "res://assets/sprites/avatars/avatar_goat_1.png",
+            "res://assets/sprites/avatars/avatar_goat_2.png"
+         ]
       },
       "Lizard": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_lizard_0.png",
+            "res://assets/sprites/avatars/avatar_lizard_1.png",
+            "res://assets/sprites/avatars/avatar_lizard_2.png"
+         ]
       },
       "Mouse": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_mouse_0.png",
+            "res://assets/sprites/avatars/avatar_mouse_1.png",
+            "res://assets/sprites/avatars/avatar_mouse_2.png"
+         ]
       },
       "Pig": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_pig_2.png",
+            "res://assets/sprites/avatars/avatar_pig_3.png",
+            "res://assets/sprites/avatars/avatar_pig_4.png"
+         ]
       },
       "Rabbit": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_rabbit_0.png",
+            "res://assets/sprites/avatars/avatar_rabbit_1.png",
+            "res://assets/sprites/avatars/avatar_rabbit_2.png"
+         ]
       },
       "Sheep": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_sheep_0.png",
+            "res://assets/sprites/avatars/avatar_sheep_1.png",
+            "res://assets/sprites/avatars/avatar_sheep_2.png"
+         ]
       },
       "Squirrel": {
-         "level": 0
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_squirrel_0.png",
+            "res://assets/sprites/avatars/avatar_squirrel_1.png",
+            "res://assets/sprites/avatars/avatar_squirrel_2.png",
+            "res://assets/sprites/avatars/avatar_squirrel_3.png"
+         ]
       },
       "Bat": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_bat_0.png",
+            "res://assets/sprites/avatars/avatar_bat_1.png",
+            "res://assets/sprites/avatars/avatar_bat_2.png"
+         ]
       },
       "Crow": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_crow_0.png",
+            "res://assets/sprites/avatars/avatar_crow_1.png",
+            "res://assets/sprites/avatars/avatar_crow_2.png"
+         ]
       },
       "Deer": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_deer_1.png",
+            "res://assets/sprites/avatars/avatar_deer_2.png",
+            "res://assets/sprites/avatars/avatar_deer_3.png"
+         ]
       },
       "Fox": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_fox_1.png",
+            "res://assets/sprites/avatars/avatar_fox_2.png",
+            "res://assets/sprites/avatars/avatar_fox_3.png"
+         ]
       },
       "Goblin": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_goblin_0.png",
+            "res://assets/sprites/avatars/avatar_goblin_1.png",
+            "res://assets/sprites/avatars/avatar_goblin_2.png"
+         ]
       },
       "Hawk": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_hawk_0.png",
+            "res://assets/sprites/avatars/avatar_hawk_1.png",
+            "res://assets/sprites/avatars/avatar_hawk_2.png"
+         ]
       },
       "Minion": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_minion_0.png",
+            "res://assets/sprites/avatars/avatar_minion_1.png",
+            "res://assets/sprites/avatars/avatar_minion_2.png"
+         ]
       },
       "Raven": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_raven_0.png",
+            "res://assets/sprites/avatars/avatar_raven_1.png",
+            "res://assets/sprites/avatars/avatar_raven_2.png"
+         ]
       },
       "Slime": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_slime_0.png",
+            "res://assets/sprites/avatars/avatar_slime_1.png",
+            "res://assets/sprites/avatars/avatar_slime_2.png"
+         ]
       },
       "Snake": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_snake_0.png",
+            "res://assets/sprites/avatars/avatar_snake_1.png",
+            "res://assets/sprites/avatars/avatar_snake_2.png"
+         ]
       },
       "Wolf": {
-         "level": 1
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_wolf_0.png",
+            "res://assets/sprites/avatars/avatar_wolf_1.png",
+            "res://assets/sprites/avatars/avatar_wolf_2.png"
+         ]
       },
       "Bear": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_bear_0.png",
+            "res://assets/sprites/avatars/avatar_bear_1.png",
+            "res://assets/sprites/avatars/avatar_bear_2.png"
+         ]
       },
       "Crocodile": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_crocodile_0.png",
+            "res://assets/sprites/avatars/avatar_crocodile_1.png",
+            "res://assets/sprites/avatars/avatar_crocodile_2.png"
+         ]
       },
       "Cyclops": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_cyclops_0.png",
+            "res://assets/sprites/avatars/avatar_cyclops_1.png",
+            "res://assets/sprites/avatars/avatar_cyclops_2.png"
+         ]
       },
       "Demon": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_demon_0.png",
+            "res://assets/sprites/avatars/avatar_demon_1.png",
+            "res://assets/sprites/avatars/avatar_demon_2.png"
+         ]
       },
       "Ghoul": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_ghoul_0.png",
+            "res://assets/sprites/avatars/avatar_ghoul_1.png",
+            "res://assets/sprites/avatars/avatar_ghoul_2.png"
+         ]
       },
       "Griffin": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_griffin_0.png",
+            "res://assets/sprites/avatars/avatar_griffin_1.png",
+            "res://assets/sprites/avatars/avatar_griffin_2.png"
+         ]
       },
       "Merfolk": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_merfolk_0.png",
+            "res://assets/sprites/avatars/avatar_merfolk_1.png",
+            "res://assets/sprites/avatars/avatar_merfolk_2.png"
+         ]
       },
       "Ogre": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_ogre_0.png",
+            "res://assets/sprites/avatars/avatar_ogre_1.png",
+            "res://assets/sprites/avatars/avatar_ogre_2.png"
+         ]
       },
       "Pegasus": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_pegasus_0.png",
+            "res://assets/sprites/avatars/avatar_pegasus_1.png",
+            "res://assets/sprites/avatars/avatar_pegasus_2.png"
+         ]
       },
       "Werewolf": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_werewolf_0.png",
+            "res://assets/sprites/avatars/avatar_werewolf_1.png",
+            "res://assets/sprites/avatars/avatar_werewolf_2.png"
+         ]
       },
       "Zombie": {
-         "level": 2
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_zombie_0.png",
+            "res://assets/sprites/avatars/avatar_zombie_1.png",
+            "res://assets/sprites/avatars/avatar_zombie_2.png"
+         ]
       },
       "Basilisk": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_basilisk_0.png",
+            "res://assets/sprites/avatars/avatar_basilisk_1.png",
+            "res://assets/sprites/avatars/avatar_basilisk_2.png"
+         ]
       },
       "Djinn": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_djinn_0.png",
+            "res://assets/sprites/avatars/avatar_djinn_1.png",
+            "res://assets/sprites/avatars/avatar_djinn_2.png"
+         ]
       },
       "Dragon": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_dragon_0.png",
+            "res://assets/sprites/avatars/avatar_dragon_1.png",
+            "res://assets/sprites/avatars/avatar_dragon_2.png"
+         ]
       },
       "Leviathan": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_leviathan_0.png",
+            "res://assets/sprites/avatars/avatar_leviathan_1.png",
+            "res://assets/sprites/avatars/avatar_leviathan_2.png"
+         ]
       },
       "Lich": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_lich_0.png",
+            "res://assets/sprites/avatars/avatar_lich_1.png",
+            "res://assets/sprites/avatars/avatar_lich_2.png"
+         ]
       },
       "Mage": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_mage_0.png",
+            "res://assets/sprites/avatars/avatar_mage_1.png",
+            "res://assets/sprites/avatars/avatar_mage_2.png"
+         ]
       },
       "Nightmare": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_nightmare_0.png",
+            "res://assets/sprites/avatars/avatar_nightmare_1.png",
+            "res://assets/sprites/avatars/avatar_nightmare_2.png"
+         ]
       },
       "Phoenix": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_phoenix_0.png",
+            "res://assets/sprites/avatars/avatar_phoenix_1.png",
+            "res://assets/sprites/avatars/avatar_phoenix_2.png"
+         ]
       },
       "Vampire": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_vampire_0.png",
+            "res://assets/sprites/avatars/avatar_vampire_1.png",
+            "res://assets/sprites/avatars/avatar_vampire_2.png"
+         ]
       },
       "Wraith": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_wraith_0.png",
+            "res://assets/sprites/avatars/avatar_wraith_1.png",
+            "res://assets/sprites/avatars/avatar_wraith_2.png"
+         ]
       },
       "Yeti": {
-         "level": 3
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_yeti_0.png",
+            "res://assets/sprites/avatars/avatar_yeti_1.png",
+            "res://assets/sprites/avatars/avatar_yeti_2.png"
+         ]
       }
    },
    "adjectives": {

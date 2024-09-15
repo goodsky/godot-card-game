@@ -104,16 +104,14 @@ public partial class MainGame : Node2D
 
 			return;
 		}
-
-		if (OS.IsDebugBuild())
-		{
-			DeckLoader.Debug_TestEndToEnd(deckSize: 20);
-		}
 		
 		if (Deck == null)
 		{
 			GD.PushError("No Deck set! Initializing to the Starter Deck.");
-			Deck = DeckLoader.LoadDeck(Constants.StarterDeckResourcePath);
+
+			// TODO: Load a deck instead of the whole card pool
+			var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
+			Deck = new Deck(cardPool.Cards, "Default");
 		}
 
 		const int StartingHandSize = 3;
@@ -166,8 +164,8 @@ public partial class MainGame : Node2D
 			Name = $"Blue Monster #{DrawnCardCount}",
 			AvatarResource = blueMonsterAvatars[Random.Shared.Next(blueMonsterAvatars.Length)],
 			Attack = Random.Shared.Next(1, 6),
-			Defense = Random.Shared.Next(1, 11),
-			BloodCost = Random.Shared.Next(1, 4),
+			Health = Random.Shared.Next(1, 11),
+			BloodCost = (CardBloodCost)Random.Shared.Next(1, 4),
 		};
 
 		var card = InstantiateCardInHand(blueMonsterCard);
