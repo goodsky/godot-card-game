@@ -2,12 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Godot;
 
 public static class GameLoader
 {
 	private static readonly string GameDeckDirectory = "res://decks";
 	private static readonly string UserDeckDirectory = "user://decks";
+
+	public class SavedCardPool
+	{
+		[JsonPropertyName("name")]
+		public string Name { get; set; }
+
+		[JsonPropertyName("cards")]
+		public List<CardInfo> Cards { get; set; }
+	}
 
 	public static List<(CardPool cards, string path)> GetAvailableCardPools()
 	{
@@ -45,66 +56,12 @@ public static class GameLoader
 			return null;
 		}
 
-		var cardPoolJson = Json.ParseString(fileContent);
-		var cardPoolDict = cardPoolJson.AsGodotDictionary();
-		if (cardPoolDict == null || cardPoolDict.Count == 0)
-		{
-			GD.PrintErr($"Invalid JSON. Failed to load card pool {cardPoolPath}.");
-			return null;
-		}
-
-		if (!cardPoolDict.TryGetValue("name", out var name))
-		{
-			GD.PrintErr($"Schema Error. Mising card pool name in {cardPoolPath}.");
-			return null;
-		}
-
-		if (!cardPoolDict.TryGetValue("cards", out var cards))
-		{
-			GD.PrintErr($"Schema Error. Mising cards in {cardPoolPath}.");
-			return null;
-		}
-
-		var cardInfos = new List<CardInfo>();
-		foreach (var card in cards.AsGodotArray())
-		{
-			var cardDict = card.AsGodotDictionary();
-			var cardInfo = new CardInfo()
-			{
-				Name = cardDict["name"].As<string>(),
-				AvatarResource = cardDict["img"].As<string>(),
-				Attack = cardDict["attack"].As<int>(),
-				Health = cardDict["defense"].As<int>(),
-				BloodCost = cardDict["cost"].As<CardBloodCost>(),
-			};
-
-			cardInfos.Add(cardInfo);
-		}
-
-		return new CardPool(cardInfos, name.AsString());
+		var cardPool = JsonSerializer.Deserialize<SavedCardPool>(fileContent);
+		return new CardPool(cardPool.Cards, cardPool.Name);
 	}
 
 	public static void SaveCardPool(CardPool cards, string filename = null)
 	{
-		var cardsArray = new Godot.Collections.Array();
-		foreach (var cardInfo in cards.Cards)
-		{
-			cardsArray.Add(new Godot.Collections.Dictionary() {
-				{ "name", cardInfo.Name },
-				{ "img", cardInfo.AvatarResource },
-				{ "attack", cardInfo.Attack },
-				{ "defense", cardInfo.Health },
-				{ "cost", (int)cardInfo.BloodCost },
-			});
-		}
-
-		var cardPoolDict = new Godot.Collections.Dictionary() {
-			{ "name", cards.Name },
-			{ "cards", cardsArray }, 
-		};
-
-		var cardPoolJson = Json.Stringify(cardPoolDict, indent: "   ");
-
 		if (string.IsNullOrEmpty(filename))
 		{
 			var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
@@ -115,7 +72,9 @@ public static class GameLoader
 		{
 			filename = filename + ".cards.json";
 		}
-		
+
+		var cardPoolJson = JsonSerializer.Serialize(new SavedCardPool() { Cards = cards.Cards, Name = cards.Name });
+
 		DirAccess.MakeDirRecursiveAbsolute(UserDeckDirectory);
 		var filePath = Path.Combine(UserDeckDirectory, filename);
 		GD.Print("Saving card pool at ", filePath);
@@ -125,6 +84,7 @@ public static class GameLoader
 		{
 			throw new InvalidOperationException($"Failed to save card pool at {filePath}: {Godot.FileAccess.GetOpenError()}");
 		}
+
 		file.StoreString(cardPoolJson);
 		file.Close();
 	}

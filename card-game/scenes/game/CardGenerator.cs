@@ -211,9 +211,7 @@ public static class CardGenerator
 			}
 
 			var statAction = SelectRandom(possibleActions);
-			GD.Print($"Applying {statAction.StatName} to {JsonSerializer.Serialize(cardInfo)}");
 			cardInfo = statAction.ApplyStat(cardInfo);
-			GD.Print($"Applied {JsonSerializer.Serialize(cardInfo)}");
 			remainingPoints -= statAction.Cost(data);
 		}
 		return cardInfo;

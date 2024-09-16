@@ -166,6 +166,7 @@ public partial class MainGame : Node2D
 			Attack = Random.Shared.Next(1, 6),
 			Health = Random.Shared.Next(1, 11),
 			BloodCost = (CardBloodCost)Random.Shared.Next(1, 4),
+			Rarity = CardRarity.Rare,
 		};
 
 		var card = InstantiateCardInHand(blueMonsterCard);

@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Godot;
 
 public enum CardBloodCost {
@@ -17,16 +18,22 @@ public enum CardRarity {
 
 public struct CardInfo
 {
+	[JsonPropertyName("name")]
 	public string Name { get; set; }
 
+	[JsonPropertyName("avatar")]
 	public string AvatarResource { get; set; }
 
+	[JsonPropertyName("attack")]
 	public int Attack { get; set; }
 
+	[JsonPropertyName("health")]
 	public int Health { get; set; }
 
+	[JsonPropertyName("cost")]
 	public CardBloodCost BloodCost { get; set; }
 
+	[JsonPropertyName("rarity")]
 	public CardRarity Rarity { get; set; }
 }
 
@@ -151,6 +158,8 @@ public partial class Card : Node2D
 		cardInfo.AppendLine("");
 		cardInfo.AppendLine($"Attack: {CardInfo.Attack}");
 		cardInfo.AppendLine($"Defense: {CardInfo.Health}");
+		cardInfo.AppendLine($"Cost: {CardInfo.BloodCost}");
+		cardInfo.AppendLine($"Rarity: {CardInfo.Rarity}");
 
 		InfoArea.Instance.SetInfoBar(cardInfo.ToString(), this);
 	}
@@ -168,7 +177,7 @@ public partial class Card : Node2D
 
 		for (int i = 0; i < BloodCostIcons.Length; i++)
 		{
-			BloodCostIcons[i].Visible = (i < (int)info.BloodCost);
+			BloodCostIcons[i].Visible = i < ((int)info.BloodCost);
 		}
 	}
 }
