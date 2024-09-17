@@ -9,6 +9,8 @@ public partial class Hand : CardDrop
 	private Vector2 _area;
 	private bool _isHoverOver = false;
 	private bool _hasGhostCard = false;
+	private bool _canReorderCards = true;
+	private bool _canPlayCards = false;
 	private Dictionary<Card, HandCardCallbacks> _cardCallbacks = new Dictionary<Card, HandCardCallbacks>();
 
 	[Export]
@@ -29,7 +31,10 @@ public partial class Hand : CardDrop
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
-		
+		_canPlayCards = nextState == GameState.PlayCard_SelectCard;
+		_canReorderCards =
+			nextState != GameState.PlayCard_SelectLocation &&
+			nextState != GameState.PlayCard_PayPrice;
 	}
 
     public override bool TryAddCard(Card card, Vector2? globalPosition)
@@ -230,6 +235,8 @@ public partial class Hand : CardDrop
 
 		public void StartDragging()
 		{
+			if (!_hand._canReorderCards) return;
+
 			if (CardManager.Instance.DraggingCard != null)
 			{
 				Card[] childCards = _hand.GetChildCards();
@@ -261,6 +268,8 @@ public partial class Hand : CardDrop
 
 		public void StartHovering()
 		{
+			if (!_hand._canReorderCards) return;
+
 			foreach (var callbacks in HoveredOverCards)
 			{
 				callbacks.HoverDown();

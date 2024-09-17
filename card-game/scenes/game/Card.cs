@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.Text.Json.Serialization;
 using Godot;
@@ -41,7 +42,11 @@ public partial class Card : Node2D
 {
 	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
 	
+	public static readonly float MaxDragX = 550;
+	public static readonly float MinDragY = 450;
+
 	private bool _isDragging = false;
+	private bool _freeDragging = false; // This is only for Isaac mode right now
 
 	// When not dragging, the home drop node for this card to live at.
 	public CardDrop HomeCardDrop { get; set; }
@@ -102,11 +107,28 @@ public partial class Card : Node2D
 		Area.AreaMouseOut += HoverOut;
 	}
 
+	public override void _Draw()
+	{
+		if (_isDragging && CardManager.Instance.ActiveCardDrop is PlayArea)
+		{
+			DrawArrowToCardDrop(CardManager.Instance.ActiveCardDrop);
+		}
+	}
+
 	public override void _PhysicsProcess(double delta)
 	{
 		if (_isDragging)
 		{
-			GlobalPosition = GlobalPosition.Lerp(GetGlobalMousePosition(), 15f * (float)delta);
+			if (_freeDragging)
+			{
+				GlobalPosition = GlobalPosition.Lerp(GetGlobalMousePosition(), 15f * (float)delta);
+			}
+			else
+			{
+				QueueRedraw();
+				Vector2 dragTarget = new Vector2(Math.Min(GetGlobalMousePosition().X, MaxDragX), Math.Max(GetGlobalMousePosition().Y, MinDragY));
+				GlobalPosition = GlobalPosition.Lerp(dragTarget, 15f * (float)delta);
+			}
 		}
 		else if (TargetPosition.HasValue)
 		{
@@ -128,6 +150,7 @@ public partial class Card : Node2D
 	public void StartDragging()
 	{
 		_isDragging = true;
+		_freeDragging = MainGame.Instance.IsaacMode;
 		CardManager.Instance.SetDraggingCard(this);
 
 		// When using touch screens - sometimes the global mouse position does not match card position
@@ -167,6 +190,14 @@ public partial class Card : Node2D
 	private void HoverOut()
 	{
 		InfoArea.Instance.ResetInfoBar(this);
+	}
+
+	private void DrawArrowToCardDrop(CardDrop cardDrop)
+	{
+		Vector2 delta = cardDrop.GlobalPosition - GlobalPosition;
+		DrawLine(Vector2.Zero, delta, Colors.IndianRed, width: 5f);
+		DrawLine(delta + new Vector2(-10, 10), delta, Colors.IndianRed, width: 5f);
+		DrawLine(delta + new Vector2(10, 10), delta, Colors.IndianRed, width: 5f);
 	}
 
 	private void UpdateVisuals(CardInfo info)
