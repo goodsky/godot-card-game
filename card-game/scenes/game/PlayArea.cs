@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using Godot;
 
 public partial class PlayArea : CardDrop
@@ -16,18 +14,19 @@ public partial class PlayArea : CardDrop
 	[Export]
 	public ClickableArea Area { get; set; }
 
-    protected override int MaxCards => 1;
+	protected override int MaxCards => 1;
 
-    public override void _Ready()
+	public override void _Ready()
 	{
 		base._Ready();
 
 		_size = Area.GetRectangleShape().Size;
+		Area.AreaClicked += Clicked;
 	}
 
 	public override void _Draw()
 	{
-		DrawRect(new Rect2(-_size.X / 2, -_size.Y / 2, _size.X, _size.Y), _isHoverOver ? Colors.Yellow : Colors.Gray, false, 2.0f);
+		DrawRect(new Rect2(-_size.X / 2, -_size.Y / 2, _size.X, _size.Y), _isHoverOver ? Colors.WhiteSmoke : Colors.Gray, false, 2.0f);
 	}
 
 	public override bool TryAddCard(Card card, Vector2? globalPosition)
@@ -41,7 +40,7 @@ public partial class PlayArea : CardDrop
 				card.Area.AreaStartDragging += card.StartDragging;
 				card.Area.AreaStopDragging += card.StopDragging;
 			}
-			
+
 			return true;
 		}
 		return false;
@@ -49,13 +48,24 @@ public partial class PlayArea : CardDrop
 
 	public override bool TryRemoveCard(Card card)
 	{
-		if  (base.TryRemoveCard(card))
+		if (base.TryRemoveCard(card))
 		{
 			card.Area.AreaStartDragging -= card.StartDragging;
 			card.Area.AreaStopDragging -= card.StopDragging;
 			return true;
 		}
 		return false;
+	}
+
+	public void Clicked()
+	{
+		if (SupportsDrop && CardManager.Instance.SelectedCard != null)
+		{
+			Card selectedCard = CardManager.Instance.SelectedCard;
+			GD.Print($"DROP {selectedCard.Name} in {Name}");
+			CardManager.Instance.SelectCard(null);
+			CardManager.Instance.SetCardDrop(selectedCard, this);
+		}
 	}
 
 	public void HoverOver()

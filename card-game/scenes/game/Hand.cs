@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Godot;
 
 public partial class Hand : CardDrop
@@ -19,15 +18,15 @@ public partial class Hand : CardDrop
 	[Export]
 	public Area2D Area { get; set; }
 
-    protected override int MaxCards => HandSize;
+	protected override int MaxCards => HandSize;
 
-    public override void _Ready()
-    {
-        base._Ready();
+	public override void _Ready()
+	{
+		base._Ready();
 
 		var rect = Area.GetNode<CollisionShape2D>("CollisionShape2D").Shape as RectangleShape2D;
 		_area = rect.Size;
-    }
+	}
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
@@ -37,7 +36,7 @@ public partial class Hand : CardDrop
 			nextState != GameState.PlayCard_PayPrice;
 	}
 
-    public override bool TryAddCard(Card card, Vector2? globalPosition)
+	public override bool TryAddCard(Card card, Vector2? globalPosition)
 	{
 		if (base.TryAddCard(card, globalPosition))
 		{
@@ -67,9 +66,9 @@ public partial class Hand : CardDrop
 		return false;
 	}
 
-    public override void _Process(double delta)
-    {
-        if (_isHoverOver && CardManager.Instance.DraggingCard != null)
+	public override void _Process(double delta)
+	{
+		if (_isHoverOver && CardManager.Instance.DraggingCard != null)
 		{
 			_hasGhostCard = true;
 			UpdateCardPositions(CardManager.Instance.DraggingCard);
@@ -79,7 +78,17 @@ public partial class Hand : CardDrop
 			_hasGhostCard = false;
 			UpdateCardPositions();
 		}
-    }
+	}
+
+	public void OnArea2DInputEvent(Node viewport, InputEvent inputEvent, long shape_idx)
+	{
+		if (inputEvent.IsActionPressed(Constants.ClickEventName))
+		{
+			// Clicking on the hand area should clear the selected card
+			// If the click is over a card - we will handle the select later
+			CardManager.Instance.SelectCard(null);
+		}
+	}
 
 	public void HoverOver()
 	{
@@ -128,12 +137,12 @@ public partial class Hand : CardDrop
 				handIndex += 1; // Leave space for the ghost card
 			}
 
-			var relativePosition = new Vector2(spacePerCard * handIndex - (spacePerCard * (handSize-1) / 2), 0);
+			var relativePosition = new Vector2(spacePerCard * handIndex - (spacePerCard * (handSize - 1) / 2), 0);
 			// GD.Print($"UpdateCardPosition[{i}]: SpacePerCard: {spacePerCard}; HandSize: {handSize}; HandIndex: {handIndex}; NewPos: {relativePosition}");
 			card.TargetPosition = GlobalPosition + relativePosition;
 		}
 	}
-	
+
 	private float GetCardSpacing(int handSize)
 	{
 		if (handSize == 0)
@@ -171,6 +180,11 @@ public partial class Hand : CardDrop
 			}
 		}
 		cards[targetIndex] = reorderingCard;
+
+		if (sourceIndex != targetIndex)
+		{
+			_cardCallbacks[reorderingCard].CardHasReorderedInHand = true;
+		}
 	}
 
 	private class HandCardCallbacks
@@ -206,6 +220,8 @@ public partial class Hand : CardDrop
 		protected Hand _hand;
 		protected Card _card;
 
+		public bool CardHasReorderedInHand;
+
 		public HandCardCallbacks(Card card, Hand hand)
 		{
 			_areaShape = card.Area.GetCollisionShape();
@@ -217,20 +233,38 @@ public partial class Hand : CardDrop
 
 		public void AddCallbacks()
 		{
+			_card.Area.AreaClicked += Select;
 			_card.Area.AreaStartDragging += StartDragging;
 			_card.Area.AreaStopDragging += StopDragging;
 			_card.Area.AreaMouseOver += StartHovering;
 			_card.Area.AreaMouseOut += StopHovering;
+			_card.CardUnselected += Unselect;
 		}
 
 		public void RemoveCallbacks()
 		{
+			_card.Area.AreaClicked -= Select;
 			_card.Area.AreaStartDragging -= StartDragging;
 			_card.Area.AreaStopDragging -= StopDragging;
 			_card.Area.AreaMouseOver -= StartHovering;
 			_card.Area.AreaMouseOut -= StopHovering;
+			_card.CardUnselected -= Unselect;
 
 			StopHovering();
+		}
+
+		public void Select()
+		{
+			if (!_hand._canPlayCards) return;
+
+			HoverUp();
+			CardManager.Instance.SelectCard(_card);
+		}
+
+		public void Unselect()
+		{
+			// CardManager.Instance.UnselectCard(_card); We don't need to do this - since we are a consumer for unselect events!
+			HoverDown();
 		}
 
 		public void StartDragging()
@@ -254,6 +288,7 @@ public partial class Hand : CardDrop
 				}
 			}
 
+			CardHasReorderedInHand = false;
 			HoverDown();
 			_card.StartDragging();
 		}
@@ -263,6 +298,12 @@ public partial class Hand : CardDrop
 			if (CardManager.Instance.DraggingCard == _card)
 			{
 				_card.StopDragging();
+
+				if (!CardHasReorderedInHand && _hand.IsAncestorOf(_card))
+				{
+					// if we picked up and dropped off the card in the same spot - trigger selection
+					Select();
+				}
 			}
 		}
 
@@ -307,6 +348,7 @@ public partial class Hand : CardDrop
 
 		private void HoverDown()
 		{
+			if (CardManager.Instance.SelectedCard == _card) return; // don't hover down if we are selected
 			if (_card.ZIndex == 9) _card.ZIndex = 0; // make sure we don't affect the ZIndex of the dragging card (which will be 10)
 			_card.TargetPositionOffset = null;
 			var areaRect = _areaShape.Shape as RectangleShape2D;

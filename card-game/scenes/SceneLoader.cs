@@ -26,12 +26,13 @@ public partial class SceneLoader : Node2D
 		mainMenu.Position = Vector2.Zero;
 	}
 
-	public void LoadMainGame(Deck deck)
+	public void LoadMainGame(Deck sacrifices, Deck creatures)
 	{
 		RemoveAllChildren();
 
 		MainGame mainGame = Constants.MainGameScene.Instantiate<MainGame>();
-		mainGame.Deck = deck;
+		mainGame.Sacrifices = sacrifices;
+		mainGame.Creatures = creatures;
 		AddChild(mainGame);
 	}
 

@@ -13,15 +13,15 @@ public partial class MainMenu : Control
 	[Export]
 	public Control SelectCards { get; set; }
 
-    public override void _Ready()
-    {
-        if (OS.IsDebugBuild())
+	public override void _Ready()
+	{
+		if (OS.IsDebugBuild())
 		{
 			GameLoader.Debug_TestEndToEnd();
 		}
-    }
+	}
 
-    public override void _Input(InputEvent inputEvent)
+	public override void _Input(InputEvent inputEvent)
 	{
 		if (inputEvent.IsActionPressed("ui_cancel"))
 		{
@@ -31,7 +31,7 @@ public partial class MainMenu : Control
 
 	public void Click_BuildCards()
 	{
-		
+
 	}
 
 	public void Click_PlayGame()
@@ -58,8 +58,11 @@ public partial class MainMenu : Control
 		if (SceneLoader.Instance != null)
 		{
 			// TODO: Card Pool vs. Deck
-			var fullCardPoolDeck = new Deck(_selectedCards.Cards, "All Cards");
-			SceneLoader.Instance.LoadMainGame(fullCardPoolDeck);
+			var sacrificeCards = _selectedCards.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
+			var creatureCards = _selectedCards.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
+			var sacrificeDeck = new Deck(sacrificeCards, "Sacrifices");
+			var creatureDeck = new Deck(creatureCards, "Creatures");
+			SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck);
 		}
 	}
 
@@ -95,7 +98,7 @@ public partial class MainMenu : Control
 			.Where(c => c is Button && c.Name == "StartGameButton")
 			.Select(c => c as Button)
 			.FirstOrDefault();
-		
+
 		_cards = GameLoader.GetAvailableCardPools().Select(t => t.cards).ToArray();
 		cardsList.Clear();
 		foreach (var cardPool in _cards)

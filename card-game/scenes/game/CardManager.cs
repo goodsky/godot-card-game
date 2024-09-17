@@ -2,7 +2,7 @@ using Godot;
 
 public partial class CardManager : Node2D
 {
-	public static CardManager Instance { get; private set; } 
+	public static CardManager Instance { get; private set; }
 
 	public Card DraggingCard { get; private set; } = null;
 
@@ -10,12 +10,12 @@ public partial class CardManager : Node2D
 
 	public CardDrop ActiveCardDrop { get; private set; } = null;
 
-    public override void _Ready()
-    {
-        Instance = this;
-    }
+	public override void _Ready()
+	{
+		Instance = this;
+	}
 
-    public void ActivateCardDrop(CardDrop cardDrop)
+	public void ActivateCardDrop(CardDrop cardDrop)
 	{
 		// if (ActiveCardDrop != null)
 		// {
@@ -53,6 +53,15 @@ public partial class CardManager : Node2D
 
 		card.HomeCardDrop = cardDrop;
 		cardDrop?.TryAddCard(card, cardGlobalPosition);
+	}
+
+	public void SelectCard(Card card)
+	{
+		var oldSelectedCard = SelectedCard;
+		SelectedCard = card;
+
+		oldSelectedCard?.Unselect();
+		card?.Select();
 	}
 
 	public void SetDraggingCard(Card card)

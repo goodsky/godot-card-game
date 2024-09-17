@@ -17,5 +17,6 @@ DebugCards = []
 shape = SubResource("RectangleShape2D_0j34p")
 debug_color = Color(1, 1, 1, 0.105882)
 
+[connection signal="input_event" from="Area2D" to="." method="OnArea2DInputEvent"]
 [connection signal="mouse_entered" from="Area2D" to="." method="HoverOver"]
 [connection signal="mouse_exited" from="Area2D" to="." method="HoverOut"]

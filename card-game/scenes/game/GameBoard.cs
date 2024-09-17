@@ -15,6 +15,21 @@ public partial class GameBoard : Node2D
 	[Export]
 	public PlayArea[] Lane3 { get; set; }
 
+	public override void _Input(InputEvent inputEvent)
+	{
+		bool clickedWithNoCardDrop = inputEvent.IsActionPressed(Constants.ClickEventName) &&
+			CardManager.Instance.SelectedCard != null && CardManager.Instance.ActiveCardDrop == null;
+
+		bool cancelClicked = inputEvent.IsActionPressed(Constants.RightClickEventName) || inputEvent.IsActionPressed(Constants.EscEventName);
+
+		if (clickedWithNoCardDrop || cancelClicked)
+		{
+			// Clicks that don't have a card drop should clear the selected card.
+			// Is there a better place for this responsibility to live?
+			CardManager.Instance.SelectCard(null);
+		}
+	}
+
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
 		switch (nextState)

@@ -181,10 +181,12 @@ horizontal_alignment = 1
 autowrap_mode = 3
 
 [node name="DrawDeckButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+visible = false
 layout_mode = 2
-text = "Draw from Deck"
+text = "Draw Creature"
 
 [node name="DrawSacrificeButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+visible = false
 layout_mode = 2
 theme = SubResource("Theme_1ly1u")
 text = "Draw Sacrifice"

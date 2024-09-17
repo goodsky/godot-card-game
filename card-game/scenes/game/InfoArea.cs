@@ -8,7 +8,7 @@ public partial class InfoArea : Node2D
 	// who set the infobar content? Used when resetting the info to avoid unexpected resets.
 	private object _infoOwner;
 
-    /**
+	/**
 	In Isaac mode - there is not game state - so ignore everything here
 	*/
 	[Export]
@@ -18,10 +18,10 @@ public partial class InfoArea : Node2D
 	public RichTextLabel InfoLabel { get; set; }
 
 	[Export]
-	public Label TurnLabel { get; set; } 
+	public Label TurnLabel { get; set; }
 
 	[Export]
-	public Label GameStateDescriptionLabel { get; set; } 
+	public Label GameStateDescriptionLabel { get; set; }
 
 	[Export]
 	public Button DrawFromDeckButton { get; set; }
@@ -35,29 +35,35 @@ public partial class InfoArea : Node2D
 	public override void _Ready()
 	{
 		Instance = this;
+		DrawFromDeckButton.Text = $"Draw Creature ({MainGame.Instance.Creatures.Count})";
+		DrawFromSacrificeButton.Text = $"Draw Sacrifice ({MainGame.Instance.Sacrifices.Count})";
 	}
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
-		switch(lastState)
+		switch (lastState)
 		{
 			case GameState.DrawCard:
 				DrawFromDeckButton.Visible = false;
 				DrawFromSacrificeButton.Visible = false;
 				break;
-			
+
 			case GameState.PlayCard_SelectCard:
 				EndTurnButton.Visible = false;
 				break;
 		}
 
-		switch(nextState)
+		switch (nextState)
 		{
 			case GameState.DrawCard:
 				TurnLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Choose a card";
 				DrawFromDeckButton.Visible = true;
+				DrawFromDeckButton.Disabled = MainGame.Instance.Creatures.Count == 0;
+				DrawFromDeckButton.Text = $"Draw Creature ({MainGame.Instance.Creatures.Count})";
 				DrawFromSacrificeButton.Visible = true;
+				DrawFromSacrificeButton.Disabled = MainGame.Instance.Sacrifices.Count == 0;
+				DrawFromSacrificeButton.Text = $"Draw Sacrifice ({MainGame.Instance.Sacrifices.Count})";
 				break;
 
 			case GameState.PlayCard_SelectCard:

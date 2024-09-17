@@ -3,14 +3,16 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Godot;
 
-public enum CardBloodCost {
+public enum CardBloodCost
+{
 	Zero = 0,
 	One = 1,
 	Two = 2,
 	Three = 3,
 }
 
-public enum CardRarity {
+public enum CardRarity
+{
 	Sacrifice = 0,
 	Common = 1,
 	Uncommon = 2,
@@ -41,10 +43,11 @@ public struct CardInfo
 public partial class Card : Node2D
 {
 	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
-	
+
 	public static readonly float MaxDragX = 550;
 	public static readonly float MinDragY = 450;
 
+	private bool _isSelected = false;
 	private bool _isDragging = false;
 	private bool _freeDragging = false; // This is only for Isaac mode right now
 
@@ -69,7 +72,7 @@ public partial class Card : Node2D
 	public Sprite2D[] BloodCostIcons { get; set; }
 
 	[Export]
-	public CanvasText NameLabel { get; set;}
+	public CanvasText NameLabel { get; set; }
 
 	[Export]
 	public CanvasText AttackLabel { get; set; }
@@ -80,6 +83,9 @@ public partial class Card : Node2D
 	[Export]
 	public ClickableArea Area { get; set; }
 
+	[Signal]
+	public delegate void CardUnselectedEventHandler();
+
 	public override void _Ready()
 	{
 		switch (CardInfo.Rarity)
@@ -87,7 +93,7 @@ public partial class Card : Node2D
 			case CardRarity.Sacrifice:
 				Background.SelfModulate = new Color("88615f");
 				break;
-			
+
 			case CardRarity.Common:
 				Background.SelfModulate = new Color("777168");
 				break;
@@ -100,7 +106,7 @@ public partial class Card : Node2D
 				Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
 				break;
 		}
-		
+
 		UpdateVisuals(CardInfo);
 
 		Area.AreaMouseOver += HoverOver;
@@ -111,7 +117,16 @@ public partial class Card : Node2D
 	{
 		if (_isDragging && CardManager.Instance.ActiveCardDrop is PlayArea)
 		{
-			DrawArrowToCardDrop(CardManager.Instance.ActiveCardDrop);
+			Vector2 topOfPlayArea = CardManager.Instance.ActiveCardDrop.GlobalPosition - new Vector2(0, 40f);
+			DrawArrowToPosition(topOfPlayArea, Colors.LawnGreen);
+		}
+		else if (_isSelected)
+		{
+			Vector2 mousePosition = GetGlobalMousePosition();
+			if (mousePosition.X < MaxDragX && mousePosition.Y < MinDragY)
+			{
+				DrawArrowToPosition(mousePosition, CardManager.Instance.ActiveCardDrop is PlayArea ? Colors.LawnGreen : Colors.IndianRed);
+			}
 		}
 	}
 
@@ -132,8 +147,14 @@ public partial class Card : Node2D
 		}
 		else if (TargetPosition.HasValue)
 		{
+			if (_isSelected)
+			{
+				QueueRedraw();
+			}
+
 			Vector2 targetPosition = TargetPosition.Value;
-			if (TargetPositionOffset.HasValue) {
+			if (TargetPositionOffset.HasValue)
+			{
 				targetPosition += TargetPositionOffset.Value;
 			}
 
@@ -145,6 +166,18 @@ public partial class Card : Node2D
 	{
 		CardInfo = cardInfo;
 		Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
+	}
+
+	public void Select()
+	{
+		_isSelected = true;
+	}
+
+	public void Unselect()
+	{
+		_isSelected = false;
+		QueueRedraw();
+		EmitSignal(SignalName.CardUnselected);
 	}
 
 	public void StartDragging()
@@ -168,8 +201,10 @@ public partial class Card : Node2D
 	public void StopDragging()
 	{
 		_isDragging = false;
+		_isSelected = false;
 		CardManager.Instance.ClearDraggingCard(this);
 
+		QueueRedraw();
 		ZIndex = 0;
 	}
 
@@ -192,12 +227,18 @@ public partial class Card : Node2D
 		InfoArea.Instance.ResetInfoBar(this);
 	}
 
-	private void DrawArrowToCardDrop(CardDrop cardDrop)
+	private void DrawArrowToPosition(Vector2 targetGlobalPosition, Color color)
 	{
-		Vector2 delta = cardDrop.GlobalPosition - GlobalPosition;
-		DrawLine(Vector2.Zero, delta, Colors.IndianRed, width: 5f);
-		DrawLine(delta + new Vector2(-10, 10), delta, Colors.IndianRed, width: 5f);
-		DrawLine(delta + new Vector2(10, 10), delta, Colors.IndianRed, width: 5f);
+		Vector2 delta = targetGlobalPosition - GlobalPosition;
+		DrawLine(Vector2.Zero, delta, color, width: 10f);
+
+		float angle = delta.Angle();
+		Vector2[] arrowHead = new Vector2[] {
+			delta + new Vector2(0, -5).Rotated(angle + (Mathf.Pi / 2)),
+			delta + new Vector2(0, -35).Rotated(angle + (Mathf.Pi / 2) + (4 * Mathf.Pi / 5)),
+			delta + new Vector2(0, -35).Rotated(angle + (Mathf.Pi / 2) + (6 * Mathf.Pi / 5)),
+		};
+		DrawColoredPolygon(arrowHead, color);
 	}
 
 	private void UpdateVisuals(CardInfo info)

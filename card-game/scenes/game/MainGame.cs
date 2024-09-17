@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 /**
@@ -41,7 +42,9 @@ public partial class MainGame : Node2D
 	[Export]
 	public HealthBar HealthBar { get; set; }
 
-	public Deck Deck { get; set; }
+	public Deck Creatures { get; set; }
+
+	public Deck Sacrifices { get; set; }
 
 	public override void _Ready()
 	{
@@ -55,7 +58,7 @@ public partial class MainGame : Node2D
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
-				var drawnCardInfo = Deck.DrawFromTop();
+				var drawnCardInfo = Creatures.DrawFromTop();
 				InstantiateCardInHand(drawnCardInfo);
 				TransitionToState(GameState.PlayCard_SelectCard);
 				break;
@@ -72,6 +75,8 @@ public partial class MainGame : Node2D
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
+				var drawnCardInfo = Sacrifices.DrawFromTop();
+				InstantiateCardInHand(drawnCardInfo);
 				TransitionToState(GameState.PlayCard_SelectCard);
 				break;
 
@@ -104,14 +109,17 @@ public partial class MainGame : Node2D
 
 			return;
 		}
-		
-		if (Deck == null)
+
+		if (Creatures == null)
 		{
 			GD.PushError("No Deck set! Initializing to the Starter Deck.");
 
 			// TODO: Load a deck instead of the whole card pool
 			var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
-			Deck = new Deck(cardPool.Cards, "Default");
+			var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
+			var creatureCards = cardPool.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
+			Sacrifices = new Deck(sacrificeCards, "Sacrifices");
+			Creatures = new Deck(creatureCards, "Creatures");
 		}
 
 		const int StartingHandSize = 3;
@@ -119,7 +127,7 @@ public partial class MainGame : Node2D
 
 		for (int i = 0; i < StartingHandSize; i++)
 		{
-			var drawnCardInfo = Deck.DrawFromTop();
+			var drawnCardInfo = Creatures.DrawFromTop();
 			InstantiateCardInHand(drawnCardInfo);
 
 			await ToSignal(GetTree().CreateTimer(0.234f), "timeout");
@@ -158,7 +166,7 @@ public partial class MainGame : Node2D
 			"res://assets/sprites/avatars/avatar_blue_monster_01.jpeg",
 			"res://assets/sprites/avatars/avatar_blue_monster_02.jpeg",
 		};
-		
+
 		var blueMonsterCard = new CardInfo()
 		{
 			Name = $"Blue Monster #{DrawnCardCount}",
@@ -190,5 +198,6 @@ public partial class MainGame : Node2D
 public class StateMachineException : Exception
 {
 	public StateMachineException(string action, GameState currentState) :
-		base($"Invalid State Transition [{currentState}] Cannot process action \"{action}\"") { }
+		base($"Invalid State Transition [{currentState}] Cannot process action \"{action}\"")
+	{ }
 }
