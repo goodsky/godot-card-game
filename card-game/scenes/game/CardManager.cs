@@ -39,7 +39,7 @@ public partial class CardManager : Node2D
 
 	public void SetCardDrop(Card card, CardDrop cardDrop)
 	{
-		if (cardDrop != null && !cardDrop.CanDropCard())
+		if (cardDrop != null && !cardDrop.CanDropCard(card))
 		{
 			GD.Print($"Can't drop card {card.Name} onto {cardDrop.Name}.");
 			return;

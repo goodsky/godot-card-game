@@ -44,9 +44,6 @@ public partial class Card : Node2D
 {
 	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
 
-	public static readonly float MaxDragX = 550;
-	public static readonly float MinDragY = 450;
-
 	private bool _isSelected = false;
 	private bool _isDragging = false;
 	private bool _freeDragging = false; // This is only for Isaac mode right now
@@ -115,17 +112,23 @@ public partial class Card : Node2D
 
 	public override void _Draw()
 	{
-		if (_isDragging && CardManager.Instance.ActiveCardDrop is PlayArea)
-		{
-			Vector2 topOfPlayArea = CardManager.Instance.ActiveCardDrop.GlobalPosition - new Vector2(0, 40f);
-			DrawArrowToPosition(topOfPlayArea, Colors.LawnGreen);
-		}
-		else if (_isSelected)
+		if (MainGame.Instance.CurrentState == GameState.PlayCard_SelectCard && (_isDragging || _isSelected))
 		{
 			Vector2 mousePosition = GetGlobalMousePosition();
-			if (mousePosition.X < MaxDragX && mousePosition.Y < MinDragY)
+			if (mousePosition.X < MainGame.Instance.Board.Background.Size.X &&
+				mousePosition.Y < MainGame.Instance.Board.Background.Size.Y)
 			{
-				DrawArrowToPosition(mousePosition, CardManager.Instance.ActiveCardDrop is PlayArea ? Colors.LawnGreen : Colors.IndianRed);
+				CardDrop activeCardDrop = CardManager.Instance.ActiveCardDrop;
+				if (activeCardDrop is PlayArea)
+				{
+					Vector2 topOfPlayArea = CardManager.Instance.ActiveCardDrop.GlobalPosition - new Vector2(0, 40f);
+					Color arrowColor = activeCardDrop.CanDropCard(this) ? Colors.LawnGreen : Colors.IndianRed;
+					DrawArrowToPosition(topOfPlayArea, arrowColor);
+				}
+				else
+				{
+					DrawArrowToPosition(mousePosition, Colors.IndianRed);
+				}
 			}
 		}
 	}
@@ -140,9 +143,19 @@ public partial class Card : Node2D
 			}
 			else
 			{
-				QueueRedraw();
-				Vector2 dragTarget = new Vector2(Math.Min(GetGlobalMousePosition().X, MaxDragX), Math.Max(GetGlobalMousePosition().Y, MinDragY));
+				float xMargin = 50f;
+				float yMargin = 65f;
+				float minDragX = xMargin;
+				float maxDragX = MainGame.Instance.Board.Background.Size.X - xMargin;
+				float minDragY = MainGame.Instance.Board.Background.Size.Y;
+				float maxDragY = GetViewportRect().Size.Y - yMargin;
+
+				Vector2 dragTarget = new Vector2(
+					Math.Clamp(GetGlobalMousePosition().X, minDragX, maxDragX),
+					Math.Clamp(GetGlobalMousePosition().Y, minDragY, maxDragY));
+
 				GlobalPosition = GlobalPosition.Lerp(dragTarget, 15f * (float)delta);
+				QueueRedraw();
 			}
 		}
 		else if (TargetPosition.HasValue)

@@ -11,9 +11,9 @@ public abstract partial class CardDrop : Node2D
 
 	protected Node CardsNode;
 
-	protected int CardCount => GetChildCards().Length;
-
 	protected abstract int MaxCards { get; }
+
+	public int CardCount => GetChildCards().Length;
 
 	public override void _Ready()
 	{
@@ -30,7 +30,7 @@ public abstract partial class CardDrop : Node2D
 		}
 	}
 
-	public virtual bool CanDropCard()
+	public virtual bool CanDropCard(Card card)
 	{
 		return CardCount < MaxCards;
 	}

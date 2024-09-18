@@ -29,7 +29,12 @@ public partial class PlayArea : CardDrop
 		DrawRect(new Rect2(-_size.X / 2, -_size.Y / 2, _size.X, _size.Y), _isHoverOver ? Colors.WhiteSmoke : Colors.Gray, false, 2.0f);
 	}
 
-	public override bool TryAddCard(Card card, Vector2? globalPosition)
+    public override bool CanDropCard(Card card)
+    {
+        return MainGame.Instance.Board.CanPlayCardAtLocation(card, this);
+    }
+
+    public override bool TryAddCard(Card card, Vector2? globalPosition)
 	{
 		if (base.TryAddCard(card, globalPosition))
 		{
@@ -62,7 +67,6 @@ public partial class PlayArea : CardDrop
 		if (SupportsDrop && CardManager.Instance.SelectedCard != null)
 		{
 			Card selectedCard = CardManager.Instance.SelectedCard;
-			GD.Print($"DROP {selectedCard.Name} in {Name}");
 			CardManager.Instance.SelectCard(null);
 			CardManager.Instance.SetCardDrop(selectedCard, this);
 		}

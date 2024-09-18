@@ -1,5 +1,4 @@
 using Godot;
-using System;
 
 public partial class GameBoard : Node2D
 {
@@ -14,6 +13,15 @@ public partial class GameBoard : Node2D
 
 	[Export]
 	public PlayArea[] Lane3 { get; set; }
+
+	[Export]
+	public BackgroundRenderer Background { get; set; }
+
+	public int PlayerCardCount =>
+		Lane0[0].CardCount +
+		Lane1[0].CardCount +
+		Lane2[0].CardCount +
+		Lane3[0].CardCount;
 
 	public override void _Input(InputEvent inputEvent)
 	{
@@ -43,6 +51,17 @@ public partial class GameBoard : Node2D
 				DisableLanes();
 				break;
 		}
+	}
+
+	public bool CanPlayCardAtLocation(Card card, CardDrop cardDrop)
+	{
+		if (card == null || cardDrop == null) return false;
+
+		bool canAfford = PlayerCardCount >= (int)card.CardInfo.BloodCost;
+		bool isEmptyPlayArea = cardDrop is PlayArea && cardDrop.CardCount == 0;
+		bool isSacrificablePlayArea = cardDrop is PlayArea && (int)card.CardInfo.BloodCost > 0;
+		
+		return canAfford && (isEmptyPlayArea || isSacrificablePlayArea);
 	}
 
 	private void DisableLanes()

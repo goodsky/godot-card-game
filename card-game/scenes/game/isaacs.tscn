@@ -1,10 +1,11 @@
-[gd_scene load_steps=14 format=3 uid="uid://btkkhgkubjwj1"]
+[gd_scene load_steps=15 format=3 uid="uid://btkkhgkubjwj1"]
 
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_32l42"]
 [ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="1_d472e"]
 [ext_resource type="Script" path="res://scenes/game/CardManager.cs" id="1_e8g3v"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="2_77sy5"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_e8sjc"]
+[ext_resource type="Script" path="res://scenes/game/GameBoard.cs" id="3_tcm3y"]
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/game/Hand.tscn" id="4_wiasx"]
 [ext_resource type="Script" path="res://scenes/game/InfoArea.cs" id="5_sd7tc"]
 
@@ -34,92 +35,100 @@ Hand = NodePath("Hand")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("1_e8g3v")
 
-[node name="PlayArea" type="Node2D" parent="."]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background")]
+script = ExtResource("3_tcm3y")
+Lane0 = [NodePath("PlayArea1")]
+Lane1 = [NodePath("PlayArea2")]
+Lane2 = [NodePath("PlayArea3")]
+Lane3 = [NodePath("PlayArea4")]
+Background = NodePath("Background")
+
+[node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("1_d472e")
 Size = Vector2(800, 450)
 
-[node name="PlayArea1" parent="PlayArea" instance=ExtResource("2_77sy5")]
+[node name="PlayArea1" parent="GameBoard" instance=ExtResource("2_77sy5")]
 position = Vector2(80, 365)
 SupportsPickUp = true
 
-[node name="PlayArea2" parent="PlayArea" instance=ExtResource("2_77sy5")]
+[node name="PlayArea2" parent="GameBoard" instance=ExtResource("2_77sy5")]
 position = Vector2(208, 365)
 SupportsPickUp = true
 
-[node name="PlayArea3" parent="PlayArea" instance=ExtResource("2_77sy5")]
+[node name="PlayArea3" parent="GameBoard" instance=ExtResource("2_77sy5")]
 position = Vector2(336, 365)
 SupportsPickUp = true
 
-[node name="PlayArea4" parent="PlayArea" instance=ExtResource("2_77sy5")]
+[node name="PlayArea4" parent="GameBoard" instance=ExtResource("2_77sy5")]
 position = Vector2(464, 365)
 SupportsPickUp = true
 
-[node name="PlayArea5" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea5" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(80, 220)
 SupportsPickUp = true
 Area = NodePath("../PlayArea1/ClickableArea")
 
-[node name="PlayArea6" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea6" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(208, 220)
 SupportsPickUp = true
 Area = NodePath("../PlayArea2/ClickableArea")
 
-[node name="PlayArea7" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea7" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(336, 220)
 SupportsPickUp = true
 Area = NodePath("../PlayArea3/ClickableArea")
 
-[node name="PlayArea8" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea8" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(464, 220)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea9" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea9" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(80, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea1/ClickableArea")
 
-[node name="PlayArea10" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea10" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(208, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea2/ClickableArea")
 
-[node name="PlayArea11" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea11" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(336, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea3/ClickableArea")
 
-[node name="PlayArea12" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea12" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(464, 75)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea13" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea13" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(592, 366)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea14" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea14" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(592, 220)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea15" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea15" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(592, 76)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea16" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea16" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(720, 366)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea17" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea17" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(720, 220)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")
 
-[node name="PlayArea18" parent="PlayArea" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
+[node name="PlayArea18" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("2_77sy5")]
 position = Vector2(720, 76)
 SupportsPickUp = true
 Area = NodePath("../PlayArea4/ClickableArea")

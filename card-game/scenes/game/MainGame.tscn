@@ -29,12 +29,13 @@ HealthBar = NodePath("HealthBar")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("2_r04wx")
 
-[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3")]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background")]
 script = ExtResource("3_20nsl")
 Lane0 = [NodePath("PlayArea1"), NodePath("PlayArea5"), NodePath("PlayArea9")]
 Lane1 = [NodePath("PlayArea2"), NodePath("PlayArea6"), NodePath("PlayArea10")]
 Lane2 = [NodePath("PlayArea3"), NodePath("PlayArea7"), NodePath("PlayArea11")]
 Lane3 = [NodePath("PlayArea4"), NodePath("PlayArea8"), NodePath("PlayArea12")]
+Background = NodePath("Background")
 
 [node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("4_ms6pg")
