@@ -90,7 +90,6 @@ public partial class GameBoard : Node2D
 	public bool CanPlayCardAtLocation(Card card, CardDrop cardDrop)
 	{
 		if (card == null || cardDrop == null) return false;
-		if (MainGame.Instance.CurrentState == GameState.IsaacMode) return true;
 
 		bool canAfford = PlayerCardCount >= (int)card.CardInfo.BloodCost;
 		bool isEmptyPlayArea = cardDrop is PlayArea && cardDrop.CardCount == 0;

@@ -27,9 +27,10 @@ bg_color = Color(0.85098, 0.72549, 0.321569, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmdlw"]
 bg_color = Color(0.729412, 0.560784, 0, 1)
 
-[node name="Main" type="Node2D" node_paths=PackedStringArray("Hand")]
+[node name="Main" type="Node2D" node_paths=PackedStringArray("Board", "Hand")]
 script = ExtResource("1_32l42")
 IsaacMode = true
+Board = NodePath("GameBoard")
 Hand = NodePath("Hand")
 
 [node name="CardManager" type="Node2D" parent="."]
