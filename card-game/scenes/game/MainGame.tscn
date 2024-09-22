@@ -1,7 +1,7 @@
 [gd_scene load_steps=22 format=3 uid="uid://cdq0smiv61oi3"]
 
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_q2hu1"]
-[ext_resource type="Script" path="res://scenes/game/CardManager.cs" id="2_r04wx"]
+[ext_resource type="Script" path="res://scenes/game/ActiveCardState.cs" id="2_r04wx"]
 [ext_resource type="Script" path="res://scenes/game/GameBoard.cs" id="3_20nsl"]
 [ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="4_ms6pg"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="5_ab3aq"]

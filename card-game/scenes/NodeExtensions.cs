@@ -1,5 +1,5 @@
-using System;
 using System.Collections;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 
@@ -22,7 +22,7 @@ public static class NodeExtensions
         return node.ToSignal(timer, "timeout");
     }
 
-    public static async Task StartCoroutine(this Node node, IEnumerable coroutine)
+    public static async Task StartCoroutine(this Node node, IEnumerable coroutine, CancellationToken? token = null)
     {
         SceneTree scene = node.GetTree();
         foreach (object x in coroutine)
@@ -34,6 +34,11 @@ public static class NodeExtensions
             else
             {
                 await node.ToSignal(scene, SceneTree.SignalName.PhysicsFrame);
+            }
+
+            if (token != null && token.Value.IsCancellationRequested)
+            {
+                return;
             }
         }
     }

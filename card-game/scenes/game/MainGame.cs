@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 /**
@@ -86,7 +87,8 @@ public partial class MainGame : Node2D
 		}
 	}
 
-	public void PlayCard(Card card, PlayArea playArea, CardDrop oldHome)
+
+	public void PlayedCard(Card card, PlayArea playArea, CardDrop oldHome)
 	{
 		bool playAreaAlreadyHasCard = (playArea.CardCount == 2);
 		if (card.CardInfo.BloodCost == CardBloodCost.Zero)
@@ -94,18 +96,24 @@ public partial class MainGame : Node2D
 			card.TargetPosition = playArea.GlobalPosition;
 			TransitionToState(GameState.PlayCard);
 		}
-		else if (card.CardInfo.BloodCost == CardBloodCost.One && playAreaAlreadyHasCard)
+		else if (playAreaAlreadyHasCard)
 		{
-			CardManager.Instance.StageCardPendingBloodCost(card, oldHome);
-			Task _ = this.StartCoroutine(SacrificeCardsThenPlayNewCard(playArea.GetChildCards(), card, playArea));
+			ActiveCardState.Instance.StageCardPendingBloodCost(card, oldHome);
+			TransitionToState(GameState.PlayCard_PayPrice);
+			ActiveCardState.Instance.AddSacrificeCard(playArea.GetChildCards()[0]);
 		}
 		else
 		{
-			Vector2 pendingPlayOffset = new Vector2(0, 75f);
-			card.TargetPosition = playArea.GlobalPosition + pendingPlayOffset;
-
-			CardManager.Instance.StageCardPendingBloodCost(card, oldHome);
+			ActiveCardState.Instance.StageCardPendingBloodCost(card, oldHome);
 			TransitionToState(GameState.PlayCard_PayPrice);
+		}
+	}
+
+	public void CardCostPaid()
+	{
+		if (CurrentState == GameState.PlayCard_PayPrice)
+		{
+			TransitionToState(GameState.PlayCard);
 		}
 	}
 
@@ -165,7 +173,8 @@ public partial class MainGame : Node2D
 
 	private void TransitionToState(GameState nextState)
 	{
-		if (CurrentState == GameState.IsaacMode) {
+		if (CurrentState == GameState.IsaacMode)
+		{
 			GD.Print($"Embrace the Isaac mode! Cannot transition to {nextState}");
 		}
 
@@ -184,23 +193,9 @@ public partial class MainGame : Node2D
 		card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
 
 		card.SetCardInfo(cardInfo);
-		CardManager.Instance.SetCardDrop(card, Hand);
+		ActiveCardState.Instance.SetCardDrop(card, Hand);
 
 		return card;
-	}
-
-	/** Transition Coroutines */
-	private IEnumerable SacrificeCardsThenPlayNewCard(Card[] sacrifices, Card playedCard, PlayArea playArea)
-	{
-		foreach (Card card in sacrifices)
-		{
-			card.Kill();
-		}
-
-		yield return new CoroutineDelay(1.0);
-
-		playedCard.TargetPosition = playArea.GlobalPosition;
-		TransitionToState(GameState.PlayCard);
 	}
 
 	/** Isaac Mode! (and other miscellaneous manual test routines) */
@@ -233,7 +228,7 @@ public partial class MainGame : Node2D
 		var debugCards = GetTree().GetNodesInGroup("DebugCard");
 		foreach (var card in debugCards)
 		{
-			CardManager.Instance.SetCardDrop(card as Card, null);
+			ActiveCardState.Instance.SetCardDrop(card as Card, null);
 			card.QueueFree();
 		}
 	}

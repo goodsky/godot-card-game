@@ -29,12 +29,12 @@ public partial class PlayArea : CardDrop
 		DrawRect(new Rect2(-_size.X / 2, -_size.Y / 2, _size.X, _size.Y), _isHoverOver ? Colors.WhiteSmoke : Colors.Gray, false, 2.0f);
 	}
 
-    public override bool CanDropCard(Card card)
-    {
-        return MainGame.Instance.Board.CanPlayCardAtLocation(card, this);
-    }
+	public override bool CanDropCard(Card card)
+	{
+		return MainGame.Instance.Board.CanPlayCardAtLocation(card, this);
+	}
 
-    public override bool TryAddCard(Card card, Vector2? globalPosition)
+	public override bool TryAddCard(Card card, Vector2? globalPosition)
 	{
 		CardDrop oldCardDrop = card.HomeCardDrop;
 		if (base.TryAddCard(card, globalPosition))
@@ -42,7 +42,7 @@ public partial class PlayArea : CardDrop
 			switch (MainGame.Instance.CurrentState)
 			{
 				case GameState.PlayCard:
-					MainGame.Instance.PlayCard(card, this, oldCardDrop);
+					MainGame.Instance.PlayedCard(card, this, oldCardDrop);
 					break;
 
 				case GameState.IsaacMode:
@@ -54,7 +54,7 @@ public partial class PlayArea : CardDrop
 						card.Area.AreaStopDragging += card.StopDragging;
 					}
 					break;
-				
+
 				default:
 					card.TargetPosition = GlobalPosition;
 					GD.PushError($"[Unexpected State Action] Card added to PlayArea during {MainGame.Instance.CurrentState}.");
@@ -79,11 +79,11 @@ public partial class PlayArea : CardDrop
 
 	public void Clicked()
 	{
-		if (SupportsDrop && CardManager.Instance.SelectedCard != null)
+		if (SupportsDrop && ActiveCardState.Instance.SelectedCard != null)
 		{
-			Card selectedCard = CardManager.Instance.SelectedCard;
-			CardManager.Instance.SelectCard(null);
-			CardManager.Instance.SetCardDrop(selectedCard, this);
+			Card selectedCard = ActiveCardState.Instance.SelectedCard;
+			ActiveCardState.Instance.SelectCard(null);
+			ActiveCardState.Instance.SetCardDrop(selectedCard, this);
 		}
 	}
 
@@ -92,7 +92,7 @@ public partial class PlayArea : CardDrop
 		if (!SupportsDrop) return;
 
 		_isHoverOver = true;
-		CardManager.Instance.ActivateCardDrop(this);
+		ActiveCardState.Instance.ActivateCardDrop(this);
 		QueueRedraw();
 	}
 
@@ -101,7 +101,7 @@ public partial class PlayArea : CardDrop
 		if (!SupportsDrop) return;
 
 		_isHoverOver = false;
-		CardManager.Instance.DeactivateCardDrop(this);
+		ActiveCardState.Instance.DeactivateCardDrop(this);
 		QueueRedraw();
 	}
 }

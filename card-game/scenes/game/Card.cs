@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading;
 using System.Threading.Tasks;
 using Godot;
 
@@ -120,10 +121,10 @@ public partial class Card : Node2D
 			if (mousePosition.X < MainGame.Instance.Board.Background.Size.X &&
 				mousePosition.Y < MainGame.Instance.Board.Background.Size.Y)
 			{
-				CardDrop activeCardDrop = CardManager.Instance.ActiveCardDrop;
+				CardDrop activeCardDrop = ActiveCardState.Instance.ActiveCardDrop;
 				if (activeCardDrop is PlayArea)
 				{
-					Vector2 topOfPlayArea = CardManager.Instance.ActiveCardDrop.GlobalPosition - new Vector2(0, 40f);
+					Vector2 topOfPlayArea = ActiveCardState.Instance.ActiveCardDrop.GlobalPosition - new Vector2(0, 40f);
 					Color arrowColor = activeCardDrop.CanDropCard(this) ? Colors.LawnGreen : Colors.IndianRed;
 					DrawArrowToPosition(topOfPlayArea, arrowColor);
 				}
@@ -136,7 +137,7 @@ public partial class Card : Node2D
 	}
 
 	public override void _PhysicsProcess(double delta)
-	{	
+	{
 		if (_isDragging)
 		{
 			if (_freeDragging)
@@ -199,7 +200,7 @@ public partial class Card : Node2D
 	{
 		_isDragging = true;
 		_freeDragging = MainGame.Instance.CurrentState == GameState.IsaacMode;
-		CardManager.Instance.SetDraggingCard(this);
+		ActiveCardState.Instance.SetDraggingCard(this);
 
 		// When using touch screens - sometimes the global mouse position does not match card position
 		float mouseToCardDelta = GlobalPosition.DistanceTo(GetGlobalMousePosition());
@@ -215,16 +216,16 @@ public partial class Card : Node2D
 
 	public void StopDragging()
 	{
+		ZIndex = 0;
 		_isDragging = false;
 		_isSelected = false;
-		CardManager.Instance.ClearDraggingCard(this);
+		ActiveCardState.Instance.ClearDraggingCard(this);
 
 		QueueRedraw();
-		ZIndex = 0;
 	}
 
 	private bool _isKilled = false;
-    public async void Kill()
+	public async void Kill()
 	{
 		if (_isKilled) return;
 		_isKilled = true;
@@ -253,12 +254,44 @@ public partial class Card : Node2D
 		QueueFree();
 	}
 
+	private CancellationTokenSource rotationCancellation = null;
+	public async Task RotateCard(float radians)
+	{
+		rotationCancellation?.Cancel();
+
+		rotationCancellation = new CancellationTokenSource();
+		await this.StartCoroutine(RotateCardCoroutine(radians), rotationCancellation.Token);
+	}
+
+	private IEnumerable RotateCardCoroutine(float radians)
+	{
+		float rotateDelta = 0.1f;
+		if (Rotation > radians)
+		{
+			while (Rotation > radians)
+			{
+				Rotation -= rotateDelta;
+				yield return null;
+			}
+		}
+		else
+		{
+			while (Rotation < radians)
+			{
+				Rotation += rotateDelta;
+				yield return null;
+			}
+		}
+		Rotation = radians;
+		rotationCancellation = null;
+	}
+
 	private bool _isShaking = false;
 	public void StartShaking()
 	{
 		if (_isShaking) return;
 		_isShaking = true;
-		Task t = this.StartCoroutine(ShakingCoroutine());
+		Task _ = this.StartCoroutine(ShakingCoroutine());
 	}
 
 	public void StopShaking()
@@ -268,8 +301,8 @@ public partial class Card : Node2D
 
 	private IEnumerable ShakingCoroutine()
 	{
-		float shakeDelta = 0.1f;
-		float maxAngle = Mathf.Pi / 4;
+		float shakeDelta = 0.015f;
+		float maxAngle = Mathf.Pi / 24;
 		while (_isShaking)
 		{
 			Rotation += shakeDelta;
@@ -281,7 +314,7 @@ public partial class Card : Node2D
 
 			yield return null;
 		}
-		
+
 		Rotation = 0f;
 	}
 

@@ -1,9 +1,13 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Godot;
 
-public partial class CardManager : Node2D
+public partial class ActiveCardState : Node2D
 {
-	public static CardManager Instance { get; private set; }
+	public static ActiveCardState Instance { get; private set; }
 
 	public Card DraggingCard { get; private set; } = null;
 
@@ -56,11 +60,15 @@ public partial class CardManager : Node2D
 
 		Vector2 cardStartingGlobalPosition = card.GlobalPosition;
 		card.HomeCardDrop?.TryRemoveCard(card);
-		card.HomeCardDrop = null;
 
 		if (cardDrop?.TryAddCard(card, cardStartingGlobalPosition) == false)
 		{
 			GD.PushError($"Failed to set card drop. {card.Name} could not be added to {cardDrop?.Name}");
+		}
+
+		if (cardDrop == null)
+		{
+			card.HomeCardDrop = null;
 		}
 	}
 
@@ -75,8 +83,23 @@ public partial class CardManager : Node2D
 
 	public void StageCardPendingBloodCost(Card card, CardDrop oldHome)
 	{
+		Vector2 pendingPlayOffset = new Vector2(0, 75f);
+		card.TargetPosition = card.HomeCardDrop.GlobalPosition + pendingPlayOffset;
+		card.ZIndex = 10;
+
 		StagedCard = card;
 		StagedCardOldHome = oldHome;
+	}
+
+	public void CancelStagedCard()
+	{
+		if (StagedCard != null)
+		{
+			GD.Print($"Cancelled Staged Card. Reset {StagedCard.Name} to {StagedCardOldHome?.Name}");
+			SetCardDrop(StagedCard, StagedCardOldHome);
+			StagedCard = null;
+			StagedCardOldHome = null;
+		}
 	}
 
 	public int AddSacrificeCard(Card card)
@@ -84,6 +107,17 @@ public partial class CardManager : Node2D
 		if (!ProposedSacrifices.Contains(card))
 		{
 			ProposedSacrifices.Add(card);
+			card.StopShaking();
+			Task _ = card.RotateCard(Mathf.Pi / 2);
+
+			MainGame.Instance.Board.UpdatePayThePrice(ProposedSacrifices.Count);
+
+			if (ProposedSacrifices.Count >= (int)StagedCard.CardInfo.BloodCost)
+			{
+				_resolveSacrificesCancellation?.Cancel();
+				_resolveSacrificesCancellation = new CancellationTokenSource();
+				Task __ = this.StartCoroutine(ResolveSacrificesThenPlayNewCard(), _resolveSacrificesCancellation.Token);
+			}
 		}
 
 		return ProposedSacrifices.Count;
@@ -93,17 +127,12 @@ public partial class CardManager : Node2D
 	{
 		if (ProposedSacrifices.Contains(card))
 		{
-			ProposedSacrifices.Remove(card);
-		}
-	}
+			_resolveSacrificesCancellation?.Cancel();
 
-	public void ResolveStagedCard()
-	{
-		StagedCard = null;
-		StagedCardOldHome = null;
-		foreach (Card card in ProposedSacrifices)
-		{
-			RemoveSacrificeCard(card);
+			ProposedSacrifices.Remove(card);
+			card.RotateCard(0).ContinueWith((t) => card.CallThreadSafe("StartShaking"));
+
+			MainGame.Instance.Board.UpdatePayThePrice(ProposedSacrifices.Count);
 		}
 	}
 
@@ -132,5 +161,34 @@ public partial class CardManager : Node2D
 		}
 
 		DraggingCard = null;
+	}
+
+	/** Coroutines */
+	private CancellationTokenSource _resolveSacrificesCancellation = null;
+	private IEnumerable ResolveSacrificesThenPlayNewCard()
+	{
+		yield return new CoroutineDelay(1.0);
+
+		if (ProposedSacrifices.Count != (int)StagedCard.CardInfo.BloodCost)
+		{
+			GD.PushError($"Sacrifices do not equal Blood Cost while resolving. {string.Join(";", ProposedSacrifices.Select(c => c.Name))} for {StagedCard.CardInfo.BloodCost}");
+		}
+
+		foreach (Card card in ProposedSacrifices)
+		{
+			card.Kill();
+		}
+		ProposedSacrifices.Clear();
+		_resolveSacrificesCancellation = null; // too late to stop now!
+
+		yield return new CoroutineDelay(1.0);
+
+		StagedCard.TargetPosition = StagedCard.HomeCardDrop.GlobalPosition;
+		StagedCard = null;
+		StagedCardOldHome = null;
+		MainGame.Instance.CardCostPaid();
+
+		yield return new CoroutineDelay(0.5);
+		StagedCard.ZIndex = 0;
 	}
 }
