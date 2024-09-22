@@ -30,10 +30,8 @@ public partial class Hand : CardDrop
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
-		_canPlayCards = nextState == GameState.PlayCard_SelectCard;
-		_canReorderCards =
-			nextState != GameState.PlayCard_SelectLocation &&
-			nextState != GameState.PlayCard_PayPrice;
+		_canPlayCards = (nextState == GameState.PlayCard);
+		_canReorderCards = (nextState != GameState.PlayCard_PayPrice);
 	}
 
 	public override bool TryAddCard(Card card, Vector2? globalPosition)

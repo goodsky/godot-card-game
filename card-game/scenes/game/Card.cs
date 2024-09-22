@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using Godot;
 
 public enum CardBloodCost
@@ -112,7 +114,7 @@ public partial class Card : Node2D
 
 	public override void _Draw()
 	{
-		if (MainGame.Instance.CurrentState == GameState.PlayCard_SelectCard && (_isDragging || _isSelected))
+		if (MainGame.Instance.CurrentState == GameState.PlayCard && (_isDragging || _isSelected))
 		{
 			Vector2 mousePosition = GetGlobalMousePosition();
 			if (mousePosition.X < MainGame.Instance.Board.Background.Size.X &&
@@ -134,7 +136,7 @@ public partial class Card : Node2D
 	}
 
 	public override void _PhysicsProcess(double delta)
-	{
+	{	
 		if (_isDragging)
 		{
 			if (_freeDragging)
@@ -196,7 +198,7 @@ public partial class Card : Node2D
 	public void StartDragging()
 	{
 		_isDragging = true;
-		_freeDragging = MainGame.Instance.IsaacMode;
+		_freeDragging = MainGame.Instance.CurrentState == GameState.IsaacMode;
 		CardManager.Instance.SetDraggingCard(this);
 
 		// When using touch screens - sometimes the global mouse position does not match card position
@@ -219,6 +221,68 @@ public partial class Card : Node2D
 
 		QueueRedraw();
 		ZIndex = 0;
+	}
+
+	private bool _isKilled = false;
+    public async void Kill()
+	{
+		if (_isKilled) return;
+		_isKilled = true;
+		await this.StartCoroutine(KillCoroutine());
+	}
+
+	private IEnumerable KillCoroutine()
+	{
+		if (_isKilled) yield return null;
+
+		Color m = Modulate;
+		for (float a = 1; a >= 0; a -= 0.05f)
+		{
+			m.A = a;
+			Modulate = m;
+			yield return null;
+		}
+
+		GD.Print($"Card Killed : {Name}");
+		Node parent = GetParent()?.GetParent();
+		if (parent is CardDrop cardDrop)
+		{
+			GD.Print($"Removing from CardDrop {cardDrop.Name}");
+			cardDrop.TryRemoveCard(this);
+		}
+		QueueFree();
+	}
+
+	private bool _isShaking = false;
+	public void StartShaking()
+	{
+		if (_isShaking) return;
+		_isShaking = true;
+		Task t = this.StartCoroutine(ShakingCoroutine());
+	}
+
+	public void StopShaking()
+	{
+		_isShaking = false;
+	}
+
+	private IEnumerable ShakingCoroutine()
+	{
+		float shakeDelta = 0.1f;
+		float maxAngle = Mathf.Pi / 4;
+		while (_isShaking)
+		{
+			Rotation += shakeDelta;
+			if (Rotation > maxAngle || Rotation < -maxAngle)
+			{
+				Rotation = Mathf.Clamp(Rotation, -maxAngle, maxAngle);
+				shakeDelta *= -1;
+			}
+
+			yield return null;
+		}
+		
+		Rotation = 0f;
 	}
 
 	private void HoverOver()

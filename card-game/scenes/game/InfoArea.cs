@@ -35,8 +35,8 @@ public partial class InfoArea : Node2D
 	public override void _Ready()
 	{
 		Instance = this;
-		DrawFromDeckButton.Text = $"Draw Creature ({MainGame.Instance.Creatures.Count})";
-		DrawFromSacrificeButton.Text = $"Draw Sacrifice ({MainGame.Instance.Sacrifices.Count})";
+		DrawFromDeckButton.Text = $"Draw Creature ({MainGame.Instance.Creatures?.Count})";
+		DrawFromSacrificeButton.Text = $"Draw Sacrifice ({MainGame.Instance.Sacrifices?.Count})";
 	}
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
@@ -48,7 +48,7 @@ public partial class InfoArea : Node2D
 				DrawFromSacrificeButton.Visible = false;
 				break;
 
-			case GameState.PlayCard_SelectCard:
+			case GameState.PlayCard:
 				EndTurnButton.Visible = false;
 				break;
 		}
@@ -66,15 +66,10 @@ public partial class InfoArea : Node2D
 				DrawFromSacrificeButton.Text = $"Draw Sacrifice ({MainGame.Instance.Sacrifices.Count})";
 				break;
 
-			case GameState.PlayCard_SelectCard:
+			case GameState.PlayCard:
 				TurnLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Play a Card\nor\nEnd your Turn";
 				EndTurnButton.Visible = true;
-				break;
-
-			case GameState.PlayCard_SelectLocation:
-				TurnLabel.Text = "Your Turn";
-				GameStateDescriptionLabel.Text = "Where do you want to place that card?";
 				break;
 		}
 	}

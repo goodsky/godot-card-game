@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -10,8 +11,7 @@ public enum GameState
 {
 	Initializing,
 	DrawCard,
-	PlayCard_SelectCard,
-	PlayCard_SelectLocation,
+	PlayCard,
 	PlayCard_PayPrice,
 	PlayerCombatStart,
 	PlayerCombatEnd,
@@ -19,6 +19,7 @@ public enum GameState
 	EnemyCombatStart,
 	EnemyCombatEnd,
 	EnemyStageCard,
+	IsaacMode,
 }
 
 public partial class MainGame : Node2D
@@ -60,7 +61,7 @@ public partial class MainGame : Node2D
 			case GameState.DrawCard:
 				var drawnCardInfo = Creatures.DrawFromTop();
 				InstantiateCardInHand(drawnCardInfo);
-				TransitionToState(GameState.PlayCard_SelectCard);
+				TransitionToState(GameState.PlayCard);
 				break;
 
 			default:
@@ -77,7 +78,7 @@ public partial class MainGame : Node2D
 			case GameState.DrawCard:
 				var drawnCardInfo = Sacrifices.DrawFromTop();
 				InstantiateCardInHand(drawnCardInfo);
-				TransitionToState(GameState.PlayCard_SelectCard);
+				TransitionToState(GameState.PlayCard);
 				break;
 
 			default:
@@ -85,11 +86,34 @@ public partial class MainGame : Node2D
 		}
 	}
 
+	public void PlayCard(Card card, PlayArea playArea, CardDrop oldHome)
+	{
+		bool playAreaAlreadyHasCard = (playArea.CardCount == 2);
+		if (card.CardInfo.BloodCost == CardBloodCost.Zero)
+		{
+			card.TargetPosition = playArea.GlobalPosition;
+			TransitionToState(GameState.PlayCard);
+		}
+		else if (card.CardInfo.BloodCost == CardBloodCost.One && playAreaAlreadyHasCard)
+		{
+			CardManager.Instance.StageCardPendingBloodCost(card, oldHome);
+			Task _ = this.StartCoroutine(SacrificeCardsThenPlayNewCard(playArea.GetChildCards(), card, playArea));
+		}
+		else
+		{
+			Vector2 pendingPlayOffset = new Vector2(0, 75f);
+			card.TargetPosition = playArea.GlobalPosition + pendingPlayOffset;
+
+			CardManager.Instance.StageCardPendingBloodCost(card, oldHome);
+			TransitionToState(GameState.PlayCard_PayPrice);
+		}
+	}
+
 	public void EndTurn()
 	{
 		switch (CurrentState)
 		{
-			case GameState.PlayCard_SelectCard:
+			case GameState.PlayCard:
 				TransitionToState(GameState.PlayerCombatStart);
 				break;
 
@@ -102,6 +126,9 @@ public partial class MainGame : Node2D
 	{
 		if (IsaacMode)
 		{
+			TransitionToState(GameState.IsaacMode);
+			Task t = this.StartCoroutine(Debug_TestCoroutine());
+
 			for (int i = 0; i < 3; i++)
 			{
 				Debug_DrawCard();
@@ -123,14 +150,14 @@ public partial class MainGame : Node2D
 		}
 
 		const int StartingHandSize = 3;
-		await ToSignal(GetTree().CreateTimer(0.20f), "timeout");
+		await this.Delay(0.200);
 
 		for (int i = 0; i < StartingHandSize; i++)
 		{
 			var drawnCardInfo = Creatures.DrawFromTop();
 			InstantiateCardInHand(drawnCardInfo);
 
-			await ToSignal(GetTree().CreateTimer(0.234f), "timeout");
+			await this.Delay(0.234);
 		}
 
 		TransitionToState(GameState.DrawCard);
@@ -138,6 +165,10 @@ public partial class MainGame : Node2D
 
 	private void TransitionToState(GameState nextState)
 	{
+		if (CurrentState == GameState.IsaacMode) {
+			GD.Print($"Embrace the Isaac mode! Cannot transition to {nextState}");
+		}
+
 		GD.Print($"State Transition: {CurrentState} -> {nextState}");
 
 		// Godot requires enums be converted to int - so they are valid variants.
@@ -158,7 +189,21 @@ public partial class MainGame : Node2D
 		return card;
 	}
 
-	/** Isaac Mode! */
+	/** Transition Coroutines */
+	private IEnumerable SacrificeCardsThenPlayNewCard(Card[] sacrifices, Card playedCard, PlayArea playArea)
+	{
+		foreach (Card card in sacrifices)
+		{
+			card.Kill();
+		}
+
+		yield return new CoroutineDelay(1.0);
+
+		playedCard.TargetPosition = playArea.GlobalPosition;
+		TransitionToState(GameState.PlayCard);
+	}
+
+	/** Isaac Mode! (and other miscellaneous manual test routines) */
 	public void Debug_DrawCard()
 	{
 		var blueMonsterAvatars = new[] {
@@ -191,6 +236,32 @@ public partial class MainGame : Node2D
 			CardManager.Instance.SetCardDrop(card as Card, null);
 			card.QueueFree();
 		}
+	}
+
+	private IEnumerable Debug_TestCoroutine()
+	{
+		GD.Print("Testing the coroutine!");
+		yield return new CoroutineDelay(2.0);
+		GD.Print("I waited 2 seconds!");
+		yield return null;
+		GD.Print("And that time I didn't wait at all!");
+		for (int i = 10; i > 0; i--)
+		{
+			GD.Print($"{i}...");
+			yield return new CoroutineDelay(0.2);
+		}
+
+		GD.Print("Blastoff!");
+		yield return new CoroutineDelay(5);
+		GD.Print("Get ready for a big one...");
+		yield return new CoroutineDelay(1);
+		for (int i = 100; i > 0; i--)
+		{
+			GD.Print($"{i}...!");
+			yield return null;
+		}
+
+		GD.Print("Okay I'm done! Bye!");
 	}
 	/** END Isaac Mode! */
 }

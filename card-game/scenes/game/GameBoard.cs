@@ -1,7 +1,10 @@
+using System.Linq;
 using Godot;
 
 public partial class GameBoard : Node2D
 {
+	private PlayArea[] _playerLanes => new[] { Lane0[0], Lane1[0], Lane2[0], Lane3[0] };
+
 	[Export]
 	public PlayArea[] Lane0 { get; set; }
 
@@ -17,11 +20,13 @@ public partial class GameBoard : Node2D
 	[Export]
 	public BackgroundRenderer Background { get; set; }
 
-	public int PlayerCardCount =>
-		Lane0[0].CardCount +
-		Lane1[0].CardCount +
-		Lane2[0].CardCount +
-		Lane3[0].CardCount;
+	[Export]
+	public CanvasItem PayCostPanel { get; set; }
+
+	[Export]
+	public CanvasItem[] PayBloodCostIcons { get; set; }
+
+	public int PlayerCardCount => _playerLanes.Sum(lane => lane.CardCount > 0 ? 1 : 0);
 
 	public override void _Input(InputEvent inputEvent)
 	{
@@ -40,11 +45,31 @@ public partial class GameBoard : Node2D
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
+		switch (lastState)
+		{
+			case GameState.PlayCard:
+				DisableLanes();
+				break;
+
+			case GameState.PlayCard_PayPrice:
+				DisablePayThePrice();
+				break;
+		}
+
 		switch (nextState)
 		{
-			case GameState.PlayCard_SelectCard:
-			case GameState.PlayCard_SelectLocation:
+			case GameState.PlayCard:
 				EnableLanes();
+				break;
+
+			case GameState.PlayCard_PayPrice:
+				Card stagedCard = CardManager.Instance.StagedCard;
+				if (stagedCard == null)
+				{
+					GD.PushError($"[UnexpectedState] Transitioned to PayPrice without a StagedCard.");
+					break;
+				}
+				InitializePayThePrice(stagedCard.CardInfo.BloodCost);
 				break;
 
 			default:
@@ -56,6 +81,7 @@ public partial class GameBoard : Node2D
 	public bool CanPlayCardAtLocation(Card card, CardDrop cardDrop)
 	{
 		if (card == null || cardDrop == null) return false;
+		if (MainGame.Instance.CurrentState == GameState.IsaacMode) return true;
 
 		bool canAfford = PlayerCardCount >= (int)card.CardInfo.BloodCost;
 		bool isEmptyPlayArea = cardDrop is PlayArea && cardDrop.CardCount == 0;
@@ -64,19 +90,50 @@ public partial class GameBoard : Node2D
 		return canAfford && (isEmptyPlayArea || isSacrificablePlayArea);
 	}
 
+	private void InitializePayThePrice(CardBloodCost cost)
+	{
+		PayCostPanel.Visible = true;
+		for (int i = 0; i < PayBloodCostIcons.Length; i++)
+		{
+			PayBloodCostIcons[i].Visible = (i < (int)cost);
+		}
+
+		foreach (PlayArea lane in _playerLanes)
+		{
+			Card laneCard = lane.GetChildCards().FirstOrDefault();
+			if (laneCard != null)
+			{
+				laneCard.StartShaking();
+			}
+		}
+	}
+
+	private void DisablePayThePrice()
+	{
+		PayCostPanel.Visible = false;
+
+		foreach (PlayArea lane in _playerLanes)
+		{
+			Card laneCard = lane.GetChildCards().FirstOrDefault();
+			if (laneCard != null)
+			{
+				laneCard.StopShaking();
+			}		}
+	}
+
 	private void DisableLanes()
 	{
-		Lane0[0].SupportsDrop = false;
-		Lane1[0].SupportsDrop = false;
-		Lane2[0].SupportsDrop = false;
-		Lane3[0].SupportsDrop = false;
+		foreach (var lane in _playerLanes)
+		{
+			lane.SupportsDrop = false;
+		}
 	}
 
 	private void EnableLanes()
 	{
-		Lane0[0].SupportsDrop = true;
-		Lane1[0].SupportsDrop = true;
-		Lane2[0].SupportsDrop = true;
-		Lane3[0].SupportsDrop = true;
+		foreach (var lane in _playerLanes)
+		{
+			lane.SupportsDrop = true;
+		}
 	}
 }

@@ -35,13 +35,14 @@ Hand = NodePath("Hand")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("1_e8g3v")
 
-[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background")]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayBloodCostIcons")]
 script = ExtResource("3_tcm3y")
 Lane0 = [NodePath("PlayArea1")]
 Lane1 = [NodePath("PlayArea2")]
 Lane2 = [NodePath("PlayArea3")]
 Lane3 = [NodePath("PlayArea4")]
 Background = NodePath("Background")
+PayBloodCostIcons = []
 
 [node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("1_d472e")

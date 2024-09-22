@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Godot;
 
 public partial class CardManager : Node2D
@@ -8,7 +9,15 @@ public partial class CardManager : Node2D
 
 	public Card SelectedCard { get; private set; } = null;
 
+	// Play a Card
+	public Card StagedCard { get; private set; } = null;
+	private CardDrop StagedCardOldHome = null;
+
+	// Choose Sacrifices
+	public List<Card> ProposedSacrifices { get; private set; } = new List<Card>();
+
 	public CardDrop ActiveCardDrop { get; private set; } = null;
+
 
 	public override void _Ready()
 	{
@@ -45,14 +54,14 @@ public partial class CardManager : Node2D
 			return;
 		}
 
-		Vector2 cardGlobalPosition = card.GlobalPosition;
-		if (card.HomeCardDrop != null)
-		{
-			card.HomeCardDrop.TryRemoveCard(card);
-		}
+		Vector2 cardStartingGlobalPosition = card.GlobalPosition;
+		card.HomeCardDrop?.TryRemoveCard(card);
+		card.HomeCardDrop = null;
 
-		card.HomeCardDrop = cardDrop;
-		cardDrop?.TryAddCard(card, cardGlobalPosition);
+		if (cardDrop?.TryAddCard(card, cardStartingGlobalPosition) == false)
+		{
+			GD.PushError($"Failed to set card drop. {card.Name} could not be added to {cardDrop?.Name}");
+		}
 	}
 
 	public void SelectCard(Card card)
@@ -62,6 +71,40 @@ public partial class CardManager : Node2D
 
 		oldSelectedCard?.Unselect();
 		card?.Select();
+	}
+
+	public void StageCardPendingBloodCost(Card card, CardDrop oldHome)
+	{
+		StagedCard = card;
+		StagedCardOldHome = oldHome;
+	}
+
+	public int AddSacrificeCard(Card card)
+	{
+		if (!ProposedSacrifices.Contains(card))
+		{
+			ProposedSacrifices.Add(card);
+		}
+
+		return ProposedSacrifices.Count;
+	}
+
+	public void RemoveSacrificeCard(Card card)
+	{
+		if (ProposedSacrifices.Contains(card))
+		{
+			ProposedSacrifices.Remove(card);
+		}
+	}
+
+	public void ResolveStagedCard()
+	{
+		StagedCard = null;
+		StagedCardOldHome = null;
+		foreach (Card card in ProposedSacrifices)
+		{
+			RemoveSacrificeCard(card);
+		}
 	}
 
 	public void SetDraggingCard(Card card)

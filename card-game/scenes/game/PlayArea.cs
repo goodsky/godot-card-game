@@ -14,7 +14,7 @@ public partial class PlayArea : CardDrop
 	[Export]
 	public ClickableArea Area { get; set; }
 
-	protected override int MaxCards => 1;
+	protected override int MaxCards => MainGame.Instance.CurrentState == GameState.IsaacMode ? 1 : 2;
 
 	public override void _Ready()
 	{
@@ -36,14 +36,29 @@ public partial class PlayArea : CardDrop
 
     public override bool TryAddCard(Card card, Vector2? globalPosition)
 	{
+		CardDrop oldCardDrop = card.HomeCardDrop;
 		if (base.TryAddCard(card, globalPosition))
 		{
-			card.TargetPosition = GlobalPosition;
-
-			if (SupportsPickUp)
+			switch (MainGame.Instance.CurrentState)
 			{
-				card.Area.AreaStartDragging += card.StartDragging;
-				card.Area.AreaStopDragging += card.StopDragging;
+				case GameState.PlayCard:
+					MainGame.Instance.PlayCard(card, this, oldCardDrop);
+					break;
+
+				case GameState.IsaacMode:
+					card.TargetPosition = GlobalPosition;
+
+					if (SupportsPickUp)
+					{
+						card.Area.AreaStartDragging += card.StartDragging;
+						card.Area.AreaStopDragging += card.StopDragging;
+					}
+					break;
+				
+				default:
+					card.TargetPosition = GlobalPosition;
+					GD.PushError($"[Unexpected State Action] Card added to PlayArea during {MainGame.Instance.CurrentState}.");
+					break;
 			}
 
 			return true;
