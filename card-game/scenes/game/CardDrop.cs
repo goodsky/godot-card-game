@@ -47,6 +47,7 @@ public abstract partial class CardDrop : Node2D
 				card.GlobalPosition = globalPosition.Value;
 			}
 
+			card.HomeCardDrop = this;
 			return true;
 		}
 		return false;
@@ -63,7 +64,7 @@ public abstract partial class CardDrop : Node2D
 		return false;
 	}
 
-	protected Card[] GetChildCards()
+	public Card[] GetChildCards()
 	{
 		return CardsNode.GetChildren()
 			.Where(child => child is Card)

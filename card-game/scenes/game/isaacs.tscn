@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_32l42"]
 [ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="1_d472e"]
-[ext_resource type="Script" path="res://scenes/game/CardManager.cs" id="1_e8g3v"]
+[ext_resource type="Script" path="res://scenes/game/ActiveCardState.cs" id="1_e8g3v"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="2_77sy5"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_e8sjc"]
 [ext_resource type="Script" path="res://scenes/game/GameBoard.cs" id="3_tcm3y"]
@@ -35,13 +35,14 @@ Hand = NodePath("Hand")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("1_e8g3v")
 
-[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background")]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayBloodCostIcons")]
 script = ExtResource("3_tcm3y")
 Lane0 = [NodePath("PlayArea1")]
 Lane1 = [NodePath("PlayArea2")]
 Lane2 = [NodePath("PlayArea3")]
 Lane3 = [NodePath("PlayArea4")]
 Background = NodePath("Background")
+PayBloodCostIcons = []
 
 [node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("1_d472e")

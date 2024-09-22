@@ -8,9 +8,10 @@ public partial class Hand : CardDrop
 	private Vector2 _area;
 	private bool _isHoverOver = false;
 	private bool _hasGhostCard = false;
-	private bool _canReorderCards = true;
-	private bool _canPlayCards = false;
 	private Dictionary<Card, HandCardCallbacks> _cardCallbacks = new Dictionary<Card, HandCardCallbacks>();
+
+	private bool CanReorderCards => MainGame.Instance.CurrentState != GameState.PlayCard_PayPrice;
+	private bool CanPlayCards => MainGame.Instance.CurrentState == GameState.PlayCard || MainGame.Instance.CurrentState == GameState.IsaacMode;
 
 	[Export]
 	public int HandSize { get; set; }
@@ -30,10 +31,6 @@ public partial class Hand : CardDrop
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
 	{
-		_canPlayCards = nextState == GameState.PlayCard_SelectCard;
-		_canReorderCards =
-			nextState != GameState.PlayCard_SelectLocation &&
-			nextState != GameState.PlayCard_PayPrice;
 	}
 
 	public override bool TryAddCard(Card card, Vector2? globalPosition)
@@ -68,10 +65,10 @@ public partial class Hand : CardDrop
 
 	public override void _Process(double delta)
 	{
-		if (_isHoverOver && CardManager.Instance.DraggingCard != null)
+		if (_isHoverOver && ActiveCardState.Instance.DraggingCard != null)
 		{
 			_hasGhostCard = true;
-			UpdateCardPositions(CardManager.Instance.DraggingCard);
+			UpdateCardPositions(ActiveCardState.Instance.DraggingCard);
 		}
 		else if (_hasGhostCard)
 		{
@@ -86,20 +83,20 @@ public partial class Hand : CardDrop
 		{
 			// Clicking on the hand area should clear the selected card
 			// If the click is over a card - we will handle the select later
-			CardManager.Instance.SelectCard(null);
+			ActiveCardState.Instance.SelectCard(null);
 		}
 	}
 
 	public void HoverOver()
 	{
 		_isHoverOver = true;
-		CardManager.Instance.ActivateCardDrop(this);
+		ActiveCardState.Instance.ActivateCardDrop(this);
 	}
 
 	public void HoverOut()
 	{
 		_isHoverOver = false;
-		CardManager.Instance.DeactivateCardDrop(this);
+		ActiveCardState.Instance.DeactivateCardDrop(this);
 	}
 
 	protected void UpdateCardPositions(Card ghostCard = null)
@@ -255,10 +252,10 @@ public partial class Hand : CardDrop
 
 		public void Select()
 		{
-			if (!_hand._canPlayCards) return;
+			if (!_hand.CanPlayCards) return;
 
 			HoverUp();
-			CardManager.Instance.SelectCard(_card);
+			ActiveCardState.Instance.SelectCard(_card);
 		}
 
 		public void Unselect()
@@ -269,12 +266,12 @@ public partial class Hand : CardDrop
 
 		public void StartDragging()
 		{
-			if (!_hand._canReorderCards) return;
+			if (!_hand.CanReorderCards) return;
 
-			if (CardManager.Instance.DraggingCard != null)
+			if (ActiveCardState.Instance.DraggingCard != null)
 			{
 				Card[] childCards = _hand.GetChildCards();
-				int draggingCardIndex = Array.IndexOf(childCards, CardManager.Instance.DraggingCard);
+				int draggingCardIndex = Array.IndexOf(childCards, ActiveCardState.Instance.DraggingCard);
 				int myCardIndex = Array.IndexOf(childCards, _card);
 
 				// GD.Print($"Already dragging card {CardManager.Instance.DraggingCard.Name}({draggingCardIndex}) while starting drag on {_card.Name}({myCardIndex})");
@@ -284,7 +281,7 @@ public partial class Hand : CardDrop
 				}
 				else
 				{
-					CardManager.Instance.DraggingCard.StopDragging();
+					ActiveCardState.Instance.DraggingCard.StopDragging();
 				}
 			}
 
@@ -295,7 +292,7 @@ public partial class Hand : CardDrop
 
 		public void StopDragging()
 		{
-			if (CardManager.Instance.DraggingCard == _card)
+			if (ActiveCardState.Instance.DraggingCard == _card)
 			{
 				_card.StopDragging();
 
@@ -309,7 +306,7 @@ public partial class Hand : CardDrop
 
 		public void StartHovering()
 		{
-			if (!_hand._canReorderCards) return;
+			if (!_hand.CanReorderCards) return;
 
 			foreach (var callbacks in HoveredOverCards)
 			{
@@ -317,7 +314,7 @@ public partial class Hand : CardDrop
 			}
 
 			HoveredOverCards.Add(this);
-			if (CardManager.Instance.DraggingCard == null)
+			if (ActiveCardState.Instance.DraggingCard == null)
 			{
 				GetTopCardFromList(HoveredOverCards)?.HoverUp();
 			}
@@ -331,7 +328,7 @@ public partial class Hand : CardDrop
 			}
 
 			HoveredOverCards.RemoveAll((callback) => callback == this);
-			if (CardManager.Instance.DraggingCard == null)
+			if (ActiveCardState.Instance.DraggingCard == null)
 			{
 				GetTopCardFromList(HoveredOverCards)?.HoverUp();
 			}
@@ -348,7 +345,7 @@ public partial class Hand : CardDrop
 
 		private void HoverDown()
 		{
-			if (CardManager.Instance.SelectedCard == _card) return; // don't hover down if we are selected
+			if (ActiveCardState.Instance.SelectedCard == _card) return; // don't hover down if we are selected
 			if (_card.ZIndex == 9) _card.ZIndex = 0; // make sure we don't affect the ZIndex of the dragging card (which will be 10)
 			_card.TargetPositionOffset = null;
 			var areaRect = _areaShape.Shape as RectangleShape2D;
