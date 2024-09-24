@@ -16,6 +16,9 @@ public partial class PlayArea : CardDrop
 
 	protected override int MaxCards => MainGame.Instance.CurrentState == GameState.IsaacMode ? 1 : 2;
 
+	public bool HasPlayedCard => CardCount >= 1;
+	public bool HasStagedCard => CardCount == 2;
+
 	public override void _Ready()
 	{
 		base._Ready();

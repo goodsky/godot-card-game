@@ -32,7 +32,12 @@ public partial class InfoArea : Node2D
 	[Export]
 	public Button EndTurnButton { get; set; }
 
-	public override void _Ready()
+    public override void _EnterTree()
+    {
+        Instance = this;
+    }
+
+    public override void _Ready()
 	{
 		Instance = this;
 		DrawFromDeckButton.Text = $"Draw Creature ({MainGame.Instance.Creatures?.Count})";

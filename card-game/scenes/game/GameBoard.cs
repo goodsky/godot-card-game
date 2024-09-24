@@ -1,10 +1,16 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Godot;
 
 public partial class GameBoard : Node2D
 {
-	private PlayArea[] _playerLanes => new[] { Lane0[0], Lane1[0], Lane2[0], Lane3[0] };
+	private static readonly int PLAYER_INDEX = 0;
+	private static readonly int ENEMY_INDEX = 1;
+	private static readonly int ENEMY_NEXT_INDEX = 2;
+	private PlayArea[][] _allLanes => new[] { Lane0, Lane1, Lane2, Lane3 };
+	private PlayArea[] _playerAreas => _allLanes.Select(lane => lane[PLAYER_INDEX]).ToArray();
 	private Dictionary<Card, SacrificeCardCallbacks> _sacrificeCallbacks = new Dictionary<Card, SacrificeCardCallbacks>();
 
 	[Export]
@@ -28,7 +34,7 @@ public partial class GameBoard : Node2D
 	[Export]
 	public CanvasItem[] PayBloodCostIcons { get; set; }
 
-	public int PlayerCardCount => _playerLanes.Sum(lane => lane.CardCount > 0 ? 1 : 0);
+	public int PlayerCardCount => _playerAreas.Sum(lane => lane.CardCount > 0 ? 1 : 0);
 
 	public override void _Input(InputEvent inputEvent)
 	{
@@ -81,6 +87,10 @@ public partial class GameBoard : Node2D
 				InitializePayThePrice(stagedCard.CardInfo.BloodCost);
 				break;
 
+			case GameState.PlayerCombat:
+				Task _ = this.StartCoroutine(PlayerCombatCoroutine());
+				break;
+
 			default:
 				DisableLanes();
 				break;
@@ -107,7 +117,7 @@ public partial class GameBoard : Node2D
 			PayBloodCostIcons[i].Modulate = new Color(1, 1, 1, 0.5f);
 		}
 
-		foreach (PlayArea lane in _playerLanes)
+		foreach (PlayArea lane in _playerAreas)
 		{
 			Card laneCard = lane.GetChildCards().FirstOrDefault();
 			if (laneCard != null && laneCard != ActiveCardState.Instance.StagedCard)
@@ -133,7 +143,7 @@ public partial class GameBoard : Node2D
 
 		ActiveCardState.Instance.CancelStagedCard();
 
-		foreach (PlayArea lane in _playerLanes)
+		foreach (PlayArea lane in _playerAreas)
 		{
 			Card laneCard = lane.GetChildCards().FirstOrDefault();
 			if (laneCard != null && _sacrificeCallbacks.TryGetValue(laneCard, out SacrificeCardCallbacks callbacks))
@@ -148,7 +158,7 @@ public partial class GameBoard : Node2D
 
 	private void DisableLanes()
 	{
-		foreach (var lane in _playerLanes)
+		foreach (var lane in _playerAreas)
 		{
 			lane.SupportsDrop = false;
 		}
@@ -156,10 +166,45 @@ public partial class GameBoard : Node2D
 
 	private void EnableLanes()
 	{
-		foreach (var lane in _playerLanes)
+		foreach (var lane in _playerAreas)
 		{
 			lane.SupportsDrop = true;
 		}
+	}
+
+	private IEnumerable PlayerCombatCoroutine()
+	{
+		yield return new CoroutineDelay(1.0);
+
+		foreach (var lane in _allLanes)
+		{
+			Card playerCard = lane[PLAYER_INDEX].GetChildCards().FirstOrDefault();
+			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
+			Card enemyBackCard = lane[ENEMY_NEXT_INDEX].GetChildCards().FirstOrDefault();
+
+			if (playerCard != null)
+			{
+				int damage = playerCard.CardInfo.Attack;
+				Vector2 startPosition = playerCard.GlobalPosition;
+				if (enemyCard != null)
+				{
+					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(enemyCard.GlobalPosition, 0.05f));
+					GD.Print($"Dealed {damage} damage to {enemyCard.CardInfo.Name}!");
+					enemyCard.DealDamage(damage);
+				}
+				else
+				{
+					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(lane[ENEMY_NEXT_INDEX].GlobalPosition, 0.05f));
+					GD.Print($"Dealed {damage} damage to the enemy!");
+					// TODO: Swing at the enemy
+				}
+
+				yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(startPosition, 0.1f));
+				yield return new CoroutineDelay(0.5);
+			}
+		}
+
+		MainGame.Instance.EndPlayerCombat();
 	}
 
 	private class SacrificeCardCallbacks

@@ -14,11 +14,9 @@ public enum GameState
 	DrawCard,
 	PlayCard,
 	PlayCard_PayPrice,
-	PlayerCombatStart,
-	PlayerCombatEnd,
+	PlayerCombat,
 	EnemyPlayCard,
-	EnemyCombatStart,
-	EnemyCombatEnd,
+	EnemyCombat,
 	EnemyStageCard,
 	IsaacMode,
 }
@@ -48,9 +46,13 @@ public partial class MainGame : Node2D
 
 	public Deck Sacrifices { get; set; }
 
-	public override void _Ready()
+    public override void _EnterTree()
+    {
+        Instance = this;
+    }
+
+    public override void _Ready()
 	{
-		Instance = this;
 		InitializeGame();
 	}
 
@@ -90,7 +92,7 @@ public partial class MainGame : Node2D
 
 	public void PlayedCard(Card card, PlayArea playArea, CardDrop oldHome)
 	{
-		bool playAreaAlreadyHasCard = (playArea.CardCount == 2);
+		bool playAreaAlreadyHasCard = (playArea.CardCount == 2); // card cound is 2 because existing card + staged card
 		if (card.CardInfo.BloodCost == CardBloodCost.Zero)
 		{
 			card.TargetPosition = playArea.GlobalPosition;
@@ -111,9 +113,14 @@ public partial class MainGame : Node2D
 
 	public void CardCostPaid()
 	{
-		if (CurrentState == GameState.PlayCard_PayPrice)
+		switch (CurrentState)
 		{
-			TransitionToState(GameState.PlayCard);
+			case GameState.PlayCard_PayPrice:
+				TransitionToState(GameState.PlayCard);
+				break;
+
+			default:
+				throw new StateMachineException(nameof(CardCostPaid), CurrentState);
 		}
 	}
 
@@ -122,11 +129,24 @@ public partial class MainGame : Node2D
 		switch (CurrentState)
 		{
 			case GameState.PlayCard:
-				TransitionToState(GameState.PlayerCombatStart);
+				TransitionToState(GameState.PlayerCombat);
 				break;
 
 			default:
 				throw new StateMachineException(nameof(EndTurn), CurrentState);
+		}
+	}
+
+	public void EndPlayerCombat()
+	{
+		switch (CurrentState)
+		{
+			case GameState.PlayerCombat:
+				TransitionToState(GameState.EnemyPlayCard);
+				break;
+			
+			default:
+				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
 		}
 	}
 

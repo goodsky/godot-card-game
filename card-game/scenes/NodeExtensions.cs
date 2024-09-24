@@ -31,6 +31,10 @@ public static class NodeExtensions
             {
                 await node.Delay(xDelay.TimeSec);
             }
+            if (x is Task xTask)
+            {
+                await xTask;
+            }
             else
             {
                 await node.ToSignal(scene, SceneTree.SignalName.PhysicsFrame);
@@ -41,5 +45,20 @@ public static class NodeExtensions
                 return;
             }
         }
+    }
+
+    public static IEnumerable LerpPositionCoroutine(this Node2D node, Vector2 target, float speed)
+    {
+        Card card = node as Card;
+        card?.SetAnimationControl(true);
+
+        Vector2 start = node.GlobalPosition;
+        for (float t = 0.0f; t < 1.0f; t = Mathf.Clamp(t + speed, 0.0f, 1.0f))
+        {
+            node.GlobalPosition = start.Lerp(target, t);
+            yield return null;
+        }
+
+        card?.SetAnimationControl(false);
     }
 }

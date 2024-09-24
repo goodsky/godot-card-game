@@ -47,9 +47,12 @@ public partial class Card : Node2D
 {
 	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
 
-	private bool _isSelected = false;
+	private bool _isAnimating = false; // when this Card's position is being controlled by an animation
 	private bool _isDragging = false;
+	private bool _isSelected = false;
 	private bool _freeDragging = false; // This is only for Isaac mode right now
+
+	private CombatInfo _combatInfo;
 
 	// When not dragging, the home drop node for this card to live at.
 	public CardDrop HomeCardDrop { get; set; }
@@ -88,6 +91,11 @@ public partial class Card : Node2D
 
 	public override void _Ready()
 	{
+		_combatInfo = new CombatInfo
+		{
+			Damage = 0,
+		};
+
 		switch (CardInfo.Rarity)
 		{
 			case CardRarity.Sacrifice:
@@ -107,7 +115,7 @@ public partial class Card : Node2D
 				break;
 		}
 
-		UpdateVisuals(CardInfo);
+		UpdateVisuals();
 
 		Area.AreaMouseOver += HoverOver;
 		Area.AreaMouseOut += HoverOut;
@@ -161,7 +169,7 @@ public partial class Card : Node2D
 				QueueRedraw();
 			}
 		}
-		else if (TargetPosition.HasValue)
+		else if (!_isAnimating && TargetPosition.HasValue)
 		{
 			if (_isSelected)
 			{
@@ -178,10 +186,22 @@ public partial class Card : Node2D
 		}
 	}
 
+	public void SetAnimationControl(bool isAnimating)
+	{
+		_isAnimating = isAnimating;
+	}
+
 	public void SetCardInfo(CardInfo cardInfo)
 	{
 		CardInfo = cardInfo;
 		Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
+		UpdateVisuals();
+	}
+
+	public void DealDamage(int damage)
+	{
+		_combatInfo.Damage = damage;
+		UpdateVisuals();
 	}
 
 	public void Select()
@@ -351,15 +371,20 @@ public partial class Card : Node2D
 		DrawColoredPolygon(arrowHead, color);
 	}
 
-	private void UpdateVisuals(CardInfo info)
+	private void UpdateVisuals()
 	{
-		NameLabel.Text = info.Name;
-		AttackLabel.Text = info.Attack.ToString();
-		DefenseLabel.Text = info.Health.ToString();
+		NameLabel.Text = CardInfo.Name;
+		AttackLabel.Text = CardInfo.Attack.ToString();
+		DefenseLabel.Text = CardInfo.Health.ToString();
 
 		for (int i = 0; i < BloodCostIcons.Length; i++)
 		{
-			BloodCostIcons[i].Visible = i < ((int)info.BloodCost);
+			BloodCostIcons[i].Visible = i < ((int)CardInfo.BloodCost);
 		}
+	}
+
+	private class CombatInfo
+	{
+		public int Damage { get; set; }
 	}
 }
