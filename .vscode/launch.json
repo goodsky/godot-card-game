@@ -1,0 +1,39 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Game",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-godot",
+            "program": "${env:GODOT4}",
+            "cwd": "${workspaceFolder}\\card-game",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "args": [
+                "--path",
+                "${workspaceRoot}\\card-game"
+            ]
+        },
+        {
+            "name": "Godot Editor",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-godot",
+            "program": "${env:GODOT4}",
+            "cwd": "${workspaceFolder}\\card-game",
+            "console": "internalConsole",
+            "stopAtEntry": false,
+            "args": [
+                "--path",
+                "${workspaceRoot}\\card-game",
+                "--editor"
+            ]
+        },
+        {
+            "name": "Attach to Process",
+            "type": "coreclr",
+            "request": "attach"
+        }
+    ]
+}

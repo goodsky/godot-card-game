@@ -88,8 +88,10 @@ public static class CardGenerator
 		},
 	};
 
+	private static int NextGeneratedCardId = 0;
 	public static CardPool GenerateRandomCardPool(NewCardPoolArgs args, string name)
 	{
+		NextGeneratedCardId = 0;
 		GeneratorData data = LoadGeneratorData();
 
 		var cards = new List<CardInfo>();
@@ -180,6 +182,7 @@ public static class CardGenerator
 		var adjective = SelectRandom(adjectives);
 
 		var cardInfo =  new CardInfo {
+			Id = NextGeneratedCardId++,
 			Name = $"{adjective.Key} {noun.Key}",
 			AvatarResource = avatar,
 			Attack = 0,

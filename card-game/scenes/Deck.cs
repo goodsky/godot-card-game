@@ -20,7 +20,7 @@ public class Deck
     {
         if (Count == 0)
         {
-            return new CardInfo { Name = "ERROR", Attack = 0, Health = 0, AvatarResource = Constants.ErrorAvatarPath, BloodCost = CardBloodCost.Zero, Rarity = CardRarity.Rare };
+            return new CardInfo { Id = -1, Name = "ERROR", Attack = 0, Health = 0, AvatarResource = Constants.ErrorAvatarPath, BloodCost = CardBloodCost.Zero, Rarity = CardRarity.Rare };
         }
 
         int drawIndex = Cards.Count - 1;

@@ -24,6 +24,9 @@ public enum CardRarity
 
 public struct CardInfo
 {
+	[JsonPropertyName("id")]
+	public int Id { get; set; }
+
 	[JsonPropertyName("name")]
 	public string Name { get; set; }
 

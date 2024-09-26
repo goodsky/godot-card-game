@@ -209,7 +209,8 @@ public partial class MainGame : Node2D
 	private Card InstantiateCardInHand(CardInfo cardInfo)
 	{
 		var card = Constants.CardScene.Instantiate<Card>();
-		card.Name = $"Card_{DrawnCardCount++}";
+		string nodeName = cardInfo.Name.Replace(" ", "_");
+		card.Name = $"{nodeName}_{DrawnCardCount++}";
 		card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
 
 		card.SetCardInfo(cardInfo);
@@ -229,6 +230,7 @@ public partial class MainGame : Node2D
 
 		var blueMonsterCard = new CardInfo()
 		{
+			Id = DrawnCardCount,
 			Name = $"Blue Monster #{DrawnCardCount}",
 			AvatarResource = blueMonsterAvatars[Random.Shared.Next(blueMonsterAvatars.Length)],
 			Attack = Random.Shared.Next(1, 6),
