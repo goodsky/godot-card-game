@@ -91,6 +91,18 @@ public partial class GameBoard : Node2D
 				Task _ = this.StartCoroutine(PlayerCombatCoroutine());
 				break;
 
+			case GameState.EnemyPlayCard:
+				// TODO: Play the staged cards
+				break;
+
+			case GameState.EnemyCombat:
+				// TODO: Resolve combat
+				break;
+
+			case GameState.EnemyStageCard:
+				// TODO: Stage the next AI cards.
+				break;
+
 			default:
 				DisableLanes();
 				break;

@@ -33,6 +33,18 @@ public partial class SceneLoader : Node2D
 		MainGame mainGame = Constants.MainGameScene.Instantiate<MainGame>();
 		mainGame.Sacrifices = sacrifices;
 		mainGame.Creatures = creatures;
+
+		// TODO: Load the Enemy AI from somewhere
+		var moves = new ScriptedMove[] {
+			new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),
+			new ScriptedMove(1, CardBloodCost.One, CardRarity.Common),
+			new ScriptedMove(3, CardBloodCost.Two),
+			new ScriptedMove(4, CardBloodCost.Two),
+			new ScriptedMove(4, CardBloodCost.Two),
+			new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
+		};
+		mainGame.Opponent = new EnemyAI(new CardPool(creatures.Cards, "EnemyDeck"), moves);
+
 		AddChild(mainGame);
 	}
 

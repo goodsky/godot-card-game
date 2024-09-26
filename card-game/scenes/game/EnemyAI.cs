@@ -22,30 +22,28 @@ public class EnemyAI
 
     public List<PlayedCard> GetMovesForTurn(int turn, bool[] backLaneHasCard)
     {
-        List<ScriptedMove> scriptedMoves = _moves.Where((move) => move.Turn <= turn && !move.Resolved).ToList();
+        List<ScriptedMove> thisTurnMoves = _moves.Where((move) => move.Turn <= turn && !move.Resolved).ToList();
         List<PlayedCard> playedCards = new List<PlayedCard>();
-        
-        for (int i = 0; i < scriptedMoves.Count; i++)
+
+        foreach (ScriptedMove move in thisTurnMoves)
         {
-            var scriptedMove = scriptedMoves[i];
             if (backLaneHasCard.All(hasCard => hasCard))
             {
                 break;
             }
 
             int lane = -1;
-            if (scriptedMove.Lane != null)
+            if (move.Lane != null)
             {
-                lane = scriptedMove.Lane.Value;
+                lane = move.Lane.Value;
                 if (lane < 0 || lane >= backLaneHasCard.Length)
                 {
                     GD.PushError($"Scripted Move has an invalid lane value {lane}.");
-                    scriptedMove.Resolved = true;
+                    move.Resolved = true;
                     continue;
                 }
-                else if (backLaneHasCard[scriptedMove.Lane.Value])
+                else if (backLaneHasCard[move.Lane.Value])
                 {
-                    GD.Print($"Lane {scriptedMove} is occupied! Skipping");
                     continue;
                 }
             }
@@ -57,36 +55,38 @@ public class EnemyAI
                 {
                     if (backLaneHasCard[lane]) continue;
                     if (laneIdx > 0) laneIdx--;
-                    break;
+                    else break;
                 }
 
                 if (lane >= backLaneHasCard.Length)
                 {
                     GD.PushError($"Unexpected lane for resolved turn! openLanes={openLanes}; lanes=[{string.Join(",", backLaneHasCard)}]");
-                    scriptedMove.Resolved = true;
+                    move.Resolved = true;
                     continue;
                 }
+
+                backLaneHasCard[lane] = true;
             }
 
             CardInfo? cardInfo = null;
-            if (scriptedMove.CardIdToPlay != null)
+            if (move.CardIdToPlay != null)
             {
-                cardInfo = GetCardById(scriptedMove.CardIdToPlay.Value);
+                cardInfo = GetCardById(move.CardIdToPlay.Value);
             }
-            
-            if (cardInfo == null && scriptedMove.CardRarityToPlay != null)
+
+            if (cardInfo == null && move.CardCostToPlay != null)
             {
-                cardInfo = GetCardByRarity(scriptedMove.CardRarityToPlay.Value);
+                cardInfo = GetCardByCostAndRarity(move.CardCostToPlay.Value, move.CardRarityToPlay);
             }
 
             if (cardInfo == null)
             {
                 GD.PushError("Could not find a card for move!");
-                scriptedMove.Resolved = true;
+                move.Resolved = true;
                 continue;
             }
 
-            scriptedMove.Resolved = true;
+            move.Resolved = true;
             playedCards.Add(new PlayedCard { Card = cardInfo.Value, Lane = lane });
         }
 
@@ -105,27 +105,51 @@ public class EnemyAI
         return cardsWithId.First();
     }
 
-    private CardInfo? GetCardByRarity(CardRarity rarity)
+    private CardInfo? GetCardByCostAndRarity(CardBloodCost cost, CardRarity? rarity)
     {
-        var cardsWithRarity = _cardPool.Cards.Where(card => card.Rarity == rarity);
-        if (!cardsWithRarity.Any())
+        var possibleCards = _cardPool.Cards.Where(card => card.BloodCost == cost);
+        if (rarity != null)
         {
-            GD.PushError($"Enemy AI is trying to use a rarity that doesn't exist {rarity}");
+            possibleCards = possibleCards.Where(card => card.Rarity == rarity.Value);
+        }
+
+        if (!possibleCards.Any())
+        {
+            GD.PushError($"Enemy AI is trying to use a cost and rarity that doesn't exist. Cost = {cost}; Rarity = {rarity};");
             return null;
         }
 
-        CardInfo[] cards = cardsWithRarity.ToArray();
+        CardInfo[] cards = possibleCards.ToArray();
         return cards[Random.Shared.Next(cards.Length)];
     }
 }
 
-public struct ScriptedMove
+public class ScriptedMove
 {
-    public bool Resolved { get; set; }
+    public bool Resolved { get; set; } = false;
     public int Turn { get; set; }
     public int? Lane { get; set; }
     public int? CardIdToPlay { get; set; }
+    public CardBloodCost? CardCostToPlay { get; set; }
     public CardRarity? CardRarityToPlay { get; set; }
+
+    public ScriptedMove(int turn, int cardId, int? lane = null)
+    {
+        Turn = turn;
+        CardIdToPlay = cardId;
+        CardCostToPlay = null;
+        CardRarityToPlay = null;
+        Lane = lane;
+    }
+
+    public ScriptedMove(int turn, CardBloodCost cost, CardRarity? rarity = null, int? lane = null)
+    {
+        Turn = turn;
+        CardIdToPlay = null;
+        CardCostToPlay = cost;
+        CardRarityToPlay = rarity;
+        Lane = lane;
+    }
 }
 
 public struct PlayedCard

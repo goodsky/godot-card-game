@@ -25,6 +25,7 @@ public partial class MainGame : Node2D
 {
 	public static MainGame Instance { get; private set; }
 
+	public int CurrentTurn { get; private set; }
 	public GameState CurrentState { get; private set; } = GameState.Initializing;
 
 	[Signal]
@@ -46,12 +47,14 @@ public partial class MainGame : Node2D
 
 	public Deck Sacrifices { get; set; }
 
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
+	public EnemyAI Opponent { get; set; }
 
-    public override void _Ready()
+	public override void _EnterTree()
+	{
+		Instance = this;
+	}
+
+	public override void _Ready()
 	{
 		InitializeGame();
 	}
@@ -144,7 +147,7 @@ public partial class MainGame : Node2D
 			case GameState.PlayerCombat:
 				TransitionToState(GameState.EnemyPlayCard);
 				break;
-			
+
 			default:
 				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
 		}
@@ -175,7 +178,19 @@ public partial class MainGame : Node2D
 			var creatureCards = cardPool.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
 			Sacrifices = new Deck(sacrificeCards, "Sacrifices");
 			Creatures = new Deck(creatureCards, "Creatures");
+
+			var moves = new ScriptedMove[] {
+				new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),
+				new ScriptedMove(1, CardBloodCost.One, CardRarity.Common),
+				new ScriptedMove(3, CardBloodCost.Two),
+				new ScriptedMove(4, CardBloodCost.Two),
+				new ScriptedMove(4, CardBloodCost.Two),
+				new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
+			};
+			Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves);
 		}
+
+		CurrentTurn = 0;
 
 		const int StartingHandSize = 3;
 		await this.Delay(0.200);
@@ -188,7 +203,7 @@ public partial class MainGame : Node2D
 			await this.Delay(0.234);
 		}
 
-		TransitionToState(GameState.DrawCard);
+		TransitionToState(GameState.EnemyStageCard);
 	}
 
 	private void TransitionToState(GameState nextState)
