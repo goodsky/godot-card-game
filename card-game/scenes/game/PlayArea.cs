@@ -57,6 +57,11 @@ public partial class PlayArea : CardDrop
 					}
 					break;
 
+				case GameState.EnemyStageCard:
+				case GameState.EnemyPlayCard:
+					// The GameBoard takes care of everything here.
+					break;
+
 				default:
 					card.TargetPosition = GlobalPosition;
 					GD.PushError($"[Unexpected State Action] Card added to PlayArea during {MainGame.Instance.CurrentState}.");

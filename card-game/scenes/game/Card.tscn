@@ -14,14 +14,14 @@
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fbrmm"]
 size = Vector2(100, 130)
 
-[node name="Card" type="Node2D" node_paths=PackedStringArray("Background", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "DefenseLabel", "Area")]
+[node name="Card" type="Node2D" node_paths=PackedStringArray("Background", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel", "Area")]
 script = ExtResource("1_g252h")
 Background = NodePath("Background")
 Avatar = NodePath("Background/Avatar")
 BloodCostIcons = [NodePath("Background/Card-cost-1"), NodePath("Background/Card-cost-2"), NodePath("Background/Card-cost-3")]
 NameLabel = NodePath("Background/CardTitle")
 AttackLabel = NodePath("Background/AttackStat")
-DefenseLabel = NodePath("Background/DefenseStat")
+HealthLabel = NodePath("Background/HealthStat")
 Area = NodePath("ClickableArea")
 
 [node name="Background" type="Sprite2D" parent="."]
@@ -55,7 +55,7 @@ Color = Color(1, 0, 0, 1)
 position = Vector2(40, 45)
 texture = ExtResource("8_0re76")
 
-[node name="DefenseStat" parent="Background" instance=ExtResource("3_exfcv")]
+[node name="HealthStat" parent="Background" instance=ExtResource("3_exfcv")]
 position = Vector2(2, 25)
 Text = "2"
 MaxFontSize = 36

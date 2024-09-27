@@ -153,6 +153,46 @@ public partial class MainGame : Node2D
 		}
 	}
 
+	public void OpponentDoneStagingCards()
+	{
+		switch (CurrentState)
+		{
+			case GameState.EnemyStageCard:
+				CurrentTurn++;
+				TransitionToState(GameState.DrawCard);
+				break;
+
+			default:
+				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
+		}
+	}
+
+	public void OpponentDonePlayingCards()
+	{
+		switch (CurrentState)
+		{
+			case GameState.EnemyCombat:
+				TransitionToState(GameState.EnemyStageCard);
+				break;
+
+			default:
+				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
+		}
+	}
+
+	public void EndOpponentCombat()
+	{
+		switch (CurrentState)
+		{
+			case GameState.PlayerCombat:
+				TransitionToState(GameState.EnemyPlayCard);
+				break;
+
+			default:
+				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
+		}
+	}
+
 	private async void InitializeGame()
 	{
 		if (IsaacMode)

@@ -8,9 +8,11 @@ public partial class GameBoard : Node2D
 {
 	private static readonly int PLAYER_INDEX = 0;
 	private static readonly int ENEMY_INDEX = 1;
-	private static readonly int ENEMY_NEXT_INDEX = 2;
-	private PlayArea[][] _allLanes => new[] { Lane0, Lane1, Lane2, Lane3 };
-	private PlayArea[] _playerAreas => _allLanes.Select(lane => lane[PLAYER_INDEX]).ToArray();
+	private static readonly int ENEMY_STAGE_INDEX = 2;
+	private PlayArea[][] AllLanes => new[] { Lane0, Lane1, Lane2, Lane3 };
+	private PlayArea[] PlayerLanes => AllLanes.Select(lane => lane[PLAYER_INDEX]).ToArray();
+	private bool[] StagedLaneHasCard => AllLanes.Select(lane => lane[ENEMY_STAGE_INDEX].CardCount > 0).ToArray();
+
 	private Dictionary<Card, SacrificeCardCallbacks> _sacrificeCallbacks = new Dictionary<Card, SacrificeCardCallbacks>();
 
 	[Export]
@@ -34,7 +36,7 @@ public partial class GameBoard : Node2D
 	[Export]
 	public CanvasItem[] PayBloodCostIcons { get; set; }
 
-	public int PlayerCardCount => _playerAreas.Sum(lane => lane.CardCount > 0 ? 1 : 0);
+	public int PlayerCardCount => PlayerLanes.Sum(lane => lane.CardCount > 0 ? 1 : 0);
 
 	public override void _Input(InputEvent inputEvent)
 	{
@@ -71,6 +73,7 @@ public partial class GameBoard : Node2D
 				break;
 		}
 
+		Task coroutine;
 		switch (nextState)
 		{
 			case GameState.PlayCard:
@@ -88,19 +91,22 @@ public partial class GameBoard : Node2D
 				break;
 
 			case GameState.PlayerCombat:
-				Task _ = this.StartCoroutine(PlayerCombatCoroutine());
+				coroutine = this.StartCoroutine(PlayerCombatCoroutine());
 				break;
 
 			case GameState.EnemyPlayCard:
-				// TODO: Play the staged cards
+				coroutine = this.StartCoroutine(OpponentPlayCardsCoroutine());
 				break;
 
 			case GameState.EnemyCombat:
-				// TODO: Resolve combat
+				coroutine = this.StartCoroutine(OpponentCombatCoroutine());
 				break;
 
 			case GameState.EnemyStageCard:
-				// TODO: Stage the next AI cards.
+				int turn = MainGame.Instance.CurrentTurn;
+				List<PlayedCard> moves = MainGame.Instance.Opponent.GetMovesForTurn(turn, StagedLaneHasCard);
+
+				coroutine = this.StartCoroutine(OpponentStageCardsCoroutine(moves));
 				break;
 
 			default:
@@ -129,7 +135,7 @@ public partial class GameBoard : Node2D
 			PayBloodCostIcons[i].Modulate = new Color(1, 1, 1, 0.5f);
 		}
 
-		foreach (PlayArea lane in _playerAreas)
+		foreach (PlayArea lane in PlayerLanes)
 		{
 			Card laneCard = lane.GetChildCards().FirstOrDefault();
 			if (laneCard != null && laneCard != ActiveCardState.Instance.StagedCard)
@@ -155,7 +161,7 @@ public partial class GameBoard : Node2D
 
 		ActiveCardState.Instance.CancelStagedCard();
 
-		foreach (PlayArea lane in _playerAreas)
+		foreach (PlayArea lane in PlayerLanes)
 		{
 			Card laneCard = lane.GetChildCards().FirstOrDefault();
 			if (laneCard != null && _sacrificeCallbacks.TryGetValue(laneCard, out SacrificeCardCallbacks callbacks))
@@ -170,7 +176,7 @@ public partial class GameBoard : Node2D
 
 	private void DisableLanes()
 	{
-		foreach (var lane in _playerAreas)
+		foreach (var lane in PlayerLanes)
 		{
 			lane.SupportsDrop = false;
 		}
@@ -178,21 +184,105 @@ public partial class GameBoard : Node2D
 
 	private void EnableLanes()
 	{
-		foreach (var lane in _playerAreas)
+		foreach (var lane in PlayerLanes)
 		{
 			lane.SupportsDrop = true;
 		}
+	}
+
+	private static int EnemyCardCount = 0;
+	private Card InstantiateCardInLane(CardInfo cardInfo, int laneIndex)
+	{
+		PlayArea lane = AllLanes[laneIndex][ENEMY_STAGE_INDEX];
+		if (lane.CardCount > 0)
+		{
+			GD.PushError($"Cannot play enemy card in lane {laneIndex}.");
+			return null;
+		}
+
+		var card = Constants.CardScene.Instantiate<Card>();
+		string nodeName = cardInfo.Name.Replace(" ", "_");
+		card.Name = $"e_{nodeName}_{EnemyCardCount++}";
+		card.GlobalPosition = lane.GlobalPosition + new Vector2(0, -150);
+
+		card.SetCardInfo(cardInfo);
+		ActiveCardState.Instance.SetCardDrop(card, lane);
+
+		return card;
+	}
+
+	private IEnumerable OpponentStageCardsCoroutine(IEnumerable<PlayedCard> moves)
+	{
+		foreach (PlayedCard move in moves)
+		{
+			yield return new CoroutineDelay(0.5f);
+			InstantiateCardInLane(move.Card, move.Lane);
+		}
+
+		MainGame.Instance.OpponentDoneStagingCards();
+	}
+
+	private IEnumerable OpponentPlayCardsCoroutine()
+	{
+		for (int laneIdx = 0; laneIdx < AllLanes.Length; laneIdx++)
+		{
+			PlayArea[] lane = AllLanes[laneIdx];
+			if (lane[ENEMY_STAGE_INDEX].CardCount > 0 &&
+				lane[ENEMY_INDEX].CardCount == 0)
+			{
+				yield return new CoroutineDelay(0.5f);
+
+				Card stagedCard = lane[ENEMY_STAGE_INDEX].GetChildCards().First();
+				ActiveCardState.Instance.SetCardDrop(stagedCard, lane[ENEMY_INDEX]);
+			}
+		}
+
+		MainGame.Instance.OpponentDonePlayingCards();
+	}
+
+	private IEnumerable OpponentCombatCoroutine()
+	{
+		yield return new CoroutineDelay(1.0);
+
+		foreach (var lane in AllLanes)
+		{
+			Card playerCard = lane[PLAYER_INDEX].GetChildCards().FirstOrDefault();
+			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
+
+			if (enemyCard != null)
+			{
+				int damage = enemyCard.CardInfo.Attack;
+				Vector2 startPosition = enemyCard.GlobalPosition;
+				if (playerCard != null)
+				{
+					yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.05f));
+					GD.Print($"Dealed {damage} damage to {playerCard.CardInfo.Name}!");
+					playerCard.DealDamage(damage);
+				}
+				else
+				{
+					yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.05f));
+					GD.Print($"Dealed {damage} damage to the player!");
+					// TODO: Swing at the enemy
+				}
+
+				yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(startPosition, 0.1f));
+				yield return new CoroutineDelay(0.5);
+			}
+		}
+
+		MainGame.Instance.EndOpponentCombat();
 	}
 
 	private IEnumerable PlayerCombatCoroutine()
 	{
 		yield return new CoroutineDelay(1.0);
 
-		foreach (var lane in _allLanes)
+		foreach (var lane in AllLanes)
 		{
 			Card playerCard = lane[PLAYER_INDEX].GetChildCards().FirstOrDefault();
 			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
-			Card enemyBackCard = lane[ENEMY_NEXT_INDEX].GetChildCards().FirstOrDefault();
+			Card enemyBackCard = lane[ENEMY_STAGE_INDEX].GetChildCards().FirstOrDefault();
 
 			if (playerCard != null)
 			{
@@ -200,13 +290,13 @@ public partial class GameBoard : Node2D
 				Vector2 startPosition = playerCard.GlobalPosition;
 				if (enemyCard != null)
 				{
-					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(enemyCard.GlobalPosition, 0.05f));
+					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.05f));
 					GD.Print($"Dealed {damage} damage to {enemyCard.CardInfo.Name}!");
 					enemyCard.DealDamage(damage);
 				}
 				else
 				{
-					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(lane[ENEMY_NEXT_INDEX].GlobalPosition, 0.05f));
+					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.05f));
 					GD.Print($"Dealed {damage} damage to the enemy!");
 					// TODO: Swing at the enemy
 				}

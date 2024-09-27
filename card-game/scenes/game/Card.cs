@@ -84,7 +84,7 @@ public partial class Card : Node2D
 	public CanvasText AttackLabel { get; set; }
 
 	[Export]
-	public CanvasText DefenseLabel { get; set; }
+	public CanvasText HealthLabel { get; set; }
 
 	[Export]
 	public ClickableArea Area { get; set; }
@@ -203,8 +203,13 @@ public partial class Card : Node2D
 
 	public void DealDamage(int damage)
 	{
-		_combatInfo.Damage = damage;
+		_combatInfo.Damage += damage;
 		UpdateVisuals();
+
+		if (CardInfo.Health - _combatInfo.Damage <= 0)
+		{
+			Kill();
+		}
 	}
 
 	public void Select()
@@ -378,7 +383,9 @@ public partial class Card : Node2D
 	{
 		NameLabel.Text = CardInfo.Name;
 		AttackLabel.Text = CardInfo.Attack.ToString();
-		DefenseLabel.Text = CardInfo.Health.ToString();
+
+		int health = Math.Max(0, CardInfo.Health - _combatInfo?.Damage ?? 0);
+		HealthLabel.Text = health.ToString();
 
 		for (int i = 0; i < BloodCostIcons.Length; i++)
 		{

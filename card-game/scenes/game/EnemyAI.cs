@@ -154,6 +154,6 @@ public class ScriptedMove
 
 public struct PlayedCard
 {
-    public int? Lane { get; set; }
+    public int Lane { get; set; }
     public CardInfo Card { get; set; }
 }
