@@ -59,7 +59,7 @@ public partial class PlayArea : CardDrop
 
 				case GameState.EnemyStageCard:
 				case GameState.EnemyPlayCard:
-					// The GameBoard takes care of everything here.
+					card.TargetPosition = GlobalPosition;
 					break;
 
 				default:

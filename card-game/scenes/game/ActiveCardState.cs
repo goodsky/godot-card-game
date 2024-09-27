@@ -183,12 +183,13 @@ public partial class ActiveCardState : Node2D
 
 		yield return new CoroutineDelay(1.0);
 
-		StagedCard.TargetPosition = StagedCard.HomeCardDrop.GlobalPosition;
+		Card stagedCard = StagedCard;
 		StagedCard = null;
 		StagedCardOldHome = null;
+		stagedCard.TargetPosition = stagedCard.HomeCardDrop.GlobalPosition;
 		MainGame.Instance.CardCostPaid();
 
 		yield return new CoroutineDelay(0.5);
-		StagedCard.ZIndex = 0;
+		stagedCard.ZIndex = 0;
 	}
 }

@@ -22,7 +22,18 @@ public static class NodeExtensions
         return node.ToSignal(timer, "timeout");
     }
 
-    public static async Task StartCoroutine(this Node node, IEnumerable coroutine, CancellationToken? token = null)
+    public static Task StartCoroutine(this Node node, IEnumerable coroutine, CancellationToken? token = null)
+    {
+        return StartCoroutineInternal(node, coroutine, token).ContinueWith((t) =>
+        {
+            if (t.IsFaulted)
+            {
+                GD.PushError($"Unhandled exception in coroutine! Ex={t.Exception}");
+            }
+        });
+    }
+
+    private static async Task StartCoroutineInternal(Node node, IEnumerable coroutine, CancellationToken? token = null)
     {
         SceneTree scene = node.GetTree();
         foreach (object x in coroutine)

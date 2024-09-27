@@ -32,12 +32,12 @@ public partial class InfoArea : Node2D
 	[Export]
 	public Button EndTurnButton { get; set; }
 
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
+	public override void _EnterTree()
+	{
+		Instance = this;
+	}
 
-    public override void _Ready()
+	public override void _Ready()
 	{
 		Instance = this;
 		DrawFromDeckButton.Text = $"Draw Creature ({MainGame.Instance.Creatures?.Count})";
@@ -75,6 +75,26 @@ public partial class InfoArea : Node2D
 				TurnLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Play a Card\nor\nEnd your Turn";
 				EndTurnButton.Visible = true;
+				break;
+
+			case GameState.PlayerCombat:
+				TurnLabel.Text = "Your Turn";
+				GameStateDescriptionLabel.Text = "Your cards attack";
+				break;
+
+			case GameState.EnemyPlayCard:
+				TurnLabel.Text = "Enemy Turn";
+				GameStateDescriptionLabel.Text = "Playing new cards";
+				break;
+
+			case GameState.EnemyCombat:
+				TurnLabel.Text = "Enemy Turn";
+				GameStateDescriptionLabel.Text = "Opponent cards attack";
+				break;
+
+			case GameState.EnemyStageCard:
+				TurnLabel.Text = "Get Ready";
+				GameStateDescriptionLabel.Text = "Your turn is next";
 				break;
 		}
 	}

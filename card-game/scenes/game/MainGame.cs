@@ -163,11 +163,24 @@ public partial class MainGame : Node2D
 				break;
 
 			default:
-				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
+				throw new StateMachineException(nameof(OpponentDoneStagingCards), CurrentState);
 		}
 	}
 
 	public void OpponentDonePlayingCards()
+	{
+		switch (CurrentState)
+		{
+			case GameState.EnemyPlayCard:
+				TransitionToState(GameState.EnemyCombat);
+				break;
+
+			default:
+				throw new StateMachineException(nameof(OpponentDonePlayingCards), CurrentState);
+		}
+	}
+
+	public void EndOpponentCombat()
 	{
 		switch (CurrentState)
 		{
@@ -176,20 +189,7 @@ public partial class MainGame : Node2D
 				break;
 
 			default:
-				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
-		}
-	}
-
-	public void EndOpponentCombat()
-	{
-		switch (CurrentState)
-		{
-			case GameState.PlayerCombat:
-				TransitionToState(GameState.EnemyPlayCard);
-				break;
-
-			default:
-				throw new StateMachineException(nameof(EndPlayerCombat), CurrentState);
+				throw new StateMachineException(nameof(EndOpponentCombat), CurrentState);
 		}
 	}
 
@@ -255,9 +255,9 @@ public partial class MainGame : Node2D
 
 		GD.Print($"State Transition: {CurrentState} -> {nextState}");
 
-		// Godot requires enums be converted to int - so they are valid variants.
-		EmitSignal(SignalName.OnStateTransition, (int)nextState, (int)CurrentState);
+		GameState lastState = CurrentState;
 		CurrentState = nextState;
+		EmitSignal(SignalName.OnStateTransition, (int)nextState, (int)lastState); // Godot requires enums be converted to int - so they are valid variants.
 	}
 
 	private static int DrawnCardCount = 0;

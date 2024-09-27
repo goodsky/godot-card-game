@@ -105,7 +105,6 @@ public partial class GameBoard : Node2D
 			case GameState.EnemyStageCard:
 				int turn = MainGame.Instance.CurrentTurn;
 				List<PlayedCard> moves = MainGame.Instance.Opponent.GetMovesForTurn(turn, StagedLaneHasCard);
-
 				coroutine = this.StartCoroutine(OpponentStageCardsCoroutine(moves));
 				break;
 
@@ -215,6 +214,7 @@ public partial class GameBoard : Node2D
 	{
 		foreach (PlayedCard move in moves)
 		{
+			GD.Print($"Playing card {move.Card.Name} in lane {move.Lane}");
 			yield return new CoroutineDelay(0.5f);
 			InstantiateCardInLane(move.Card, move.Lane);
 		}
@@ -251,23 +251,25 @@ public partial class GameBoard : Node2D
 
 			if (enemyCard != null)
 			{
+				enemyCard.ZIndex = 10;
 				int damage = enemyCard.CardInfo.Attack;
 				Vector2 startPosition = enemyCard.GlobalPosition;
 				if (playerCard != null)
 				{
 					yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.05f));
-					GD.Print($"Dealed {damage} damage to {playerCard.CardInfo.Name}!");
+					GD.Print($"Dealt {damage} damage to {playerCard.CardInfo.Name}!");
 					playerCard.DealDamage(damage);
 				}
 				else
 				{
 					yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.05f));
-					GD.Print($"Dealed {damage} damage to the player!");
+					GD.Print($"Dealt {damage} damage to the player!");
 					// TODO: Swing at the enemy
 				}
 
 				yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(startPosition, 0.1f));
 				yield return new CoroutineDelay(0.5);
+				enemyCard.ZIndex = 0;
 			}
 		}
 
@@ -286,23 +288,26 @@ public partial class GameBoard : Node2D
 
 			if (playerCard != null)
 			{
+				playerCard.ZIndex = 10;
+
 				int damage = playerCard.CardInfo.Attack;
 				Vector2 startPosition = playerCard.GlobalPosition;
 				if (enemyCard != null)
 				{
 					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.05f));
-					GD.Print($"Dealed {damage} damage to {enemyCard.CardInfo.Name}!");
+					GD.Print($"Dealt {damage} damage to {enemyCard.CardInfo.Name}!");
 					enemyCard.DealDamage(damage);
 				}
 				else
 				{
 					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.05f));
-					GD.Print($"Dealed {damage} damage to the enemy!");
+					GD.Print($"Dealt {damage} damage to the enemy!");
 					// TODO: Swing at the enemy
 				}
 
 				yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(startPosition, 0.1f));
 				yield return new CoroutineDelay(0.5);
+				playerCard.ZIndex = 0;
 			}
 		}
 

@@ -185,7 +185,7 @@ layout_mode = 2
 
 [node name="TurnLabel" type="Label" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 22
 text = "Your Turn"
 horizontal_alignment = 1
 text_overrun_behavior = 1
