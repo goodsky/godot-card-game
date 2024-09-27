@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=24 format=3 uid="uid://cdq0smiv61oi3"]
 
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_q2hu1"]
 [ext_resource type="Script" path="res://scenes/game/ActiveCardState.cs" id="2_r04wx"]
@@ -19,6 +19,8 @@
 [ext_resource type="Texture2D" uid="uid://doyxve2lksbnp" path="res://assets/sprites/health-bar-marker.png" id="17_eitku"]
 [ext_resource type="FontFile" uid="uid://t6imccqawqn2" path="res://assets/fonts/ArchitectsDaughter32.tres" id="18_ueumr"]
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="19_vnx7p"]
+[ext_resource type="FontFile" uid="uid://bj3go1bjn5g4" path="res://assets/fonts/Poco.tres" id="20_3x75k"]
+[ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="21_m7n3t"]
 
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
@@ -43,15 +45,16 @@ HealthBar = NodePath("HealthBar")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("2_r04wx")
 
-[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayCostPanel", "PayBloodCostIcons")]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayCostPanel", "PayBloodCostIcons", "GameOverPanel")]
 script = ExtResource("3_20nsl")
 Lane0 = [NodePath("PlayArea1"), NodePath("PlayArea5"), NodePath("PlayArea9")]
 Lane1 = [NodePath("PlayArea2"), NodePath("PlayArea6"), NodePath("PlayArea10")]
 Lane2 = [NodePath("PlayArea3"), NodePath("PlayArea7"), NodePath("PlayArea11")]
 Lane3 = [NodePath("PlayArea4"), NodePath("PlayArea8"), NodePath("PlayArea12")]
 Background = NodePath("Background")
-PayCostPanel = NodePath("../PayCost")
-PayBloodCostIcons = [NodePath("../PayCost/VFlowContainer/HFlowContainer/BloodCost1"), NodePath("../PayCost/VFlowContainer/HFlowContainer/BloodCost2"), NodePath("../PayCost/VFlowContainer/HFlowContainer/BloodCost3")]
+PayCostPanel = NodePath("../PopUps/PayCost")
+PayBloodCostIcons = [NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost1"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost2"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost3")]
+GameOverPanel = NodePath("../PopUps/GameOver")
 
 [node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("4_ms6pg")
@@ -227,9 +230,15 @@ z_index = 5
 position = Vector2(12.5, 225)
 texture = ExtResource("17_eitku")
 
-[node name="PayCost" type="PanelContainer" parent="."]
+[node name="PopUps" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+
+[node name="PayCost" type="PanelContainer" parent="PopUps"]
 visible = false
+z_index = 5
 custom_minimum_size = Vector2(450, 200)
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -243,12 +252,12 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_tlekj")
 
-[node name="VFlowContainer" type="VFlowContainer" parent="PayCost"]
+[node name="VFlowContainer" type="VFlowContainer" parent="PopUps/PayCost"]
 layout_mode = 2
 size_flags_horizontal = 4
 alignment = 1
 
-[node name="Title" type="Label" parent="PayCost/VFlowContainer"]
+[node name="Title" type="Label" parent="PopUps/PayCost/VFlowContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("18_ueumr")
@@ -256,7 +265,7 @@ theme_override_font_sizes/font_size = 36
 text = "Pay the Card Cost"
 horizontal_alignment = 1
 
-[node name="Subtitle" type="Label" parent="PayCost/VFlowContainer"]
+[node name="Subtitle" type="Label" parent="PopUps/PayCost/VFlowContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_fonts/font = ExtResource("18_ueumr")
@@ -264,27 +273,71 @@ theme_override_font_sizes/font_size = 16
 text = "Select the Cards to Sacrifice"
 horizontal_alignment = 1
 
-[node name="HFlowContainer" type="HFlowContainer" parent="PayCost/VFlowContainer"]
+[node name="HFlowContainer" type="HFlowContainer" parent="PopUps/PayCost/VFlowContainer"]
 layout_mode = 2
 alignment = 1
 
-[node name="BloodCost1" type="TextureRect" parent="PayCost/VFlowContainer/HFlowContainer"]
+[node name="BloodCost1" type="TextureRect" parent="PopUps/PayCost/VFlowContainer/HFlowContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 texture = ExtResource("19_vnx7p")
 expand_mode = 2
 
-[node name="BloodCost2" type="TextureRect" parent="PayCost/VFlowContainer/HFlowContainer"]
+[node name="BloodCost2" type="TextureRect" parent="PopUps/PayCost/VFlowContainer/HFlowContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 texture = ExtResource("19_vnx7p")
 expand_mode = 2
 
-[node name="BloodCost3" type="TextureRect" parent="PayCost/VFlowContainer/HFlowContainer"]
+[node name="BloodCost3" type="TextureRect" parent="PopUps/PayCost/VFlowContainer/HFlowContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 texture = ExtResource("19_vnx7p")
 expand_mode = 2
+
+[node name="GameOver" type="PanelContainer" parent="PopUps"]
+visible = false
+z_index = 5
+custom_minimum_size = Vector2(450, 200)
+layout_mode = 2
+offset_left = 31.0
+offset_top = 42.0
+offset_right = 541.0
+offset_bottom = 269.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_tlekj")
+
+[node name="VFlowContainer" type="VFlowContainer" parent="PopUps/GameOver"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_constants/v_separation = 8
+alignment = 1
+
+[node name="Title" type="Label" parent="PopUps/GameOver/VFlowContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("20_3x75k")
+theme_override_font_sizes/font_size = 86
+text = "You Win!"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="PopUps/GameOver/VFlowContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("20_3x75k")
+theme_override_font_sizes/font_size = 24
+text = "Shall we play again?"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="PopUps/GameOver/VFlowContainer"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("21_m7n3t")
+text = "Main Menu"
 
 [connection signal="OnStateTransition" from="." to="GameBoard" method="OnGameStateTransition"]
 [connection signal="OnStateTransition" from="." to="HandArea/Hand" method="OnGameStateTransition"]
@@ -299,3 +352,4 @@ expand_mode = 2
 [connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseEntered_EndTurnButton"]
 [connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseExited_ResetInfo"]
 [connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="." method="EndTurn"]
+[connection signal="pressed" from="PopUps/GameOver/VFlowContainer/Button" to="." method="Click_MainMenu"]

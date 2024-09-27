@@ -2,7 +2,6 @@ using Godot;
 using System;
 using System.Collections;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 /**
@@ -18,6 +17,7 @@ public enum GameState
 	EnemyPlayCard,
 	EnemyCombat,
 	EnemyStageCard,
+	GameOver,
 	IsaacMode,
 }
 
@@ -57,6 +57,11 @@ public partial class MainGame : Node2D
 	public override void _Ready()
 	{
 		InitializeGame();
+	}
+
+	public void Click_MainMenu()
+	{
+		SceneLoader.Instance.LoadMainMenu();
 	}
 
 	public void DrawCardFromDeck()
@@ -122,6 +127,9 @@ public partial class MainGame : Node2D
 				TransitionToState(GameState.PlayCard);
 				break;
 
+			case GameState.GameOver:
+				break;
+
 			default:
 				throw new StateMachineException(nameof(CardCostPaid), CurrentState);
 		}
@@ -135,6 +143,9 @@ public partial class MainGame : Node2D
 				TransitionToState(GameState.PlayerCombat);
 				break;
 
+			case GameState.GameOver:
+				break;
+
 			default:
 				throw new StateMachineException(nameof(EndTurn), CurrentState);
 		}
@@ -146,6 +157,9 @@ public partial class MainGame : Node2D
 		{
 			case GameState.PlayerCombat:
 				TransitionToState(GameState.EnemyPlayCard);
+				break;
+
+			case GameState.GameOver:
 				break;
 
 			default:
@@ -162,6 +176,9 @@ public partial class MainGame : Node2D
 				TransitionToState(GameState.DrawCard);
 				break;
 
+			case GameState.GameOver:
+				break;
+
 			default:
 				throw new StateMachineException(nameof(OpponentDoneStagingCards), CurrentState);
 		}
@@ -173,6 +190,9 @@ public partial class MainGame : Node2D
 		{
 			case GameState.EnemyPlayCard:
 				TransitionToState(GameState.EnemyCombat);
+				break;
+
+			case GameState.GameOver:
 				break;
 
 			default:
@@ -188,9 +208,17 @@ public partial class MainGame : Node2D
 				TransitionToState(GameState.EnemyStageCard);
 				break;
 
+			case GameState.GameOver:
+				break;
+
 			default:
 				throw new StateMachineException(nameof(EndOpponentCombat), CurrentState);
 		}
+	}
+
+	public void GameOver()
+	{
+		TransitionToState(GameState.GameOver);
 	}
 
 	private async void InitializeGame()
@@ -250,7 +278,14 @@ public partial class MainGame : Node2D
 	{
 		if (CurrentState == GameState.IsaacMode)
 		{
-			GD.Print($"Embrace the Isaac mode! Cannot transition to {nextState}");
+			GD.Print($"Embrace the Isaac mode! Cannot transition to {nextState}.");
+			return;
+		}
+
+		if (CurrentState == GameState.GameOver)
+		{
+			GD.Print($"Game is over. Skipping transition to {nextState}.");
+			return;
 		}
 
 		GD.Print($"State Transition: {CurrentState} -> {nextState}");

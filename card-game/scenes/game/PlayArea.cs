@@ -31,9 +31,13 @@ public partial class PlayArea : CardDrop
 
 	public override bool CanDropCard(Card card)
 	{
-		if (MainGame.Instance.CurrentState == GameState.IsaacMode) return base.CanDropCard(card);
+		if (MainGame.Instance.CurrentState == GameState.PlayCard ||
+			MainGame.Instance.CurrentState == GameState.PlayCard_PayPrice)
+		{
+			return MainGame.Instance.Board.CanPlayCardAtLocation(card, this);
+		}
 
-		return MainGame.Instance.Board.CanPlayCardAtLocation(card, this);
+		return base.CanDropCard(card);
 	}
 
 	public override bool TryAddCard(Card card, Vector2? globalPosition)

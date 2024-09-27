@@ -58,7 +58,7 @@ public static class NodeExtensions
         }
     }
 
-    public static IEnumerable LerpPositionCoroutine(this Node2D node, Vector2 target, float speed)
+    public static IEnumerable LerpGlobalPositionCoroutine(this Node2D node, Vector2 target, float speed)
     {
         Card card = node as Card;
         card?.SetAnimationControl(true);

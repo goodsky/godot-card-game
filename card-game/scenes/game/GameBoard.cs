@@ -36,6 +36,9 @@ public partial class GameBoard : Node2D
 	[Export]
 	public CanvasItem[] PayBloodCostIcons { get; set; }
 
+	[Export]
+	public CanvasItem GameOverPanel { get; set; }
+
 	public int PlayerCardCount => PlayerLanes.Sum(lane => lane.CardCount > 0 ? 1 : 0);
 
 	public override void _Input(InputEvent inputEvent)
@@ -87,7 +90,7 @@ public partial class GameBoard : Node2D
 					GD.PushError($"[UnexpectedState] Transitioned to PayPrice without a StagedCard.");
 					break;
 				}
-				InitializePayThePrice(stagedCard.CardInfo.BloodCost);
+				PopUpPayThePricePanel(stagedCard.CardInfo.BloodCost);
 				break;
 
 			case GameState.PlayerCombat:
@@ -108,6 +111,11 @@ public partial class GameBoard : Node2D
 				coroutine = this.StartCoroutine(OpponentStageCardsCoroutine(moves));
 				break;
 
+			case GameState.GameOver:
+				bool playerWon = MainGame.Instance.HealthBar.PlayerPoints > 0;
+				PopUpGameOverPanel(playerWon);
+				break;
+
 			default:
 				DisableLanes();
 				break;
@@ -125,7 +133,7 @@ public partial class GameBoard : Node2D
 		return canAfford && (isEmptyPlayArea || isSacrificablePlayArea);
 	}
 
-	private void InitializePayThePrice(CardBloodCost cost)
+	private void PopUpPayThePricePanel(CardBloodCost cost)
 	{
 		PayCostPanel.Visible = true;
 		for (int i = 0; i < PayBloodCostIcons.Length; i++)
@@ -143,6 +151,22 @@ public partial class GameBoard : Node2D
 				_sacrificeCallbacks[laneCard] = callbacks;
 				callbacks.AddCallbacks();
 			}
+		}
+	}
+
+	private void PopUpGameOverPanel(bool playerWon)
+	{
+		GameOverPanel.Visible = true;
+		Label title = GameOverPanel.FindChild("Title") as Label;
+		if (playerWon)
+		{
+			title.Text = "You Win!";
+			title.AddThemeColorOverride("font_color", Colors.ForestGreen);
+		}
+		else
+		{
+			title.Text = "You Lose";
+			title.AddThemeColorOverride("font_color", Colors.DarkRed);
 		}
 	}
 
@@ -256,18 +280,18 @@ public partial class GameBoard : Node2D
 				Vector2 startPosition = enemyCard.GlobalPosition;
 				if (playerCard != null)
 				{
-					yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.05f));
+					yield return this.StartCoroutine(enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.05f));
 					GD.Print($"Dealt {damage} damage to {playerCard.CardInfo.Name}!");
 					playerCard.DealDamage(damage);
 				}
 				else
 				{
-					yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.05f));
+					yield return this.StartCoroutine(enemyCard.LerpGlobalPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.05f));
 					GD.Print($"Dealt {damage} damage to the player!");
-					// TODO: Swing at the enemy
+					yield return MainGame.Instance.HealthBar.PlayerTakeDamage(damage);
 				}
 
-				yield return this.StartCoroutine(enemyCard.LerpPositionCoroutine(startPosition, 0.1f));
+				yield return this.StartCoroutine(enemyCard.LerpGlobalPositionCoroutine(startPosition, 0.1f));
 				yield return new CoroutineDelay(0.5);
 				enemyCard.ZIndex = 0;
 			}
@@ -294,18 +318,18 @@ public partial class GameBoard : Node2D
 				Vector2 startPosition = playerCard.GlobalPosition;
 				if (enemyCard != null)
 				{
-					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.05f));
+					yield return this.StartCoroutine(playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.05f));
 					GD.Print($"Dealt {damage} damage to {enemyCard.CardInfo.Name}!");
 					enemyCard.DealDamage(damage);
 				}
 				else
 				{
-					yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.05f));
+					yield return this.StartCoroutine(playerCard.LerpGlobalPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.05f));
 					GD.Print($"Dealt {damage} damage to the enemy!");
-					// TODO: Swing at the enemy
+					yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
 				}
 
-				yield return this.StartCoroutine(playerCard.LerpPositionCoroutine(startPosition, 0.1f));
+				yield return this.StartCoroutine(playerCard.LerpGlobalPositionCoroutine(startPosition, 0.1f));
 				yield return new CoroutineDelay(0.5);
 				playerCard.ZIndex = 0;
 			}

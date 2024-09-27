@@ -10,7 +10,7 @@ public partial class Hand : CardDrop
 	private bool _hasGhostCard = false;
 	private Dictionary<Card, HandCardCallbacks> _cardCallbacks = new Dictionary<Card, HandCardCallbacks>();
 
-	private bool CanReorderCards => MainGame.Instance.CurrentState != GameState.PlayCard_PayPrice;
+	private bool CanReorderCards => MainGame.Instance.CurrentState != GameState.PlayCard_PayPrice && MainGame.Instance.CurrentState != GameState.GameOver;
 	private bool CanPlayCards => MainGame.Instance.CurrentState == GameState.PlayCard || MainGame.Instance.CurrentState == GameState.IsaacMode;
 
 	[Export]
