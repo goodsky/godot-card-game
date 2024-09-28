@@ -45,7 +45,7 @@ HealthBar = NodePath("HealthBar")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("2_r04wx")
 
-[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayCostPanel", "PayBloodCostIcons", "GameOverPanel")]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayCostPanel", "PayBloodCostIcons")]
 script = ExtResource("3_20nsl")
 Lane0 = [NodePath("PlayArea1"), NodePath("PlayArea5"), NodePath("PlayArea9")]
 Lane1 = [NodePath("PlayArea2"), NodePath("PlayArea6"), NodePath("PlayArea10")]
@@ -54,7 +54,6 @@ Lane3 = [NodePath("PlayArea4"), NodePath("PlayArea8"), NodePath("PlayArea12")]
 Background = NodePath("Background")
 PayCostPanel = NodePath("../PopUps/PayCost")
 PayBloodCostIcons = [NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost1"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost2"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost3")]
-GameOverPanel = NodePath("../PopUps/GameOver")
 
 [node name="Background" type="Node2D" parent="GameBoard"]
 script = ExtResource("4_ms6pg")

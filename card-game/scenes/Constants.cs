@@ -14,10 +14,9 @@ public static class Constants
 
 	public static readonly string ErrorAvatarPath = "res://assets/sprites/avatars/avatar_blue_monster_00.jpeg";
 
-	public static readonly Texture2D[] CardAvatars = new Texture2D[]
+	public static class Audio
 	{
-		ResourceLoader.Load<CompressedTexture2D>("res://assets/sprites/avatars/avatar_blue_monster_00.jpeg"),
-		ResourceLoader.Load<CompressedTexture2D>("res://assets/sprites/avatars/avatar_blue_monster_01.jpeg"),
-		ResourceLoader.Load<CompressedTexture2D>("res://assets/sprites/avatars/avatar_blue_monster_02.jpeg"),
-	};
+		public static readonly AudioStream CardsShuffle = GD.Load<AudioStream>("res://assets/audio/cards-shuffle.mp3");
+		public static readonly AudioStream HoverSnap = GD.Load<AudioStream>("res://assets/audio/click-balloon-snap.mp3");
+	}
 }

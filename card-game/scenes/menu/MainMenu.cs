@@ -79,6 +79,16 @@ public partial class MainMenu : Control
 		GetTree().Quit();
 	}
 
+	public void HoverOver_Sound()
+	{
+		AudioManager.Instance.Play(Constants.Audio.HoverSnap, pitch: 1.0f);
+	}
+
+	public void HoverOut_Sound()
+	{
+		AudioManager.Instance.Play(Constants.Audio.HoverSnap, pitch: 0.8f);
+	}
+
 	private void OpenMainDialog()
 	{
 		SelectCards.Visible = false;

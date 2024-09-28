@@ -10,13 +10,13 @@
 [ext_resource type="Script" path="res://scenes/game/InfoArea.cs" id="5_sd7tc"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xci7l"]
-bg_color = Color(0.360784, 0.67451, 0.0705882, 1)
+bg_color = Color(0.0784314, 0.592157, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pi0m1"]
-bg_color = Color(0.643137, 0.878431, 0.423529, 1)
+bg_color = Color(0.513726, 0.843137, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e271m"]
-bg_color = Color(0, 0.67451, 0.0705882, 1)
+bg_color = Color(0, 0.505882, 0.996078, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi54p"]
 bg_color = Color(0.85098, 0.690196, 0.168627, 1)
@@ -177,5 +177,5 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_a6pfy")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cmdlw")
 text = "Clear Cards"
 
-[connection signal="pressed" from="DrawCardButton" to="." method="Debug_DrawCard"]
-[connection signal="pressed" from="ResetButton" to="." method="Debug_ClearCards"]
+[connection signal="pressed" from="DrawCardButton" to="." method="Isaac_DrawCard"]
+[connection signal="pressed" from="ResetButton" to="." method="Isaac_ClearCards"]

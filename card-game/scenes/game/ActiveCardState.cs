@@ -70,6 +70,11 @@ public partial class ActiveCardState : Node2D
 		{
 			card.HomeCardDrop = null;
 		}
+
+		if (MainGame.Instance.CurrentState == GameState.IsaacMode)
+		{
+			MainGame.Instance.Isaac_CheckCards();
+		}
 	}
 
 	public void SelectCard(Card card)

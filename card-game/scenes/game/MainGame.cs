@@ -223,14 +223,15 @@ public partial class MainGame : Node2D
 
 	private async void InitializeGame()
 	{
+		AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: 1.0f);
+		await this.Delay(0.5f);
+
 		if (IsaacMode)
 		{
 			TransitionToState(GameState.IsaacMode);
-			Task t = this.StartCoroutine(Debug_TestCoroutine());
-
 			for (int i = 0; i < 3; i++)
 			{
-				Debug_DrawCard();
+				Isaac_DrawCard();
 			}
 
 			return;
@@ -310,7 +311,7 @@ public partial class MainGame : Node2D
 	}
 
 	/** Isaac Mode! (and other miscellaneous manual test routines) */
-	public void Debug_DrawCard()
+	public void Isaac_DrawCard()
 	{
 		var blueMonsterAvatars = new[] {
 			"res://assets/sprites/avatars/avatar_blue_monster_00.jpeg",
@@ -335,7 +336,7 @@ public partial class MainGame : Node2D
 		GD.Print($"Drawing card {blueMonsterCard.Name}");
 	}
 
-	public void Debug_ClearCards()
+	public void Isaac_ClearCards()
 	{
 		var debugCards = GetTree().GetNodesInGroup("DebugCard");
 		foreach (var card in debugCards)
@@ -345,30 +346,24 @@ public partial class MainGame : Node2D
 		}
 	}
 
-	private IEnumerable Debug_TestCoroutine()
+	public void Isaac_CheckCards()
 	{
-		GD.Print("Testing the coroutine!");
-		yield return new CoroutineDelay(2.0);
-		GD.Print("I waited 2 seconds!");
-		yield return null;
-		GD.Print("And that time I didn't wait at all!");
-		for (int i = 10; i > 0; i--)
+		PlayArea[] allAreas = Board.FindChildren("PlayArea*").Select(x => x as PlayArea).Where(x => x != null).ToArray();
+		bool isAllFull = allAreas.All(playArea => playArea.CardCount > 0);
+		foreach (var playArea in allAreas)
 		{
-			GD.Print($"{i}...");
-			yield return new CoroutineDelay(0.2);
+			foreach (var card in playArea.GetChildCards())
+			{
+				if (isAllFull)
+				{
+					card.StartShaking();
+				}
+				else
+				{
+					card.StopShaking();
+				}
+			}		
 		}
-
-		GD.Print("Blastoff!");
-		yield return new CoroutineDelay(5);
-		GD.Print("Get ready for a big one...");
-		yield return new CoroutineDelay(1);
-		for (int i = 100; i > 0; i--)
-		{
-			GD.Print($"{i}...!");
-			yield return null;
-		}
-
-		GD.Print("Okay I'm done! Bye!");
 	}
 	/** END Isaac Mode! */
 }
