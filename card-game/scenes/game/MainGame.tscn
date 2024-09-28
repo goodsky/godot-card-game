@@ -45,7 +45,7 @@ HealthBar = NodePath("HealthBar")
 [node name="CardManager" type="Node2D" parent="."]
 script = ExtResource("2_r04wx")
 
-[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayCostPanel", "PayBloodCostIcons")]
+[node name="GameBoard" type="Node2D" parent="." node_paths=PackedStringArray("Lane0", "Lane1", "Lane2", "Lane3", "Background", "PayCostPanel", "PayBloodCostIcons", "GameOverPanel")]
 script = ExtResource("3_20nsl")
 Lane0 = [NodePath("PlayArea1"), NodePath("PlayArea5"), NodePath("PlayArea9")]
 Lane1 = [NodePath("PlayArea2"), NodePath("PlayArea6"), NodePath("PlayArea10")]
@@ -54,65 +54,79 @@ Lane3 = [NodePath("PlayArea4"), NodePath("PlayArea8"), NodePath("PlayArea12")]
 Background = NodePath("Background")
 PayCostPanel = NodePath("../PopUps/PayCost")
 PayBloodCostIcons = [NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost1"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost2"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost3")]
+GameOverPanel = NodePath("../PopUps/GameOver")
 
 [node name="Background" type="Node2D" parent="GameBoard"]
+z_index = -1
 script = ExtResource("4_ms6pg")
 Size = Vector2(600, 450)
 Color = Color(0.835294, 0.894118, 0.992157, 1)
 
 [node name="PlayArea1" parent="GameBoard" instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(84, 365)
 SupportsDrop = false
 
 [node name="PlayArea2" parent="GameBoard" instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(219, 365)
 SupportsDrop = false
 
 [node name="PlayArea3" parent="GameBoard" instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(353, 365)
 SupportsDrop = false
 
 [node name="PlayArea4" parent="GameBoard" instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(488, 365)
 SupportsDrop = false
 
 [node name="PlayArea5" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(84, 215)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea6" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(219, 215)
 SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea7" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(353, 215)
 SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea8" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(488, 215)
 SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
 
 [node name="PlayArea9" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(84, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea10" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(219, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea11" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(353, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea12" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
+z_index = -1
 position = Vector2(488, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
@@ -126,6 +140,7 @@ centered = false
 position = Vector2(300, 75)
 
 [node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "TurnLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton", "EndTurnButton")]
+z_index = -1
 position = Vector2(698, 300)
 texture = ExtResource("8_0ceje")
 script = ExtResource("9_5mu18")
@@ -217,6 +232,7 @@ theme = SubResource("Theme_1ly1u")
 text = "End Turn"
 
 [node name="HealthBar" type="Sprite2D" parent="." node_paths=PackedStringArray("Marker")]
+z_index = -1
 position = Vector2(572, 0)
 texture = ExtResource("14_btrdn")
 centered = false

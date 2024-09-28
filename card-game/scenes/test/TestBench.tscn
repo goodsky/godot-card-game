@@ -28,10 +28,17 @@ placeholder_text = "Pitch Scale"
 layout_mode = 2
 max_value = 1.0
 step = 0.01
+value = 0.5
 
-[node name="Button" type="Button" parent="Control/Buttons"]
-custom_minimum_size = Vector2(0, 64)
+[node name="PlaySoundButton" type="Button" parent="Control/Buttons"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Play Sound"
 
-[connection signal="pressed" from="Control/Buttons/Button" to="." method="Click_PlaySound"]
+[node name="PlayMultipleButton" type="Button" parent="Control/Buttons"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Play Sound x3"
+
+[connection signal="pressed" from="Control/Buttons/PlaySoundButton" to="." method="Click_PlaySound"]
+[connection signal="pressed" from="Control/Buttons/PlayMultipleButton" to="." method="Click_PlayManySounds"]

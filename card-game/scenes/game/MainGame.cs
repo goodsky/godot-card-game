@@ -56,7 +56,7 @@ public partial class MainGame : Node2D
 
 	public override void _Ready()
 	{
-		InitializeGame();
+		this.StartCoroutine(InitializeGameCoroutine());
 	}
 
 	public void Click_MainMenu()
@@ -221,60 +221,6 @@ public partial class MainGame : Node2D
 		TransitionToState(GameState.GameOver);
 	}
 
-	private async void InitializeGame()
-	{
-		AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: 1.0f);
-		await this.Delay(0.5f);
-
-		if (IsaacMode)
-		{
-			TransitionToState(GameState.IsaacMode);
-			for (int i = 0; i < 3; i++)
-			{
-				Isaac_DrawCard();
-			}
-
-			return;
-		}
-
-		if (Creatures == null)
-		{
-			GD.PushError("No Deck set! Initializing to the Starter Deck.");
-
-			// TODO: Load a deck instead of the whole card pool
-			var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
-			var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
-			var creatureCards = cardPool.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
-			Sacrifices = new Deck(sacrificeCards, "Sacrifices");
-			Creatures = new Deck(creatureCards, "Creatures");
-
-			var moves = new ScriptedMove[] {
-				new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),
-				new ScriptedMove(1, CardBloodCost.One, CardRarity.Common),
-				new ScriptedMove(3, CardBloodCost.Two),
-				new ScriptedMove(4, CardBloodCost.Two),
-				new ScriptedMove(4, CardBloodCost.Two),
-				new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
-			};
-			Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves);
-		}
-
-		CurrentTurn = 0;
-
-		const int StartingHandSize = 3;
-		await this.Delay(0.200);
-
-		for (int i = 0; i < StartingHandSize; i++)
-		{
-			var drawnCardInfo = Creatures.DrawFromTop();
-			InstantiateCardInHand(drawnCardInfo);
-
-			await this.Delay(0.234);
-		}
-
-		TransitionToState(GameState.EnemyStageCard);
-	}
-
 	private void TransitionToState(GameState nextState)
 	{
 		if (CurrentState == GameState.IsaacMode)
@@ -308,6 +254,57 @@ public partial class MainGame : Node2D
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
 
 		return card;
+	}
+
+	private IEnumerable InitializeGameCoroutine()
+	{
+		yield return AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: 1.25f, volume: .9f);
+
+		if (IsaacMode)
+		{
+			TransitionToState(GameState.IsaacMode);
+			for (int i = 0; i < 3; i++)
+			{
+				Isaac_DrawCard();
+				yield return new CoroutineDelay(0.25f);
+			}
+		}
+		else
+		{
+			const int StartingHandSize = 3;
+			CurrentTurn = 0;
+
+			if (Creatures == null)
+			{
+				GD.PushError("No Deck set! Initializing to the Starter Deck.");
+
+				// TODO: Load a deck instead of the whole card pool
+				var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
+				var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
+				var creatureCards = cardPool.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
+				Sacrifices = new Deck(sacrificeCards, "Sacrifices");
+				Creatures = new Deck(creatureCards, "Creatures");
+
+				var moves = new ScriptedMove[] {
+					new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),
+					new ScriptedMove(1, CardBloodCost.One, CardRarity.Common),
+					new ScriptedMove(3, CardBloodCost.Two),
+					new ScriptedMove(4, CardBloodCost.Two),
+					new ScriptedMove(4, CardBloodCost.Two),
+					new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
+				};
+				Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves);
+			}
+
+			for (int i = 0; i < StartingHandSize; i++)
+			{
+				var drawnCardInfo = Creatures.DrawFromTop();
+				InstantiateCardInHand(drawnCardInfo);
+				yield return new CoroutineDelay(0.234f);
+			}
+
+			TransitionToState(GameState.EnemyStageCard);
+		}
 	}
 
 	/** Isaac Mode! (and other miscellaneous manual test routines) */

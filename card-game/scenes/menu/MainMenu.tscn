@@ -146,14 +146,8 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_wbibi")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lfn0t")
 text = "Cancel"
 
-[connection signal="mouse_entered" from="CenterContainer/MainButtonsBox/BuildCardsButton" to="." method="HoverOver_Sound"]
-[connection signal="mouse_exited" from="CenterContainer/MainButtonsBox/BuildCardsButton" to="." method="HoverOut_Sound"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/BuildCardsButton" to="." method="Click_BuildADeck"]
-[connection signal="mouse_entered" from="CenterContainer/MainButtonsBox/PlayGameButton" to="." method="HoverOver_Sound"]
-[connection signal="mouse_exited" from="CenterContainer/MainButtonsBox/PlayGameButton" to="." method="HoverOut_Sound"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/PlayGameButton" to="." method="Click_PlayGame"]
-[connection signal="mouse_entered" from="CenterContainer/MainButtonsBox/ExitGameButton" to="." method="HoverOver_Sound"]
-[connection signal="mouse_exited" from="CenterContainer/MainButtonsBox/ExitGameButton" to="." method="HoverOut_Sound"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/ExitGameButton" to="." method="Click_Quit"]
 [connection signal="item_selected" from="CenterContainer/SelectCardsBox/ItemList" to="." method="Click_DeckListItem"]
 [connection signal="pressed" from="CenterContainer/SelectCardsBox/StartGameButton" to="." method="Click_StartGame"]

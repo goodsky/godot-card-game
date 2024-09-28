@@ -28,6 +28,20 @@ public partial class TestBench : Node2D
 		AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: pitchScale, volume: volume);
 	}
 
+	public void Click_PlayManySounds()
+	{
+		this.StartCoroutine(Debug_PlaySoundCoroutine());
+	}
+
+	private IEnumerable Debug_PlaySoundCoroutine()
+	{
+		yield return AudioManager.Instance.Play(Constants.Audio.CardsShuffle);
+		yield return new CoroutineDelay(1.0);
+		yield return AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: 0.5f);
+		yield return new CoroutineDelay(1.0);
+		yield return AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: 1.25f);
+	}
+
 	private IEnumerable Debug_TestCoroutine()
 	{
 		GD.Print("Testing the coroutine!");

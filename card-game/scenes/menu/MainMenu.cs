@@ -15,6 +15,12 @@ public partial class MainMenu : Control
 
 	public override void _Ready()
 	{
+		Button[] allButtons = FindChildren("*Button").Select(x => x as Button).Where(x => x != null).ToArray();
+		foreach (Button button in allButtons)
+		{
+			button.MouseEntered += () => HoverOverButton(button);
+		}
+
 		if (OS.IsDebugBuild())
 		{
 			GameLoader.Debug_TestEndToEnd();
@@ -79,14 +85,12 @@ public partial class MainMenu : Control
 		GetTree().Quit();
 	}
 
-	public void HoverOver_Sound()
+	public void HoverOverButton(Button button)
 	{
-		AudioManager.Instance.Play(Constants.Audio.HoverSnap, pitch: 1.0f);
-	}
-
-	public void HoverOut_Sound()
-	{
-		AudioManager.Instance.Play(Constants.Audio.HoverSnap, pitch: 0.8f);
+		if (!button.Disabled)
+		{
+			AudioManager.Instance.Play(Constants.Audio.HoverSnap, pitch: 1.0f, volume: 0.5f);
+		}
 	}
 
 	private void OpenMainDialog()

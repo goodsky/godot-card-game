@@ -15,6 +15,7 @@
 size = Vector2(100, 130)
 
 [node name="Card" type="Node2D" node_paths=PackedStringArray("Background", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel", "Area")]
+z_as_relative = false
 script = ExtResource("1_g252h")
 Background = NodePath("Background")
 Avatar = NodePath("Background/Avatar")
