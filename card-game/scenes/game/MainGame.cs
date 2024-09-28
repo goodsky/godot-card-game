@@ -71,7 +71,7 @@ public partial class MainGame : Node2D
 		{
 			case GameState.DrawCard:
 				var drawnCardInfo = Creatures.DrawFromTop();
-				InstantiateCardInHand(drawnCardInfo);
+				InstantiateCardInHand(drawnCardInfo, Hand.GlobalPosition + new Vector2(300, 0));
 				TransitionToState(GameState.PlayCard);
 				break;
 
@@ -88,7 +88,7 @@ public partial class MainGame : Node2D
 		{
 			case GameState.DrawCard:
 				var drawnCardInfo = Sacrifices.DrawFromTop();
-				InstantiateCardInHand(drawnCardInfo);
+				InstantiateCardInHand(drawnCardInfo, Hand.GlobalPosition + new Vector2(300, 0));
 				TransitionToState(GameState.PlayCard);
 				break;
 
@@ -243,12 +243,12 @@ public partial class MainGame : Node2D
 	}
 
 	private static int DrawnCardCount = 0;
-	private Card InstantiateCardInHand(CardInfo cardInfo)
+	private Card InstantiateCardInHand(CardInfo cardInfo, Vector2 deckGlobalPosition)
 	{
 		var card = Constants.CardScene.Instantiate<Card>();
 		string nodeName = cardInfo.Name.Replace(" ", "_");
 		card.Name = $"{nodeName}_{DrawnCardCount++}";
-		card.GlobalPosition = Hand.GlobalPosition + new Vector2(300, 0);
+		card.GlobalPosition = deckGlobalPosition;
 
 		card.SetCardInfo(cardInfo);
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
@@ -296,10 +296,11 @@ public partial class MainGame : Node2D
 				Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves);
 			}
 
+			yield return new CoroutineDelay(0.234f);
 			for (int i = 0; i < StartingHandSize; i++)
 			{
 				var drawnCardInfo = Creatures.DrawFromTop();
-				InstantiateCardInHand(drawnCardInfo);
+				InstantiateCardInHand(drawnCardInfo, Hand.GlobalPosition + new Vector2(250, 65));
 				yield return new CoroutineDelay(0.234f);
 			}
 
@@ -327,7 +328,7 @@ public partial class MainGame : Node2D
 			Rarity = CardRarity.Rare,
 		};
 
-		var card = InstantiateCardInHand(blueMonsterCard);
+		var card = InstantiateCardInHand(blueMonsterCard, Hand.GlobalPosition + new Vector2(250, 65));
 		card.AddToGroup("DebugCard");
 
 		GD.Print($"Drawing card {blueMonsterCard.Name}");

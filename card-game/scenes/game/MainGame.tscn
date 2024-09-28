@@ -25,16 +25,16 @@
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tlekj"]
-bg_color = Color(1, 0.875, 0.75, 1)
+bg_color = Color(1, 0.913725, 0.827451, 1)
 border_width_left = 6
 border_width_top = 2
 border_width_right = 6
 border_width_bottom = 2
 border_color = Color(0.192157, 0.188235, 0.168627, 1)
-corner_radius_top_left = 30
-corner_radius_top_right = 30
-corner_radius_bottom_right = 30
-corner_radius_bottom_left = 30
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
 
 [node name="MainGame" type="Node2D" node_paths=PackedStringArray("Board", "Hand", "HealthBar")]
 script = ExtResource("1_q2hu1")
@@ -52,8 +52,8 @@ Lane1 = [NodePath("PlayArea2"), NodePath("PlayArea6"), NodePath("PlayArea10")]
 Lane2 = [NodePath("PlayArea3"), NodePath("PlayArea7"), NodePath("PlayArea11")]
 Lane3 = [NodePath("PlayArea4"), NodePath("PlayArea8"), NodePath("PlayArea12")]
 Background = NodePath("Background")
-PayCostPanel = NodePath("../PopUps/PayCost")
-PayBloodCostIcons = [NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost1"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost2"), NodePath("../PopUps/PayCost/VFlowContainer/HFlowContainer/BloodCost3")]
+PayCostPanel = NodePath("../PopUps/PayBloodCostSmall")
+PayBloodCostIcons = [NodePath("../PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer/BloodCost1"), NodePath("../PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer/BloodCost2"), NodePath("../PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer/BloodCost3")]
 GameOverPanel = NodePath("../PopUps/GameOver")
 
 [node name="Background" type="Node2D" parent="GameBoard"]
@@ -246,12 +246,12 @@ position = Vector2(12.5, 225)
 texture = ExtResource("17_eitku")
 
 [node name="PopUps" type="Control" parent="."]
+z_index = 11
 layout_mode = 3
 anchors_preset = 0
 
 [node name="PayCost" type="PanelContainer" parent="PopUps"]
 visible = false
-z_index = 5
 custom_minimum_size = Vector2(450, 200)
 layout_mode = 1
 anchors_preset = 15
@@ -310,9 +310,70 @@ layout_mode = 2
 texture = ExtResource("19_vnx7p")
 expand_mode = 2
 
+[node name="PayBloodCostSmall" type="PanelContainer" parent="PopUps"]
+visible = false
+custom_minimum_size = Vector2(515, 64)
+layout_mode = 1
+offset_left = 25.0
+offset_top = 16.0
+offset_right = 540.0
+offset_bottom = 80.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_tlekj")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PopUps/PayBloodCostSmall"]
+layout_mode = 2
+size_flags_vertical = 4
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="PopUps/PayBloodCostSmall/VBoxContainer"]
+layout_mode = 2
+alignment = 1
+
+[node name="MarginContainer" type="MarginContainer" parent="PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = -15
+
+[node name="Title" type="Label" parent="PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.996078, 0.996078, 0.996078, 1)
+theme_override_colors/font_shadow_color = Color(0.596078, 0.596078, 0.596078, 1)
+theme_override_fonts/font = ExtResource("20_3x75k")
+theme_override_font_sizes/font_size = 36
+text = "Pay the Card Cost"
+horizontal_alignment = 1
+
+[node name="BloodCost1" type="TextureRect" parent="PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("19_vnx7p")
+expand_mode = 3
+
+[node name="BloodCost2" type="TextureRect" parent="PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("19_vnx7p")
+expand_mode = 3
+
+[node name="BloodCost3" type="TextureRect" parent="PopUps/PayBloodCostSmall/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+texture = ExtResource("19_vnx7p")
+expand_mode = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="PopUps/PayBloodCostSmall/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/margin_top = -15
+
+[node name="Subtitle" type="Label" parent="PopUps/PayBloodCostSmall/VBoxContainer/MarginContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.619608, 0.619608, 0.619608, 1)
+theme_override_colors/font_shadow_color = Color(0.4, 0.4, 0.4, 1)
+theme_override_fonts/font = ExtResource("20_3x75k")
+theme_override_font_sizes/font_size = 26
+text = "Click cards to sacrifice (Esc to Cancel)"
+horizontal_alignment = 1
+
 [node name="GameOver" type="PanelContainer" parent="PopUps"]
 visible = false
-z_index = 5
 custom_minimum_size = Vector2(450, 200)
 layout_mode = 2
 offset_left = 31.0

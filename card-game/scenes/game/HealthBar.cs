@@ -70,7 +70,7 @@ public partial class HealthBar : Sprite2D
 		{
 			pipIndex += pipDelta;
 			Vector2 pipPosition = new Vector2(Marker.GlobalPosition.X, GlobalPosition.Y + GetPositionForPip(pipIndex));
-			yield return this.StartCoroutine(Marker.LerpGlobalPositionCoroutine(pipPosition, 0.05f));
+			yield return Marker.LerpGlobalPositionCoroutine(pipPosition, 0.05f);
 			yield return new CoroutineDelay(0.2);
 		}
 

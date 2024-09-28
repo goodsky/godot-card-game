@@ -262,15 +262,7 @@ public partial class Card : Node2D
 
 	private IEnumerable KillCoroutine()
 	{
-		if (_isKilled) yield return null;
-
-		Color m = Modulate;
-		for (float a = 1; a >= 0; a -= 0.05f)
-		{
-			m.A = a;
-			Modulate = m;
-			yield return null;
-		}
+		yield return this.FadeTo(0.0f, 0.05f);
 
 		GD.Print($"Card Killed : {Name}");
 		Node parent = GetParent()?.GetParent();

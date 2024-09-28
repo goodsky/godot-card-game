@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +43,11 @@ public static class NodeExtensions
             {
                 await node.Delay(xDelay.TimeSec);
             }
-            if (x is Task xTask)
+            else if (x is IEnumerable xEnumerable)
+            {
+                await StartCoroutineInternal(node, xEnumerable, token);
+            }
+            else if (x is Task xTask)
             {
                 await xTask;
             }
@@ -70,6 +75,25 @@ public static class NodeExtensions
             yield return null;
         }
 
+        node.GlobalPosition = target;
         card?.SetAnimationControl(false);
+    }
+
+    public static IEnumerable FadeTo(this CanvasItem node, float alpha, float speed)
+    {
+        Color nodeColor = node.Modulate;
+        float startA = nodeColor.A;
+        float deltaA = alpha - startA;
+        GD.Print($"Fade {node.Name} from {startA} to {alpha} with speed {speed}.");
+		for (float t = 0.0f; t < 1.0f; t = Mathf.Clamp(t + speed, 0.0f, 1.0f))
+		{
+			nodeColor.A = startA + (t * deltaA);
+			node.Modulate = nodeColor;
+            GD.Print("A = ", nodeColor.A);
+			yield return null;
+		}
+
+        nodeColor.A = alpha;
+        node.Modulate = nodeColor;
     }
 }
