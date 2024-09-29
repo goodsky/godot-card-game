@@ -373,6 +373,7 @@ text = "Click cards to sacrifice (Esc to Cancel)"
 horizontal_alignment = 1
 
 [node name="GameOver" type="PanelContainer" parent="PopUps"]
+visible = false
 custom_minimum_size = Vector2(450, 200)
 layout_mode = 2
 offset_left = 31.0

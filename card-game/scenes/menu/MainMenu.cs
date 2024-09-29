@@ -93,7 +93,7 @@ public partial class MainMenu : Control
 	{
 		if (!button.Disabled)
 		{
-			AudioManager.Instance.Play(Constants.Audio.HoverSnap, pitch: 1.0f, volume: 0.5f);
+			AudioManager.Instance.Play(Constants.Audio.BalloonSnap, pitch: 1.0f, volume: 0.5f);
 		}
 	}
 

@@ -106,18 +106,22 @@ public partial class MainGame : Node2D
 			card.TargetPosition = playArea.GlobalPosition;
 			TransitionToState(GameState.PlayCard);
 
-			AudioManager.Instance.Play(Constants.Audio.PlayCardClick, pitch: AudioManager.TweakPitch());
+			AudioManager.Instance.Play(Constants.Audio.PlayCardClick, tweak: true);
 		}
 		else if (playAreaAlreadyHasCard)
 		{
 			ActiveCardState.Instance.StageCardPendingBloodCost(card, oldHome);
 			TransitionToState(GameState.PlayCard_PayPrice);
 			ActiveCardState.Instance.AddSacrificeCard(playArea.GetChildCards()[0]);
+
+			AudioManager.Instance.Play(Constants.Audio.ProposeCardClick, tweak: true);
 		}
 		else
 		{
 			ActiveCardState.Instance.StageCardPendingBloodCost(card, oldHome);
 			TransitionToState(GameState.PlayCard_PayPrice);
+
+			AudioManager.Instance.Play(Constants.Audio.ProposeCardClick, tweak: true);
 		}
 	}
 
@@ -128,7 +132,7 @@ public partial class MainGame : Node2D
 			case GameState.PlayCard_PayPrice:
 				TransitionToState(GameState.PlayCard);
 
-				AudioManager.Instance.Play(Constants.Audio.PlayCardClick, pitch: AudioManager.TweakPitch());
+				AudioManager.Instance.Play(Constants.Audio.PlayCardClick, tweak: true);
 				break;
 
 			case GameState.GameOver:
@@ -145,6 +149,8 @@ public partial class MainGame : Node2D
 		{
 			case GameState.PlayCard:
 				TransitionToState(GameState.PlayerCombat);
+
+				AudioManager.Instance.Play(Constants.Audio.TurnEnd);
 				break;
 
 			case GameState.GameOver:
@@ -178,6 +184,8 @@ public partial class MainGame : Node2D
 			case GameState.EnemyStageCard:
 				CurrentTurn++;
 				TransitionToState(GameState.DrawCard);
+
+				AudioManager.Instance.Play(Constants.Audio.TurnEnd);
 				break;
 
 			case GameState.GameOver:
@@ -256,7 +264,7 @@ public partial class MainGame : Node2D
 
 		card.SetCardInfo(cardInfo);
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
-		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: AudioManager.TweakPitch());
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, tweak: true);
 
 		return card;
 	}

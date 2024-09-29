@@ -140,6 +140,8 @@ public partial class GameBoard : Node2D
 		PayCostPanel.Visible = true;
 		this.StartCoroutine(PayCostPanel.FadeTo(1f, 0.1f));
 
+		AudioManager.Instance.Play(Constants.Audio.Heartbeat, name: "Heartbeat");
+
 		for (int i = 0; i < PayBloodCostIcons.Length; i++)
 		{
 			PayBloodCostIcons[i].Visible = (i < (int)cost);
@@ -169,6 +171,7 @@ public partial class GameBoard : Node2D
 	private void DisablePayThePrice()
 	{
 		PayCostPanel.Visible = false;
+		AudioManager.Instance.Stop("Heartbeat");
 
 		ActiveCardState.Instance.CancelStagedCard();
 
@@ -299,7 +302,7 @@ public partial class GameBoard : Node2D
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamageCard_Low :
 						Constants.Audio.DamageCard_High;
-					AudioManager.Instance.Play(damageAudio, pitch: AudioManager.TweakPitch());
+					AudioManager.Instance.Play(damageAudio, tweak: true);
 
 					playerCard.DealDamage(damage);
 				}
@@ -311,10 +314,7 @@ public partial class GameBoard : Node2D
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamagePlayer_Low :
 						Constants.Audio.DamagePlayer_High;
-					float damageVolume = damage <= 2 ?
-						0.5f :
-						1.0f;
-					AudioManager.Instance.Play(damageAudio, volume: damageVolume, pitch: AudioManager.TweakPitch());
+					AudioManager.Instance.Play(damageAudio, tweak: true);
 
 					yield return MainGame.Instance.HealthBar.PlayerTakeDamage(damage);
 				}
@@ -353,7 +353,7 @@ public partial class GameBoard : Node2D
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamageCard_Low :
 						Constants.Audio.DamageCard_High;
-					AudioManager.Instance.Play(damageAudio, pitch: AudioManager.TweakPitch());
+					AudioManager.Instance.Play(damageAudio, tweak: true);
 
 					enemyCard.DealDamage(damage);
 				}
@@ -365,10 +365,7 @@ public partial class GameBoard : Node2D
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamagePlayer_Low :
 						Constants.Audio.DamagePlayer_High;
-					float damageVolume = damage <= 2 ?
-						0.5f :
-						1.0f;
-					AudioManager.Instance.Play(damageAudio, volume: damageVolume, pitch: AudioManager.TweakPitch());
+					AudioManager.Instance.Play(damageAudio, tweak: true);
 
 					yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
 				}
@@ -434,6 +431,8 @@ public partial class GameBoard : Node2D
 				_isSelected = true;
 				Card.Modulate = Colors.White;
 				ActiveCardState.Instance.AddSacrificeCard(Card);
+
+				AudioManager.Instance.Play(Constants.Audio.ProposeSacrificeClick, tweak: true);
 			}
 		}
 

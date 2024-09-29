@@ -5,10 +5,9 @@ using Godot;
 
 public partial class AudioManager : Node
 {
-    private static readonly int ChannelCount = 8;
+    private static readonly int ChannelCount = 16;
     private Queue<AudioStreamPlayer> _channels = new Queue<AudioStreamPlayer>();
-    private Dictionary<AudioStreamPlayer, TaskCompletionSource> _activeChannels = new Dictionary<AudioStreamPlayer, TaskCompletionSource>();
-
+    private Dictionary<AudioStreamPlayer, PlayingAudio> _activeChannels = new Dictionary<AudioStreamPlayer, PlayingAudio>();
 
     public static AudioManager Instance { get; private set; }
 
@@ -26,12 +25,20 @@ public partial class AudioManager : Node
         }
     }
 
-    public static float TweakPitch()
+    private static float TweakValue(float min, float max)
     {
-        return 0.95f + ((float)Random.Shared.NextDouble() * 0.10f);
+        // try to make repetetive sounds sound less repetetive
+        float delta = max - min;
+        return min + ((float)Random.Shared.NextDouble() * delta);
     }
 
-    public Task Play(AudioStream audio, string bus = "Master", float pitch = 1.0f, float volume = 1.0f)
+    public Task Play(
+        AudioStream audio,
+        string bus = "Master",
+        float pitch = 1.0f,
+        float volume = 1.0f,
+        string name = null,
+        bool tweak = false)
     {
         if (_channels.Count == 0)
         {
@@ -40,8 +47,13 @@ public partial class AudioManager : Node
         }
 
         AudioStreamPlayer channel = _channels.Dequeue();
-        var task = new TaskCompletionSource();
-        if (!_activeChannels.TryAdd(channel, task))
+        PlayingAudio audioMetadata = new PlayingAudio
+        {
+            Name = name,
+            TaskCompletion = new TaskCompletionSource(),
+        };
+
+        if (!_activeChannels.TryAdd(channel, audioMetadata))
         {
             GD.PushError($"Could not start audio! Failed to add to active channels.");
             _channels.Enqueue(channel);
@@ -50,17 +62,38 @@ public partial class AudioManager : Node
 
         channel.Stream = audio;
         channel.Bus = bus;
+
+        if (tweak)
+        {
+            pitch += TweakValue(-0.1f, 0.1f);
+            volume += TweakValue(-0.05f, 0.05f);
+        }
+
         channel.PitchScale = pitch;
-        channel.VolumeDb = Mathf.LinearToDb(volume) - Mathf.LinearToDb(1.0f);
+        channel.VolumeDb = Mathf.LinearToDb(volume);
+
         channel.Play();
-        return task.Task;
+        return audioMetadata.TaskCompletion.Task;
+    }
+
+    public void Stop(string name)
+    {
+        foreach (var audioKvp in _activeChannels)
+        {
+            PlayingAudio metadata = audioKvp.Value;
+            if (metadata.Name == name)
+            {
+                AudioStreamPlayer player = audioKvp.Key;
+                player.Stop();
+            }
+        }
     }
 
     private void OnStreamFinished(AudioStreamPlayer channel)
     {
-        if (_activeChannels.Remove(channel, out TaskCompletionSource task))
+        if (_activeChannels.Remove(channel, out PlayingAudio metadata))
         {
-            task.SetResult();
+            metadata.TaskCompletion.SetResult();
         }
         else
         {
@@ -68,5 +101,11 @@ public partial class AudioManager : Node
         }
 
         _channels.Enqueue(channel);
+    }
+
+    private struct PlayingAudio
+    {
+        public string Name { get; set; }
+        public TaskCompletionSource TaskCompletion { get; set; }
     }
 }
