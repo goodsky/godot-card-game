@@ -105,6 +105,8 @@ public partial class MainGame : Node2D
 		{
 			card.TargetPosition = playArea.GlobalPosition;
 			TransitionToState(GameState.PlayCard);
+
+			AudioManager.Instance.Play(Constants.Audio.PlayCardClick, pitch: AudioManager.TweakPitch());
 		}
 		else if (playAreaAlreadyHasCard)
 		{
@@ -125,6 +127,8 @@ public partial class MainGame : Node2D
 		{
 			case GameState.PlayCard_PayPrice:
 				TransitionToState(GameState.PlayCard);
+
+				AudioManager.Instance.Play(Constants.Audio.PlayCardClick, pitch: AudioManager.TweakPitch());
 				break;
 
 			case GameState.GameOver:
@@ -252,6 +256,7 @@ public partial class MainGame : Node2D
 
 		card.SetCardInfo(cardInfo);
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: AudioManager.TweakPitch());
 
 		return card;
 	}

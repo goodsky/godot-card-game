@@ -23,7 +23,6 @@ public partial class SceneLoader : Node2D
 		var mainMenu = Constants.MainMenuScene.Instantiate() as MainMenu;
 
 		AddChild(mainMenu);
-		mainMenu.Position = Vector2.Zero;
 	}
 
 	public void LoadMainGame(Deck sacrifices, Deck creatures)

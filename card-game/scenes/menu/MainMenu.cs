@@ -42,6 +42,7 @@ public partial class MainMenu : Control
 
 	public void Click_PlayGame()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 		OpenSelectDeckDialog();
 	}
 
@@ -63,6 +64,8 @@ public partial class MainMenu : Control
 	{
 		if (SceneLoader.Instance != null)
 		{
+			AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
+
 			// TODO: Card Pool vs. Deck
 			var sacrificeCards = _selectedCards.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
 			var creatureCards = _selectedCards.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
@@ -76,6 +79,7 @@ public partial class MainMenu : Control
 	{
 		if (SelectCards.Visible)
 		{
+			AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 			OpenMainDialog();
 		}
 	}

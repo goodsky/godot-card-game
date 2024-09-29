@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_q2hu1"]
 [ext_resource type="Script" path="res://scenes/game/ActiveCardState.cs" id="2_r04wx"]
 [ext_resource type="Script" path="res://scenes/game/GameBoard.cs" id="3_20nsl"]
-[ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="4_ms6pg"]
+[ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="4_ms6pg"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="5_ab3aq"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="6_y6bi0"]
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/game/Hand.tscn" id="7_bjx6u"]
@@ -373,13 +373,12 @@ text = "Click cards to sacrifice (Esc to Cancel)"
 horizontal_alignment = 1
 
 [node name="GameOver" type="PanelContainer" parent="PopUps"]
-visible = false
 custom_minimum_size = Vector2(450, 200)
 layout_mode = 2
 offset_left = 31.0
-offset_top = 42.0
+offset_top = 80.0
 offset_right = 541.0
-offset_bottom = 269.0
+offset_bottom = 307.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3

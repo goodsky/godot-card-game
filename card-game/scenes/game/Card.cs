@@ -209,6 +209,8 @@ public partial class Card : Node2D
 		if (CardInfo.Health - _combatInfo.Damage <= 0)
 		{
 			Kill();
+
+			AudioManager.Instance.Play(Constants.Audio.KillCard);
 		}
 	}
 

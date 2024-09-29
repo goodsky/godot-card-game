@@ -1,7 +1,7 @@
 [gd_scene load_steps=15 format=3 uid="uid://btkkhgkubjwj1"]
 
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_32l42"]
-[ext_resource type="Script" path="res://scenes/game/BackgroundRenderer.cs" id="1_d472e"]
+[ext_resource type="Script" path="res://scenes/BackgroundRenderer.cs" id="1_d472e"]
 [ext_resource type="Script" path="res://scenes/game/ActiveCardState.cs" id="1_e8g3v"]
 [ext_resource type="PackedScene" uid="uid://bkytbde6pf5y4" path="res://scenes/game/PlayArea.tscn" id="2_77sy5"]
 [ext_resource type="Texture2D" uid="uid://b3ysgj0ikws5s" path="res://assets/sprites/hand-area.jpeg" id="3_e8sjc"]

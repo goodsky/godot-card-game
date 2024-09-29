@@ -84,12 +84,10 @@ public static class NodeExtensions
         Color nodeColor = node.Modulate;
         float startA = nodeColor.A;
         float deltaA = alpha - startA;
-        GD.Print($"Fade {node.Name} from {startA} to {alpha} with speed {speed}.");
 		for (float t = 0.0f; t < 1.0f; t = Mathf.Clamp(t + speed, 0.0f, 1.0f))
 		{
 			nodeColor.A = startA + (t * deltaA);
 			node.Modulate = nodeColor;
-            GD.Print("A = ", nodeColor.A);
 			yield return null;
 		}
 

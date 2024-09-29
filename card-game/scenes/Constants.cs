@@ -16,7 +16,21 @@ public static class Constants
 
 	public static class Audio
 	{
-		public static readonly AudioStream CardsShuffle = GD.Load<AudioStream>("res://assets/audio/cards-shuffle.mp3");
 		public static readonly AudioStream HoverSnap = GD.Load<AudioStream>("res://assets/audio/click-balloon-snap.mp3");
+		public static readonly AudioStream ClickSnap = GD.Load<AudioStream>("res://assets/audio/click-loose.mp3");
+		public static readonly AudioStream CardsShuffle = GD.Load<AudioStream>("res://assets/audio/cards-shuffle.mp3");
+		public static readonly AudioStream PlayCardClick = GD.Load<AudioStream>("res://assets/audio/click-slide-click.mp3");
+		public static readonly AudioStream DamageCard_Low = GD.Load<AudioStream>("res://assets/audio/hit-card-1.wav");
+		public static readonly AudioStream DamageCard_High = GD.Load<AudioStream>("res://assets/audio/hit-card-2.wav");
+		public static readonly AudioStream DamagePlayer_Low = GD.Load<AudioStream>("res://assets/audio/hit-player-1.wav");
+		public static readonly AudioStream DamagePlayer_High = GD.Load<AudioStream>("res://assets/audio/hit-player-2.wav");
+		public static readonly AudioStream KillCard = GD.Load<AudioStream>("res://assets/audio/kill-card.wav");
+		public static readonly AudioStream[] Whoosh = new[] {
+			GD.Load<AudioStream>("res://assets/audio/whoosh-bamboo.mp3"),
+			GD.Load<AudioStream>("res://assets/audio/whoosh-bat.mp3"),
+			GD.Load<AudioStream>("res://assets/audio/whoosh-swipe.mp3"),
+		};
+		public static readonly AudioStream GameOver_Lose = GD.Load<AudioStream>("res://assets/audio/lose.wav");
+		public static readonly AudioStream GameOver_Win = GD.Load<AudioStream>("res://assets/audio/win.wav");
 	}
 }

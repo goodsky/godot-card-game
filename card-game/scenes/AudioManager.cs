@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Godot;
@@ -23,6 +24,11 @@ public partial class AudioManager : Node
             _channels.Enqueue(channel);
             AddChild(channel);
         }
+    }
+
+    public static float TweakPitch()
+    {
+        return 0.95f + ((float)Random.Shared.NextDouble() * 0.10f);
     }
 
     public Task Play(AudioStream audio, string bus = "Master", float pitch = 1.0f, float volume = 1.0f)

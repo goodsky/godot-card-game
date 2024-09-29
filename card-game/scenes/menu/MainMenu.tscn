@@ -44,26 +44,15 @@ corner_radius_bottom_left = 8
 [node name="MainMenu" type="Control" node_paths=PackedStringArray("MainButtons", "SelectCards")]
 custom_minimum_size = Vector2(800, 600)
 layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+anchors_preset = 0
+offset_right = 800.0
+offset_bottom = 600.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme = ExtResource("1_4t1mi")
 script = ExtResource("2_pm4uq")
 MainButtons = NodePath("CenterContainer/MainButtonsBox")
 SelectCards = NodePath("CenterContainer/SelectCardsBox")
-
-[node name="Background" type="ColorRect" parent="."]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="TextureRect" type="TextureRect" parent="."]
 material = SubResource("ShaderMaterial_7470t")

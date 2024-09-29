@@ -62,8 +62,12 @@ public partial class PlayArea : CardDrop
 					break;
 
 				case GameState.EnemyStageCard:
+					card.TargetPosition = GlobalPosition;
+					break;
+
 				case GameState.EnemyPlayCard:
 					card.TargetPosition = GlobalPosition;
+					AudioManager.Instance.Play(Constants.Audio.PlayCardClick);
 					break;
 
 				default:

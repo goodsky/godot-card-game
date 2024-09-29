@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -188,18 +189,22 @@ public partial class GameBoard : Node2D
 	{
 		GameOverPanel.Modulate = new Color(1, 1, 1, 0);
 		GameOverPanel.Visible = true;
-		this.StartCoroutine(PayCostPanel.FadeTo(1f, 0.05f));
+		this.StartCoroutine(GameOverPanel.FadeTo(1f, 0.05f));
 
 		Label title = GameOverPanel.FindChild("Title") as Label;
 		if (playerWon)
 		{
 			title.Text = "You Win!";
 			title.AddThemeColorOverride("font_color", Colors.ForestGreen);
+
+			AudioManager.Instance.Play(Constants.Audio.GameOver_Win);
 		}
 		else
 		{
 			title.Text = "You Lose";
 			title.AddThemeColorOverride("font_color", Colors.DarkRed);
+
+			AudioManager.Instance.Play(Constants.Audio.GameOver_Lose);
 		}
 	}
 
@@ -279,26 +284,43 @@ public partial class GameBoard : Node2D
 			Card playerCard = lane[PLAYER_INDEX].GetChildCards().FirstOrDefault();
 			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
 
-			if (enemyCard != null && enemyCard.CardInfo.Attack > 0)
+			if (enemyCard != null)
 			{
-				enemyCard.ZIndex = 10;
 				int damage = enemyCard.CardInfo.Attack;
+				if (damage == 0) continue;
+
+				enemyCard.ZIndex = 10;
 				Vector2 startPosition = enemyCard.GlobalPosition;
 				if (playerCard != null)
 				{
-					yield return enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.05f);
+					yield return enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.08f);
 					GD.Print($"Dealt {damage} damage to {playerCard.CardInfo.Name}!");
+
+					AudioStream damageAudio = damage <= 2 ?
+						Constants.Audio.DamageCard_Low :
+						Constants.Audio.DamageCard_High;
+					AudioManager.Instance.Play(damageAudio, pitch: AudioManager.TweakPitch());
+
 					playerCard.DealDamage(damage);
 				}
 				else
 				{
-					yield return enemyCard.LerpGlobalPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.05f);
+					yield return enemyCard.LerpGlobalPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.08f);
 					GD.Print($"Dealt {damage} damage to the player!");
+
+					AudioStream damageAudio = damage <= 2 ?
+						Constants.Audio.DamagePlayer_Low :
+						Constants.Audio.DamagePlayer_High;
+					float damageVolume = damage <= 2 ?
+						0.5f :
+						1.0f;
+					AudioManager.Instance.Play(damageAudio, volume: damageVolume, pitch: AudioManager.TweakPitch());
+
 					yield return MainGame.Instance.HealthBar.PlayerTakeDamage(damage);
 				}
 
 				yield return enemyCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
-				yield return new CoroutineDelay(0.5);
+				yield return new CoroutineDelay(0.234);
 				enemyCard.ZIndex = 0;
 			}
 		}
@@ -316,26 +338,43 @@ public partial class GameBoard : Node2D
 			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
 			Card enemyBackCard = lane[ENEMY_STAGE_INDEX].GetChildCards().FirstOrDefault();
 
-			if (playerCard != null && playerCard.CardInfo.Attack > 0)
+			if (playerCard != null)
 			{
-				playerCard.ZIndex = 10;
 				int damage = playerCard.CardInfo.Attack;
+				if (damage == 0) continue;
+
+				playerCard.ZIndex = 10;
 				Vector2 startPosition = playerCard.GlobalPosition;
 				if (enemyCard != null)
 				{
-					yield return playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.05f);
+					yield return playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.08f);
 					GD.Print($"Dealt {damage} damage to {enemyCard.CardInfo.Name}!");
+
+					AudioStream damageAudio = damage <= 2 ?
+						Constants.Audio.DamageCard_Low :
+						Constants.Audio.DamageCard_High;
+					AudioManager.Instance.Play(damageAudio, pitch: AudioManager.TweakPitch());
+
 					enemyCard.DealDamage(damage);
 				}
 				else
 				{
-					yield return playerCard.LerpGlobalPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.05f);
+					yield return playerCard.LerpGlobalPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.08f);
 					GD.Print($"Dealt {damage} damage to the enemy!");
+
+					AudioStream damageAudio = damage <= 2 ?
+						Constants.Audio.DamagePlayer_Low :
+						Constants.Audio.DamagePlayer_High;
+					float damageVolume = damage <= 2 ?
+						0.5f :
+						1.0f;
+					AudioManager.Instance.Play(damageAudio, volume: damageVolume, pitch: AudioManager.TweakPitch());
+
 					yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
 				}
 
 				yield return playerCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
-				yield return new CoroutineDelay(0.5);
+				yield return new CoroutineDelay(0.234);
 				playerCard.ZIndex = 0;
 			}
 		}
