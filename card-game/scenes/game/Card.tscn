@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://c7jfumswj5p4k"]
+[gd_scene load_steps=13 format=3 uid="uid://c7jfumswj5p4k"]
 
 [ext_resource type="Script" path="res://scenes/game/Card.cs" id="1_g252h"]
 [ext_resource type="Texture2D" uid="uid://bvl2bulw6ldxu" path="res://assets/sprites/card-background.png" id="2_636mv"]
@@ -10,41 +10,43 @@
 [ext_resource type="Texture2D" uid="uid://g1tvugg8g4fv" path="res://assets/sprites/card-sword.png" id="7_er1au"]
 [ext_resource type="Texture2D" uid="uid://uelkx1cuv43c" path="res://assets/sprites/card-heart.png" id="8_0re76"]
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="9_bj6c8"]
+[ext_resource type="Texture2D" uid="uid://c4garv105erm4" path="res://assets/sprites/card-back.png" id="10_xl8wb"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_fbrmm"]
 size = Vector2(100, 130)
 
-[node name="Card" type="Node2D" node_paths=PackedStringArray("Background", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel", "Area")]
+[node name="Card" type="Node2D" node_paths=PackedStringArray("CardFront", "CardBack", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel", "Area")]
 z_as_relative = false
 script = ExtResource("1_g252h")
-Background = NodePath("Background")
-Avatar = NodePath("Background/Avatar")
-BloodCostIcons = [NodePath("Background/Card-cost-1"), NodePath("Background/Card-cost-2"), NodePath("Background/Card-cost-3")]
-NameLabel = NodePath("Background/CardTitle")
-AttackLabel = NodePath("Background/AttackStat")
-HealthLabel = NodePath("Background/HealthStat")
+CardFront = NodePath("CardFront")
+CardBack = NodePath("CardBack")
+Avatar = NodePath("CardFront/Avatar")
+BloodCostIcons = [NodePath("CardFront/Card-cost-1"), NodePath("CardFront/Card-cost-2"), NodePath("CardFront/Card-cost-3")]
+NameLabel = NodePath("CardFront/CardTitle")
+AttackLabel = NodePath("CardFront/AttackStat")
+HealthLabel = NodePath("CardFront/HealthStat")
 Area = NodePath("ClickableArea")
 
-[node name="Background" type="Sprite2D" parent="."]
+[node name="CardFront" type="Sprite2D" parent="."]
 texture = ExtResource("2_636mv")
 
-[node name="CardTitle" parent="Background" instance=ExtResource("3_exfcv")]
+[node name="CardTitle" parent="CardFront" instance=ExtResource("3_exfcv")]
 position = Vector2(-45, -63)
 Text = "FooBar the Great!"
 MaxFontSize = 12
 TextBoxSize = Vector2(90, 15)
 Font = ExtResource("4_nhbcd")
 
-[node name="Avatar" type="Sprite2D" parent="Background"]
+[node name="Avatar" type="Sprite2D" parent="CardFront"]
 position = Vector2(0, -18)
 texture = ExtResource("5_um02m")
 script = ExtResource("6_lhuuc")
 
-[node name="Card-sword" type="Sprite2D" parent="Background"]
+[node name="Card-sword" type="Sprite2D" parent="CardFront"]
 position = Vector2(-41, 45)
 texture = ExtResource("7_er1au")
 
-[node name="AttackStat" parent="Background" instance=ExtResource("3_exfcv")]
+[node name="AttackStat" parent="CardFront" instance=ExtResource("3_exfcv")]
 position = Vector2(-30, 25)
 Text = "1"
 MaxFontSize = 36
@@ -52,11 +54,11 @@ TextBoxSize = Vector2(30, 50)
 Font = ExtResource("4_nhbcd")
 Color = Color(1, 0, 0, 1)
 
-[node name="Card-shield" type="Sprite2D" parent="Background"]
+[node name="Card-shield" type="Sprite2D" parent="CardFront"]
 position = Vector2(40, 45)
 texture = ExtResource("8_0re76")
 
-[node name="HealthStat" parent="Background" instance=ExtResource("3_exfcv")]
+[node name="HealthStat" parent="CardFront" instance=ExtResource("3_exfcv")]
 position = Vector2(2, 25)
 Text = "2"
 MaxFontSize = 36
@@ -65,17 +67,21 @@ Font = ExtResource("4_nhbcd")
 Alignment = 2
 Color = Color(0, 0, 1, 1)
 
-[node name="Card-cost-1" type="Sprite2D" parent="Background"]
+[node name="Card-cost-1" type="Sprite2D" parent="CardFront"]
 position = Vector2(38, 21)
 texture = ExtResource("9_bj6c8")
 
-[node name="Card-cost-2" type="Sprite2D" parent="Background"]
+[node name="Card-cost-2" type="Sprite2D" parent="CardFront"]
 position = Vector2(25, 21)
 texture = ExtResource("9_bj6c8")
 
-[node name="Card-cost-3" type="Sprite2D" parent="Background"]
+[node name="Card-cost-3" type="Sprite2D" parent="CardFront"]
 position = Vector2(12, 21)
 texture = ExtResource("9_bj6c8")
+
+[node name="CardBack" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("10_xl8wb")
 
 [node name="ClickableArea" type="Node2D" parent="."]
 script = ExtResource("3_yne0g")

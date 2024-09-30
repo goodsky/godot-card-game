@@ -69,7 +69,10 @@ public partial class Card : Node2D
 	public CardInfo CardInfo { get; private set; }
 
 	[Export]
-	public Sprite2D Background { get; set; }
+	public Sprite2D CardFront { get; set; }
+
+	[Export]
+	public Sprite2D CardBack { get; set; }
 
 	[Export]
 	public Sprite2D Avatar { get; set; }
@@ -102,19 +105,19 @@ public partial class Card : Node2D
 		switch (CardInfo.Rarity)
 		{
 			case CardRarity.Sacrifice:
-				Background.SelfModulate = new Color("88615f");
+				CardFront.SelfModulate = new Color("88615f");
 				break;
 
 			case CardRarity.Common:
-				Background.SelfModulate = new Color("777168");
+				CardFront.SelfModulate = new Color("777168");
 				break;
 
 			case CardRarity.Uncommon:
-				Background.SelfModulate = new Color("5659ae");
+				CardFront.SelfModulate = new Color("5659ae");
 				break;
 
 			case CardRarity.Rare:
-				Background.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
+				CardFront.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
 				break;
 		}
 

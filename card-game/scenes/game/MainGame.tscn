@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3 uid="uid://cdq0smiv61oi3"]
+[gd_scene load_steps=25 format=3 uid="uid://cdq0smiv61oi3"]
 
 [ext_resource type="Script" path="res://scenes/game/MainGame.cs" id="1_q2hu1"]
 [ext_resource type="Script" path="res://scenes/game/ActiveCardState.cs" id="2_r04wx"]
@@ -21,6 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="19_vnx7p"]
 [ext_resource type="FontFile" uid="uid://bj3go1bjn5g4" path="res://assets/fonts/Poco.tres" id="20_3x75k"]
 [ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="21_m7n3t"]
+[ext_resource type="PackedScene" uid="uid://c7jfumswj5p4k" path="res://scenes/game/Card.tscn" id="22_8slqy"]
 
 [sub_resource type="Theme" id="Theme_1ly1u"]
 
@@ -59,75 +60,75 @@ GameOverPanel = NodePath("../PopUps/GameOver")
 [node name="Background" type="Node2D" parent="GameBoard"]
 z_index = -1
 script = ExtResource("4_ms6pg")
-Size = Vector2(600, 450)
+Size = Vector2(570, 450)
 Color = Color(0.835294, 0.894118, 0.992157, 1)
 
 [node name="PlayArea1" parent="GameBoard" instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(84, 365)
+position = Vector2(69, 365)
 SupportsDrop = false
 
 [node name="PlayArea2" parent="GameBoard" instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(219, 365)
+position = Vector2(204, 365)
 SupportsDrop = false
 
 [node name="PlayArea3" parent="GameBoard" instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(353, 365)
+position = Vector2(338, 365)
 SupportsDrop = false
 
 [node name="PlayArea4" parent="GameBoard" instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(488, 365)
+position = Vector2(473, 365)
 SupportsDrop = false
 
 [node name="PlayArea5" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(84, 215)
+position = Vector2(69, 215)
 SupportsPickUp = true
 SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea6" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(219, 215)
+position = Vector2(204, 215)
 SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea7" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(353, 215)
+position = Vector2(338, 215)
 SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea8" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(488, 215)
+position = Vector2(473, 215)
 SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
 
 [node name="PlayArea9" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(84, 75)
+position = Vector2(69, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea1/ClickableArea")
 
 [node name="PlayArea10" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(219, 75)
+position = Vector2(204, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea2/ClickableArea")
 
 [node name="PlayArea11" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(353, 75)
+position = Vector2(338, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea3/ClickableArea")
 
 [node name="PlayArea12" parent="GameBoard" node_paths=PackedStringArray("Area") instance=ExtResource("5_ab3aq")]
 z_index = -1
-position = Vector2(488, 75)
+position = Vector2(473, 75)
 SupportsDrop = false
 Area = NodePath("../PlayArea4/ClickableArea")
 
@@ -137,46 +138,66 @@ texture = ExtResource("6_y6bi0")
 centered = false
 
 [node name="Hand" parent="HandArea" instance=ExtResource("7_bjx6u")]
-position = Vector2(300, 75)
+position = Vector2(285, 75)
 
 [node name="InfoArea" type="Sprite2D" parent="." node_paths=PackedStringArray("InfoLabel", "TurnLabel", "GameStateDescriptionLabel", "DrawFromDeckButton", "DrawFromSacrificeButton", "EndTurnButton")]
 z_index = -1
-position = Vector2(698, 300)
+position = Vector2(570, 0)
 texture = ExtResource("8_0ceje")
+centered = false
 script = ExtResource("9_5mu18")
-InfoLabel = NodePath("ThemeContainer/Tooltip/RichTextLabel")
-TurnLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnLabel")
-GameStateDescriptionLabel = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/TurnDescription")
-DrawFromDeckButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton")
-DrawFromSacrificeButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton")
-EndTurnButton = NodePath("ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin")
+InfoLabel = NodePath("ThemeContainer/MarginContainer/VBoxContainer/TooltipPanel/RichTextLabel")
+TurnLabel = NodePath("ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/TurnLabel")
+GameStateDescriptionLabel = NodePath("ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/TurnDescription")
+DrawFromDeckButton = NodePath("ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawDeckButton")
+DrawFromSacrificeButton = NodePath("ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawSacrificeButton")
+EndTurnButton = NodePath("ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/EndTurnButtin")
 
 [node name="ThemeContainer" type="Control" parent="InfoArea"]
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 230.0
+offset_bottom = 600.0
 theme = ExtResource("10_23151")
 
-[node name="GearButton" type="TextureButton" parent="InfoArea/ThemeContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="InfoArea/ThemeContainer"]
 layout_mode = 0
-offset_left = 59.0
-offset_top = -295.0
-offset_right = 91.0
-offset_bottom = -263.0
+offset_right = 230.0
+offset_bottom = 600.0
+size_flags_vertical = 3
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="VBoxContainer" type="VBoxContainer" parent="InfoArea/ThemeContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="TopLineContainer" type="HBoxContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="LevelInfo" type="PanelContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/TopLineContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/TopLineContainer/LevelInfo"]
+layout_mode = 2
+text = "Level 0"
+
+[node name="GearButton" type="TextureButton" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/TopLineContainer"]
+layout_mode = 2
+size_flags_vertical = 4
 texture_normal = ExtResource("11_hh2ig")
 texture_pressed = ExtResource("12_qcwv1")
 texture_hover = ExtResource("13_3b13i")
 texture_focused = ExtResource("11_hh2ig")
 
-[node name="Tooltip" type="PanelContainer" parent="InfoArea/ThemeContainer"]
-layout_mode = 0
-offset_left = -90.0
-offset_top = -262.0
-offset_right = 90.0
-offset_bottom = 94.0
+[node name="TooltipPanel" type="PanelContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer"]
+custom_minimum_size = Vector2(0, 150)
+layout_mode = 2
 
-[node name="RichTextLabel" type="RichTextLabel" parent="InfoArea/ThemeContainer/Tooltip"]
+[node name="RichTextLabel" type="RichTextLabel" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/TooltipPanel"]
 layout_mode = 2
 bbcode_enabled = true
 text = "
@@ -190,50 +211,97 @@ text = "
 
 [center][font_size=16][i]Hover over things to get helpful tips[/i][/font_size][/center]"
 
-[node name="StatePrompts" type="PanelContainer" parent="InfoArea/ThemeContainer"]
-layout_mode = 0
-offset_left = -90.0
-offset_top = 108.0
-offset_right = 90.0
-offset_bottom = 298.0
-
-[node name="DrawCardContainer" type="VBoxContainer" parent="InfoArea/ThemeContainer/StatePrompts"]
+[node name="StateInfoPanel" type="PanelContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="TurnLabel" type="Label" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+[node name="DrawCardContainer" type="VBoxContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel"]
+layout_mode = 2
+
+[node name="TurnLabel" type="Label" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
 text = "Your Turn"
 horizontal_alignment = 1
 text_overrun_behavior = 1
 
-[node name="TurnDescription" type="Label" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+[node name="TurnDescription" type="Label" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer"]
 custom_minimum_size = Vector2(0, 24)
 layout_mode = 2
 text = "Details"
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="DrawDeckButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+[node name="DrawDeckButton" type="Button" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer"]
 visible = false
 layout_mode = 2
 text = "Draw Creature"
 
-[node name="DrawSacrificeButton" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+[node name="DrawSacrificeButton" type="Button" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer"]
 visible = false
 layout_mode = 2
 theme = SubResource("Theme_1ly1u")
 text = "Draw Sacrifice"
 
-[node name="EndTurnButtin" type="Button" parent="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer"]
+[node name="EndTurnButtin" type="Button" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer"]
 visible = false
 layout_mode = 2
 theme = SubResource("Theme_1ly1u")
 text = "End Turn"
 
+[node name="EndTurnButton" type="Button" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("21_m7n3t")
+text = "End Turn"
+
+[node name="DrawCardContainer" type="HBoxContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="DrawDeckContainer" type="VBoxContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer/DrawDeckContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0.756863, 0.756863, 0.756863, 1)
+text = "Deck"
+horizontal_alignment = 1
+
+[node name="CardControl" type="Control" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer/DrawDeckContainer"]
+custom_minimum_size = Vector2(100, 130)
+layout_mode = 2
+
+[node name="Card" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer/DrawDeckContainer/CardControl" instance=ExtResource("22_8slqy")]
+position = Vector2(50, 65)
+
+[node name="DrawDeckContainer2" type="VBoxContainer" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+
+[node name="Sacrifice" type="Label" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer/DrawDeckContainer2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_colors/font_shadow_color = Color(0.756863, 0.756863, 0.756863, 1)
+text = "Sacrifice
+"
+horizontal_alignment = 1
+
+[node name="CardControl" type="Control" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer/DrawDeckContainer2"]
+custom_minimum_size = Vector2(100, 130)
+layout_mode = 2
+
+[node name="Card" parent="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/DrawCardContainer/DrawDeckContainer2/CardControl" node_paths=PackedStringArray("Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel", "Area") instance=ExtResource("22_8slqy")]
+position = Vector2(50, 65)
+Avatar = NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/Avatar")
+BloodCostIcons = [NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/Card-cost-1"), NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/Card-cost-2"), NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/Card-cost-3")]
+NameLabel = NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/CardTitle")
+AttackLabel = NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/AttackStat")
+HealthLabel = NodePath("../../../DrawDeckContainer/CardControl/Card/CardFront/HealthStat")
+Area = NodePath("../../../DrawDeckContainer/CardControl/Card/ClickableArea")
+
 [node name="HealthBar" type="Sprite2D" parent="." node_paths=PackedStringArray("Marker")]
 z_index = -1
-position = Vector2(572, 0)
+position = Vector2(543, 0)
 texture = ExtResource("14_btrdn")
 centered = false
 script = ExtResource("15_cxs60")
@@ -418,14 +486,14 @@ text = "Main Menu"
 [connection signal="OnStateTransition" from="." to="GameBoard" method="OnGameStateTransition"]
 [connection signal="OnStateTransition" from="." to="HandArea/Hand" method="OnGameStateTransition"]
 [connection signal="OnStateTransition" from="." to="InfoArea" method="OnGameStateTransition"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/GearButton" to="InfoArea" method="Click_MenuBar"]
-[connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseEntered_DrawFromDeckButton"]
-[connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseExited_ResetInfo"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawDeckButton" to="." method="DrawCardFromDeck"]
-[connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseEntered_DrawSacrificeButton"]
-[connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseExited_ResetInfo"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/DrawSacrificeButton" to="." method="DrawCardFromSacrificeDeck"]
-[connection signal="mouse_entered" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseEntered_EndTurnButton"]
-[connection signal="mouse_exited" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseExited_ResetInfo"]
-[connection signal="pressed" from="InfoArea/ThemeContainer/StatePrompts/DrawCardContainer/EndTurnButtin" to="." method="EndTurn"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/TopLineContainer/GearButton" to="InfoArea" method="Click_MenuBar"]
+[connection signal="mouse_entered" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseEntered_DrawFromDeckButton"]
+[connection signal="mouse_exited" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawDeckButton" to="InfoArea" method="MouseExited_ResetInfo"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawDeckButton" to="." method="DrawCardFromDeck"]
+[connection signal="mouse_entered" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseEntered_DrawSacrificeButton"]
+[connection signal="mouse_exited" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawSacrificeButton" to="InfoArea" method="MouseExited_ResetInfo"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/DrawSacrificeButton" to="." method="DrawCardFromSacrificeDeck"]
+[connection signal="mouse_entered" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseEntered_EndTurnButton"]
+[connection signal="mouse_exited" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/EndTurnButtin" to="InfoArea" method="MouseExited_ResetInfo"]
+[connection signal="pressed" from="InfoArea/ThemeContainer/MarginContainer/VBoxContainer/StateInfoPanel/DrawCardContainer/EndTurnButtin" to="." method="EndTurn"]
 [connection signal="pressed" from="PopUps/GameOver/VFlowContainer/Button" to="." method="Click_MainMenu"]

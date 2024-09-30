@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/game/Hand.cs" id="1_0ltkp"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_0j34p"]
-size = Vector2(600, 150)
+size = Vector2(570, 150)
 
 [node name="Hand" type="Node2D" node_paths=PackedStringArray("Area", "DebugCards")]
 script = ExtResource("1_0ltkp")
