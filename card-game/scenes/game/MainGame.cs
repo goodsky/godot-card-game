@@ -264,7 +264,7 @@ public partial class MainGame : Node2D
 
 		card.SetCardInfo(cardInfo);
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
-		AudioManager.Instance.Play(Constants.Audio.ClickSnap, tweak: true);
+		AudioManager.Instance.Play(Constants.Audio.CardWhoosh, tweak: true);
 
 		return card;
 	}
@@ -373,7 +373,7 @@ public partial class MainGame : Node2D
 				{
 					card.StopShaking();
 				}
-			}		
+			}
 		}
 	}
 	/** END Isaac Mode! */
