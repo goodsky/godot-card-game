@@ -11,6 +11,7 @@ public partial class CanvasText : Node2D
 	private Vector2 _textBoxSize = new Vector2(95, 20);
 	private Font _font;
 	private HorizontalAlignment _alignment = HorizontalAlignment.Left;
+	private VerticalAlignment _verticalAlignment = VerticalAlignment.Top;
 	private Color _color = Colors.Black;
 
 	[Export]
@@ -87,6 +88,21 @@ public partial class CanvasText : Node2D
 	}
 
 	[Export]
+	public VerticalAlignment VerticalAlignment
+	{
+		get
+		{
+			return _verticalAlignment;
+		}
+
+		set
+		{
+			_verticalAlignment = value;
+			UpdateFontSize();
+		}
+	}
+
+	[Export]
 	public Color Color
 	{
 		get
@@ -140,9 +156,25 @@ public partial class CanvasText : Node2D
 					width: _textBoxSize.X);
 
 				// Text starts above the _textPos - so substract a single line's worth of height
-				// Although, for some reason it seems my fonts way over-estimate their height...
+				// Although, for some reason it seems some of my fonts way over-estimate their height...
 				var approximateFontHeight = Font.GetHeight(_dynamicFontSize) * 0.75f;
-				_textPos = new Vector2(0, approximateFontHeight);
+
+				float textY;
+				if (_verticalAlignment == VerticalAlignment.Top)
+				{
+					textY = approximateFontHeight;
+				}
+				else if (_verticalAlignment == VerticalAlignment.Bottom)
+				{
+					textY = _textBoxSize.Y;
+				}
+				else
+				{
+					float padding = _textBoxSize.Y - approximateFontHeight;
+					textY = _textBoxSize.Y - padding / 2;
+				}
+
+				_textPos = new Vector2(0, textY);
 
 				if (textSize.X <= _textBoxSize.X && textSize.Y <= _textBoxSize.Y)
 				{

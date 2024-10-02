@@ -97,30 +97,6 @@ public partial class Card : Node2D
 
 	public override void _Ready()
 	{
-		_combatInfo = new CombatInfo
-		{
-			Damage = 0,
-		};
-
-		switch (CardInfo.Rarity)
-		{
-			case CardRarity.Sacrifice:
-				CardFront.SelfModulate = new Color("88615f");
-				break;
-
-			case CardRarity.Common:
-				CardFront.SelfModulate = new Color("777168");
-				break;
-
-			case CardRarity.Uncommon:
-				CardFront.SelfModulate = new Color("5659ae");
-				break;
-
-			case CardRarity.Rare:
-				CardFront.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
-				break;
-		}
-
 		UpdateVisuals();
 
 		Area.AreaMouseOver += HoverOver;
@@ -197,10 +173,20 @@ public partial class Card : Node2D
 		_isAnimating = isAnimating;
 	}
 
+	public void ShowCardBack(bool showBack)
+	{
+		GD.Print("Set Card Back ", showBack, " for ", Name);
+		CardBack.Visible = showBack;
+		CardFront.Visible = !showBack;
+	}
+
 	public void SetCardInfo(CardInfo cardInfo)
 	{
 		CardInfo = cardInfo;
 		Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
+
+		_combatInfo = new CombatInfo { Damage = 0 };
+
 		UpdateVisuals();
 	}
 
@@ -345,8 +331,9 @@ public partial class Card : Node2D
 
 	private void HoverOver()
 	{
+		if (CardBack.Visible) return;
+
 		var cardInfo = new StringBuilder();
-		cardInfo.Append("\n\n\n\n\n");
 		cardInfo.AppendLine($"[center][font_size=16]{CardInfo.Name}[/font_size][/center]");
 		cardInfo.AppendLine("");
 		cardInfo.AppendLine($"Attack: {CardInfo.Attack}");
@@ -380,6 +367,25 @@ public partial class Card : Node2D
 	{
 		NameLabel.Text = CardInfo.Name;
 		AttackLabel.Text = CardInfo.Attack.ToString();
+
+		switch (CardInfo.Rarity)
+		{
+			case CardRarity.Sacrifice:
+				CardFront.SelfModulate = new Color("88615f");
+				break;
+
+			case CardRarity.Common:
+				CardFront.SelfModulate = new Color("777168");
+				break;
+
+			case CardRarity.Uncommon:
+				CardFront.SelfModulate = new Color("5659ae");
+				break;
+
+			case CardRarity.Rare:
+				CardFront.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
+				break;
+		}
 
 		int health = Math.Max(0, CardInfo.Health - _combatInfo?.Damage ?? 0);
 		HealthLabel.Text = health.ToString();

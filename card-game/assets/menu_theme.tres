@@ -1,6 +1,6 @@
 [gd_resource type="Theme" load_steps=7 format=3 uid="uid://deqinh8m1b4mg"]
 
-[ext_resource type="FontFile" uid="uid://bj3go1bjn5g4" path="res://assets/fonts/Poco.tres" id="1_wesgs"]
+[ext_resource type="FontFile" uid="uid://cqj4jrmv0k2pj" path="res://assets/fonts/poco/Poco.tres" id="1_mncfl"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uxnqp"]
 content_margin_left = 16.0
@@ -73,7 +73,7 @@ corner_radius_bottom_left = 8
 [resource]
 Button/constants/outline_size = 1
 Button/font_sizes/font_size = 32
-Button/fonts/font = ExtResource("1_wesgs")
+Button/fonts/font = ExtResource("1_mncfl")
 Button/styles/disabled = SubResource("StyleBoxFlat_uxnqp")
 Button/styles/hover = SubResource("StyleBoxFlat_htu51")
 Button/styles/normal = SubResource("StyleBoxFlat_hbg4k")

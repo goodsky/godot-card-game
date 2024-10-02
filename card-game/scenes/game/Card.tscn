@@ -1,14 +1,15 @@
-[gd_scene load_steps=13 format=3 uid="uid://c7jfumswj5p4k"]
+[gd_scene load_steps=14 format=3 uid="uid://c7jfumswj5p4k"]
 
 [ext_resource type="Script" path="res://scenes/game/Card.cs" id="1_g252h"]
 [ext_resource type="Texture2D" uid="uid://bvl2bulw6ldxu" path="res://assets/sprites/card-background.png" id="2_636mv"]
 [ext_resource type="PackedScene" uid="uid://demt8xneeboij" path="res://scenes/game/CanvasText.tscn" id="3_exfcv"]
 [ext_resource type="Script" path="res://scenes/game/ClickableArea.cs" id="3_yne0g"]
-[ext_resource type="FontFile" uid="uid://b8q0q4js1pbjq" path="res://assets/fonts/Poco.ttf" id="4_nhbcd"]
+[ext_resource type="FontFile" uid="uid://dkmf6cewx3ufy" path="res://assets/fonts/droid-sans/DroidSans.ttf" id="4_pnmb0"]
 [ext_resource type="Texture2D" uid="uid://cvxf0itnk118u" path="res://assets/sprites/avatars/avatar_blue_monster_00.jpeg" id="5_um02m"]
 [ext_resource type="Script" path="res://scenes/game/SpriteBorder.cs" id="6_lhuuc"]
 [ext_resource type="Texture2D" uid="uid://g1tvugg8g4fv" path="res://assets/sprites/card-sword.png" id="7_er1au"]
 [ext_resource type="Texture2D" uid="uid://uelkx1cuv43c" path="res://assets/sprites/card-heart.png" id="8_0re76"]
+[ext_resource type="FontFile" uid="uid://cqj4jrmv0k2pj" path="res://assets/fonts/poco/Poco.tres" id="8_qga00"]
 [ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="9_bj6c8"]
 [ext_resource type="Texture2D" uid="uid://c4garv105erm4" path="res://assets/sprites/card-back.png" id="10_xl8wb"]
 
@@ -31,52 +32,55 @@ Area = NodePath("ClickableArea")
 texture = ExtResource("2_636mv")
 
 [node name="CardTitle" parent="CardFront" instance=ExtResource("3_exfcv")]
-position = Vector2(-45, -63)
-Text = "FooBar the Great!"
-MaxFontSize = 12
-TextBoxSize = Vector2(90, 15)
-Font = ExtResource("4_nhbcd")
+position = Vector2(-45, -60)
+Text = "FooBar the Great"
+MaxFontSize = 14
+TextBoxSize = Vector2(90, 17)
+Font = ExtResource("4_pnmb0")
+VerticalAlignment = 1
 
 [node name="Avatar" type="Sprite2D" parent="CardFront"]
-position = Vector2(0, -18)
+position = Vector2(0, -12)
 texture = ExtResource("5_um02m")
 script = ExtResource("6_lhuuc")
 
 [node name="Card-sword" type="Sprite2D" parent="CardFront"]
+visible = false
 position = Vector2(-41, 45)
 texture = ExtResource("7_er1au")
 
 [node name="AttackStat" parent="CardFront" instance=ExtResource("3_exfcv")]
-position = Vector2(-30, 25)
-Text = "1"
+position = Vector2(-43, 25)
+Text = "0"
 MaxFontSize = 36
 TextBoxSize = Vector2(30, 50)
-Font = ExtResource("4_nhbcd")
-Color = Color(1, 0, 0, 1)
+Font = ExtResource("8_qga00")
+Color = Color(0.65098, 0, 0, 1)
 
 [node name="Card-shield" type="Sprite2D" parent="CardFront"]
+visible = false
 position = Vector2(40, 45)
 texture = ExtResource("8_0re76")
 
 [node name="HealthStat" parent="CardFront" instance=ExtResource("3_exfcv")]
-position = Vector2(2, 25)
-Text = "2"
+position = Vector2(13, 25)
+Text = "1"
 MaxFontSize = 36
 TextBoxSize = Vector2(30, 50)
-Font = ExtResource("4_nhbcd")
+Font = ExtResource("8_qga00")
 Alignment = 2
-Color = Color(0, 0, 1, 1)
+Color = Color(0, 0, 0.7, 1)
 
 [node name="Card-cost-1" type="Sprite2D" parent="CardFront"]
-position = Vector2(38, 21)
+position = Vector2(38, 28)
 texture = ExtResource("9_bj6c8")
 
 [node name="Card-cost-2" type="Sprite2D" parent="CardFront"]
-position = Vector2(25, 21)
+position = Vector2(25, 28)
 texture = ExtResource("9_bj6c8")
 
 [node name="Card-cost-3" type="Sprite2D" parent="CardFront"]
-position = Vector2(12, 21)
+position = Vector2(12, 28)
 texture = ExtResource("9_bj6c8")
 
 [node name="CardBack" type="Sprite2D" parent="."]

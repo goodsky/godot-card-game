@@ -16,6 +16,18 @@ public class Deck
         ShuffleCards();
     }
 
+    public CardInfo? PeekTop()
+    {
+        if (Count == 0)
+        {
+            return null;
+        }
+
+        int drawIndex = Cards.Count - 1;
+        CardInfo cardInfo = Cards[drawIndex];
+        return cardInfo;
+    }
+
     public CardInfo DrawFromTop()
     {
         if (Count == 0)

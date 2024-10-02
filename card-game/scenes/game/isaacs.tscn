@@ -137,7 +137,7 @@ Area = NodePath("../PlayArea4/ClickableArea")
 
 [node name="HandArea" type="Sprite2D" parent="."]
 position = Vector2(0, 449)
-scale = Vector2(1.333, 1)
+scale = Vector2(1.4, 1)
 texture = ExtResource("3_e8sjc")
 centered = false
 
