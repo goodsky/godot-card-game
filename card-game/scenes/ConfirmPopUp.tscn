@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://dwfawy33b7k8x"]
 
-[ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="1_6irg2"]
+[ext_resource type="Theme" path="res://scenes/menu/menu_theme.tres" id="1_6irg2"]
 [ext_resource type="Script" path="res://scenes/ConfirmPopUp.cs" id="2_aqfvw"]
-[ext_resource type="Theme" uid="uid://8x0i3u8oadd6" path="res://assets/menu_small_label.tres" id="2_svpfo"]
+[ext_resource type="Theme" path="res://scenes/menu/menu_small_label.tres" id="2_svpfo"]
 
 [node name="ConfirmPopUp" type="Control" node_paths=PackedStringArray("BackgroundFade", "MessageLabel", "ConfirmButton", "CancelButton")]
 process_mode = 3

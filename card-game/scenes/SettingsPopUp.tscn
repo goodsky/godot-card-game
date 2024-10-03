@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://ckwfnbu0i1w1c"]
 
-[ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="1_txowx"]
+[ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="1_txowx"]
 [ext_resource type="Script" path="res://scenes/SettingsPopUp.cs" id="2_bibd7"]
-[ext_resource type="Theme" uid="uid://8x0i3u8oadd6" path="res://assets/menu_small_label.tres" id="2_c8tfh"]
+[ext_resource type="Theme" path="res://scenes/menu/menu_small_label.tres" id="2_c8tfh"]
 
 [node name="SettingsPopUp" type="Control" node_paths=PackedStringArray("BackgroundFade", "EffectsVolumeSlider", "MusicVolumeSlider", "MainMenuButton")]
 process_mode = 3
@@ -110,7 +110,7 @@ size_flags_horizontal = 3
 [node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-text = "Cancel"
+text = "Back"
 
 [connection signal="drag_ended" from="PanelContainer/VBoxContainer/EffectsVolumeContainer/EffectVolumeSlider" to="." method="UpdateEffectsVolume"]
 [connection signal="drag_ended" from="PanelContainer/VBoxContainer/MusicVolumeContainer/MusicVolumeSlider" to="." method="UpdateMusicVolume"]
