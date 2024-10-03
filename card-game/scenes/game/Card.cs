@@ -175,7 +175,6 @@ public partial class Card : Node2D
 
 	public void ShowCardBack(bool showBack)
 	{
-		GD.Print("Set Card Back ", showBack, " for ", Name);
 		CardBack.Visible = showBack;
 		CardFront.Visible = !showBack;
 	}

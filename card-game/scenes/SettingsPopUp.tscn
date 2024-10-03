@@ -4,7 +4,8 @@
 [ext_resource type="Script" path="res://scenes/SettingsPopUp.cs" id="2_bibd7"]
 [ext_resource type="Theme" uid="uid://8x0i3u8oadd6" path="res://assets/menu_small_label.tres" id="2_c8tfh"]
 
-[node name="SettingsPopUp" type="Control"]
+[node name="SettingsPopUp" type="Control" node_paths=PackedStringArray("BackgroundFade", "EffectsVolumeSlider", "MusicVolumeSlider", "MainMenuButton")]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -13,6 +14,10 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("1_txowx")
 script = ExtResource("2_bibd7")
+BackgroundFade = NodePath("Background")
+EffectsVolumeSlider = NodePath("PanelContainer/VBoxContainer/EffectsVolumeContainer/EffectVolumeSlider")
+MusicVolumeSlider = NodePath("PanelContainer/VBoxContainer/MusicVolumeContainer/MusicVolumeSlider")
+MainMenuButton = NodePath("PanelContainer/VBoxContainer/ButtonContainer/MainMenuButton")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -21,7 +26,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.54099, 0.540991, 0.54099, 0.145098)
+color = Color(0.541176, 0.541176, 0.541176, 0.294118)
 
 [node name="PanelContainer" type="PanelContainer" parent="."]
 layout_mode = 1
@@ -94,9 +99,20 @@ theme_override_constants/separation = 25
 alignment = 2
 
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 text = "Main Menu"
 
+[node name="Buffer" type="Control" parent="PanelContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
 [node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
 text = "Cancel"
+
+[connection signal="drag_ended" from="PanelContainer/VBoxContainer/EffectsVolumeContainer/EffectVolumeSlider" to="." method="UpdateEffectsVolume"]
+[connection signal="drag_ended" from="PanelContainer/VBoxContainer/MusicVolumeContainer/MusicVolumeSlider" to="." method="UpdateMusicVolume"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ButtonContainer/MainMenuButton" to="." method="Click_MainMenu"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ButtonContainer/CancelButton" to="." method="Click_Cancel"]

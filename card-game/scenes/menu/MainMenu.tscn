@@ -96,6 +96,11 @@ layout_mode = 2
 focus_mode = 0
 text = "Play Game"
 
+[node name="SettingsButton" type="Button" parent="CenterContainer/MainButtonsBox"]
+layout_mode = 2
+focus_mode = 0
+text = "Settings"
+
 [node name="ExitGameButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 focus_mode = 0
@@ -137,6 +142,7 @@ text = "Cancel"
 
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/BuildCardsButton" to="." method="Click_BuildADeck"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/PlayGameButton" to="." method="Click_PlayGame"]
+[connection signal="pressed" from="CenterContainer/MainButtonsBox/SettingsButton" to="." method="Click_Settings"]
 [connection signal="pressed" from="CenterContainer/MainButtonsBox/ExitGameButton" to="." method="Click_Quit"]
 [connection signal="item_selected" from="CenterContainer/SelectCardsBox/ItemList" to="." method="Click_DeckListItem"]
 [connection signal="pressed" from="CenterContainer/SelectCardsBox/StartGameButton" to="." method="Click_StartGame"]

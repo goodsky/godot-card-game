@@ -6,6 +6,9 @@ using Godot;
 public partial class AudioManager : Node
 {
     private static readonly int ChannelCount = 16;
+
+    private float _effectsVolume = 1f;
+    private float _musicVolume = 1f;
     private Queue<AudioStreamPlayer> _channels = new Queue<AudioStreamPlayer>();
     private Dictionary<AudioStreamPlayer, PlayingAudio> _activeChannels = new Dictionary<AudioStreamPlayer, PlayingAudio>();
 
@@ -30,6 +33,27 @@ public partial class AudioManager : Node
         // try to make repetetive sounds sound less repetetive
         float delta = max - min;
         return min + ((float)Random.Shared.NextDouble() * delta);
+    }
+
+    public void UpdateEffectsVolume(float volume)
+    {
+        GD.Print("Updating effects volume ", volume);
+        float curVolume = _effectsVolume;
+        foreach (AudioStreamPlayer activeChannel in _activeChannels.Keys)
+        {
+            if (curVolume <= 1e-6)
+            {
+                activeChannel.VolumeDb = Mathf.LinearToDb(volume);
+            }
+            else
+            {
+                float linearVolume = Mathf.DbToLinear(activeChannel.VolumeDb);
+                float originalVolume = linearVolume / curVolume;
+                activeChannel.VolumeDb = Mathf.LinearToDb(originalVolume * volume);
+            }
+        }
+
+        _effectsVolume = volume;
     }
 
     public Task Play(
@@ -68,6 +92,8 @@ public partial class AudioManager : Node
             pitch += TweakValue(-0.1f, 0.1f);
             volume += TweakValue(-0.05f, 0.05f);
         }
+
+        volume *= _effectsVolume;
 
         channel.PitchScale = pitch;
         channel.VolumeDb = Mathf.LinearToDb(volume);

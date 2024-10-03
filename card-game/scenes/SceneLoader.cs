@@ -13,6 +13,7 @@ public partial class SceneLoader : Node2D
 	public override void _Ready()
 	{
 		Instance = this;
+		InitializeSettings();
 		LoadMainMenu();
 	}
 
@@ -53,5 +54,11 @@ public partial class SceneLoader : Node2D
 		{
 			child.QueueFree();
 		}
+	}
+
+	private void InitializeSettings()
+	{
+		var settings = SettingsLoader.LoadSettings();
+		AudioManager.Instance.UpdateEffectsVolume(settings.EffectsVolume);
 	}
 }

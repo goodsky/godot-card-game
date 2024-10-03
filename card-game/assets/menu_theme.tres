@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://deqinh8m1b4mg"]
+[gd_resource type="Theme" load_steps=10 format=3 uid="uid://deqinh8m1b4mg"]
 
 [ext_resource type="FontFile" uid="uid://cqj4jrmv0k2pj" path="res://assets/fonts/poco/Poco.tres" id="1_mncfl"]
 
@@ -54,6 +54,11 @@ corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8fl1b"]
+bg_color = Color(0.701961, 0.682353, 0.298039, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b8lsm"]
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uf810"]
 content_margin_left = 24.0
 content_margin_top = 16.0
@@ -71,7 +76,7 @@ corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ndai3"]
-bg_color = Color(0.921569, 0.784314, 0.627451, 1)
+bg_color = Color(0.592157, 0.505882, 0.305882, 1)
 border_width_left = 5
 border_width_top = 5
 border_width_right = 5
@@ -96,6 +101,8 @@ Button/styles/disabled = SubResource("StyleBoxFlat_uxnqp")
 Button/styles/hover = SubResource("StyleBoxFlat_htu51")
 Button/styles/normal = SubResource("StyleBoxFlat_hbg4k")
 Button/styles/pressed = SubResource("StyleBoxFlat_8al7e")
+HSlider/styles/grabber_area = SubResource("StyleBoxFlat_8fl1b")
+HSlider/styles/grabber_area_highlight = SubResource("StyleBoxFlat_b8lsm")
 ItemList/styles/panel = SubResource("StyleBoxFlat_uf810")
 Label/colors/font_shadow_color = Color(0.0235294, 0.0235294, 0.0235294, 1)
 Label/constants/shadow_offset_x = 3

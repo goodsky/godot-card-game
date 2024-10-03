@@ -136,7 +136,7 @@ public partial class InfoArea : Node2D
 
 	public void Click_MenuBar()
 	{
-		GD.Print("Menu Bar Clicked");
+		SettingsPopUp.PopUp(MainGame.Instance.PopUpParent, fadeBackground: false, showMainMenuButton: true);
 	}
 
 	public void MouseEntered_DrawFromDeckButton()
