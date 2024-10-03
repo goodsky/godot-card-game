@@ -9,6 +9,8 @@ public static class Constants
 	public static readonly string StarterDeckResourcePath = "user://decks/test.cards.json";
 
 	public static readonly PackedScene CardScene = GD.Load<PackedScene>("res://scenes/game/Card.tscn");
+	public static readonly PackedScene SettingsPopUp = GD.Load<PackedScene>("res://scenes/SettingsPopUp.tscn");
+	public static readonly PackedScene ConfirmPopUp = GD.Load<PackedScene>("res://scenes/ConfirmPopUp.tscn");
 	public static readonly PackedScene MainGameScene = GD.Load<PackedScene>("res://scenes/game/MainGame.tscn");
 	public static readonly PackedScene MainMenuScene = GD.Load<PackedScene>("res://scenes/menu/MainMenu.tscn");
 

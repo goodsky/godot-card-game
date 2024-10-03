@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Linq;
 
 public partial class MainMenu : Control
@@ -73,6 +72,11 @@ public partial class MainMenu : Control
 			var creatureDeck = new Deck(creatureCards, "Creatures");
 			SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck);
 		}
+	}
+
+	public void Click_Settings()
+	{
+		SettingsPopUp.PopUp(this, fadeBackground: false, showMainMenuButton: false);
 	}
 
 	public void Click_Cancel()

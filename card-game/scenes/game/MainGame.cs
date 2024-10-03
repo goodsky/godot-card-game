@@ -43,6 +43,9 @@ public partial class MainGame : Node2D
 	[Export]
 	public HealthBar HealthBar { get; set; }
 
+	[Export]
+	public Control PopUpParent { get; set; }
+
 	public Deck Creatures { get; set; }
 
 	public Deck Sacrifices { get; set; }

@@ -1,0 +1,118 @@
+[gd_scene load_steps=4 format=3 uid="uid://ckwfnbu0i1w1c"]
+
+[ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://assets/menu_theme.tres" id="1_txowx"]
+[ext_resource type="Script" path="res://scenes/SettingsPopUp.cs" id="2_bibd7"]
+[ext_resource type="Theme" uid="uid://8x0i3u8oadd6" path="res://assets/menu_small_label.tres" id="2_c8tfh"]
+
+[node name="SettingsPopUp" type="Control" node_paths=PackedStringArray("BackgroundFade", "EffectsVolumeSlider", "MusicVolumeSlider", "MainMenuButton")]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_txowx")
+script = ExtResource("2_bibd7")
+BackgroundFade = NodePath("Background")
+EffectsVolumeSlider = NodePath("PanelContainer/VBoxContainer/EffectsVolumeContainer/EffectVolumeSlider")
+MusicVolumeSlider = NodePath("PanelContainer/VBoxContainer/MusicVolumeContainer/MusicVolumeSlider")
+MainMenuButton = NodePath("PanelContainer/VBoxContainer/ButtonContainer/MainMenuButton")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.541176, 0.541176, 0.541176, 0.294118)
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="PanelContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="TopBuffer" type="Control" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EffectsVolumeContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/EffectsVolumeContainer"]
+custom_minimum_size = Vector2(101, 0)
+layout_mode = 2
+theme = ExtResource("2_c8tfh")
+text = "Effects Audio"
+
+[node name="EffectVolumeSlider" type="HSlider" parent="PanelContainer/VBoxContainer/EffectsVolumeContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.1
+value = 1.0
+
+[node name="MusicVolumeContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PanelContainer/VBoxContainer/MusicVolumeContainer"]
+custom_minimum_size = Vector2(101, 0)
+layout_mode = 2
+theme = ExtResource("2_c8tfh")
+text = "Music Audio"
+
+[node name="MusicVolumeSlider" type="HSlider" parent="PanelContainer/VBoxContainer/MusicVolumeContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.1
+value = 1.0
+
+[node name="BottomBuffer" type="Control" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonContainer" type="HBoxContainer" parent="PanelContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 25
+alignment = 2
+
+[node name="MainMenuButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+text = "Main Menu"
+
+[node name="Buffer" type="Control" parent="PanelContainer/VBoxContainer/ButtonContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
+custom_minimum_size = Vector2(170, 0)
+layout_mode = 2
+text = "Cancel"
+
+[connection signal="drag_ended" from="PanelContainer/VBoxContainer/EffectsVolumeContainer/EffectVolumeSlider" to="." method="UpdateEffectsVolume"]
+[connection signal="drag_ended" from="PanelContainer/VBoxContainer/MusicVolumeContainer/MusicVolumeSlider" to="." method="UpdateMusicVolume"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ButtonContainer/MainMenuButton" to="." method="Click_MainMenu"]
+[connection signal="pressed" from="PanelContainer/VBoxContainer/ButtonContainer/CancelButton" to="." method="Click_Cancel"]
