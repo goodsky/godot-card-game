@@ -1,0 +1,21 @@
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://bp6sa0wtarlmt"]
+
+[ext_resource type="FontFile" uid="uid://bdmp3p71mgudh" path="res://assets/fonts/connection_ii/ConnectionII.otf" id="1_bmmou"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oyw32"]
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
+shadow_color = Color(0.196078, 0.196078, 0.196078, 0.580392)
+shadow_size = 5
+shadow_offset = Vector2(3, 3)
+
+[resource]
+Label/font_sizes/font_size = 28
+Label/fonts/font = ExtResource("1_bmmou")
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_oyw32")

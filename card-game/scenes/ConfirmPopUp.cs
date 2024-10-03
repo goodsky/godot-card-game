@@ -15,6 +15,14 @@ public partial class ConfirmPopUp : Control
 	[Export]
 	public Button CancelButton { get; set; }
 
+	public override void _Input(InputEvent inputEvent)
+	{
+		if (inputEvent.IsActionPressed("ui_cancel"))
+		{
+			QueueFree();
+		}
+	}
+
 	public static void PopUp(Node root, string message, Action confirm, Action cancel = null, string confirmText = "Confirm", bool fadeBackground = false)
 	{
 		var confirmPopUp = Constants.ConfirmPopUp.Instantiate<ConfirmPopUp>();

@@ -1,20 +1,21 @@
 using System;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Godot;
 
 public static class SettingsLoader
 {
-    private static readonly string UserSettingsPath = "user://settings.json";
+    private static readonly string UserSettingsPath = Path.Combine(Constants.UserDataDirectory, "settings.json");
 
-	public class SavedSettings
-	{
-		[JsonPropertyName("effectsVolume")]
-		public float EffectsVolume { get; set; }
+    public class SavedSettings
+    {
+        [JsonPropertyName("effectsVolume")]
+        public float EffectsVolume { get; set; }
 
-		[JsonPropertyName("musicVolume")]
-		public float MusicVolume { get; set; }
-	}
+        [JsonPropertyName("musicVolume")]
+        public float MusicVolume { get; set; }
+    }
 
     public static SavedSettings LoadSettings()
     {
@@ -26,7 +27,7 @@ public static class SettingsLoader
         catch (Exception ex)
         {
             GD.Print($"Could not load settings file. Using the default. ", ex.Message);
-			return new SavedSettings
+            return new SavedSettings
             {
                 EffectsVolume = 1.0f,
                 MusicVolume = 1.0f,
@@ -45,17 +46,16 @@ public static class SettingsLoader
         };
 
         var settingsJson = JsonSerializer.Serialize(settings);
-		GD.Print("Updating settings.");
-
-		var file = Godot.FileAccess.Open(UserSettingsPath, Godot.FileAccess.ModeFlags.Write);
-		if (file == null)
-		{
-			GD.PushError($"Failed to save settings at {UserSettingsPath}: {Godot.FileAccess.GetOpenError()}");
-		}
+        DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+        var file = Godot.FileAccess.Open(UserSettingsPath, Godot.FileAccess.ModeFlags.Write);
+        if (file == null)
+        {
+            GD.PushError($"Failed to save settings at {UserSettingsPath}: {Godot.FileAccess.GetOpenError()}");
+        }
         else
         {
             file.StoreString(settingsJson);
-		    file.Close();
+            file.Close();
         }
     }
 }

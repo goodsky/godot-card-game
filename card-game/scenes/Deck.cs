@@ -3,15 +3,12 @@ using System.Collections.Generic;
 
 public class Deck
 {
-    public string Name { get; private set; }
-
     public List<CardInfo> Cards { get; private set; } = new List<CardInfo>();
 
     public int Count => Cards.Count;
 
-    public Deck(IEnumerable<CardInfo> cards, string name)
+    public Deck(IEnumerable<CardInfo> cards)
     {
-        Name = name;
         Cards = new List<CardInfo>(cards);
         ShuffleCards();
     }

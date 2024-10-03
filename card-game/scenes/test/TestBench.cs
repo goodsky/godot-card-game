@@ -33,6 +33,11 @@ public partial class TestBench : Node2D
 		this.StartCoroutine(Debug_PlaySoundCoroutine());
 	}
 
+	public void Click_GenerateDeck()
+	{
+		GameLoader.Debug_TestEndToEnd();
+	}
+
 	private IEnumerable Debug_PlaySoundCoroutine()
 	{
 		yield return AudioManager.Instance.Play(Constants.Audio.CardsShuffle);

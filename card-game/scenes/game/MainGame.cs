@@ -233,6 +233,9 @@ public partial class MainGame : Node2D
 
 	public void GameOver()
 	{
+		// bool playerWon = MainGame.Instance.HealthBar.PlayerPoints > 0;
+		GameLoader.ClearGame();
+
 		TransitionToState(GameState.GameOver);
 	}
 
@@ -298,8 +301,8 @@ public partial class MainGame : Node2D
 				var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
 				var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
 				var creatureCards = cardPool.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
-				Sacrifices = new Deck(sacrificeCards, "Sacrifices");
-				Creatures = new Deck(creatureCards, "Creatures");
+				Sacrifices = new Deck(sacrificeCards);
+				Creatures = new Deck(creatureCards);
 
 				var moves = new ScriptedMove[] {
 					new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),

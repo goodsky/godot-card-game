@@ -14,28 +14,36 @@ public partial class SettingsPopUp : Control
 	[Export]
 	public Button MainMenuButton { get; set; }
 
-    public override void _Ready()
-    {
+	public override void _Ready()
+	{
 		var settings = SettingsLoader.LoadSettings();
 
 		EffectsVolumeSlider.Value = settings.EffectsVolume;
 		MusicVolumeSlider.Value = settings.MusicVolume;
-    }
+	}
 
-    public override void _EnterTree()
-    {
+	public override void _EnterTree()
+	{
 		GD.Print("Settings pop up added");
-        GetTree().Paused = true;
-    }
+		GetTree().Paused = true;
+	}
 
-    public override void _ExitTree()
-    {
+	public override void _ExitTree()
+	{
 		GD.Print("Settings pop up removed");
 		SettingsLoader.SaveSettings((float)EffectsVolumeSlider.Value, (float)MusicVolumeSlider.Value);
-        GetTree().Paused = false;
-    }
+		GetTree().Paused = false;
+	}
 
-    public static void PopUp(Node root, bool fadeBackground = false, bool showMainMenuButton = false)
+	public override void _Input(InputEvent inputEvent)
+	{
+		if (inputEvent.IsActionPressed("ui_cancel"))
+		{
+			Click_Cancel();
+		}
+	}
+
+	public static void PopUp(Node root, bool fadeBackground = false, bool showMainMenuButton = false)
 	{
 		GD.Print("Pop up Settings Dialog");
 		var settingsPopUp = Constants.SettingsPopUp.Instantiate<SettingsPopUp>();

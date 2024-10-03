@@ -6,10 +6,20 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Godot;
 
+public class GameProgress
+{
+	public int Level { get; set; }
+
+	public int Score { get; set; }
+
+	public CardPool CardPool { get; set; }
+
+	public List<CardInfo> DeckCards { get; set; }
+}
+
 public static class GameLoader
 {
-	private static readonly string GameDeckDirectory = "res://decks";
-	private static readonly string UserDeckDirectory = "user://decks";
+	private static readonly string UserSavePath = Path.Combine(Constants.UserDataDirectory, "game.json");
 
 	public class SavedCardPool
 	{
@@ -20,11 +30,108 @@ public static class GameLoader
 		public List<CardInfo> Cards { get; set; }
 	}
 
+	public class SavedGame
+	{
+		[JsonPropertyName("level")]
+		public int Level { get; set; }
+
+		[JsonPropertyName("score")]
+		public int Score { get; set; }
+
+		[JsonPropertyName("cards")]
+		public string CardPoolName { get; set; }
+
+		[JsonPropertyName("deck")]
+		public List<int> DeckCardIds { get; set; }
+	}
+
+	public static bool SavedGameExists()
+	{
+		return Godot.FileAccess.FileExists(UserSavePath);
+	}
+
+	public static GameProgress LoadGame()
+	{
+		if (!SavedGameExists())
+		{
+			return null;
+		}
+
+		var fileContent = Godot.FileAccess.GetFileAsString(UserSavePath);
+		if (string.IsNullOrEmpty(fileContent))
+		{
+			GD.PrintErr($"Failed to load saved game from {UserSavePath}. Error=\"{Godot.FileAccess.GetOpenError()}\"");
+			return null;
+		}
+
+		var saveGame = JsonSerializer.Deserialize<SavedGame>(fileContent);
+		var cardPools = GetAvailableCardPools();
+
+		CardPool cardPool = cardPools.Select(x => x.cards).FirstOrDefault(x => x.Name == saveGame.CardPoolName);
+		if (cardPool == null)
+		{
+			GD.PushError($"Could not find card pool for save game!");
+			return null;
+		}
+
+		List<CardInfo> deck = new List<CardInfo>();
+		foreach (int id in saveGame.DeckCardIds)
+		{
+			var card = cardPool.Cards.FirstOrDefault(x => x.Id == id);
+			if (card.Id != id)
+			{
+				GD.PushError($"Failed to load card in deck with id {id} from cardpool {cardPool.Name}");
+			}
+			else
+			{
+				deck.Add(card);
+			}
+		}
+
+		return new GameProgress
+		{
+			Level = saveGame.Level,
+			Score = saveGame.Score,
+			CardPool = cardPool,
+			DeckCards = deck,
+		};
+	}
+
+	public static void SaveGame(GameProgress game)
+	{
+		GD.Print("Saving game.");
+		var saveGame = new SavedGame
+		{
+			Level = game.Level,
+			Score = game.Score,
+			CardPoolName = game.CardPool.Name,
+			DeckCardIds = game.DeckCards.Select(x => x.Id).ToList(),
+		};
+
+		var saveGameJson = JsonSerializer.Serialize(saveGame);
+		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+		var file = Godot.FileAccess.Open(UserSavePath, Godot.FileAccess.ModeFlags.Write);
+		if (file == null)
+		{
+			GD.PushError($"Failed to save game at {UserSavePath}: {Godot.FileAccess.GetOpenError()}");
+		}
+		else
+		{
+			file.StoreString(saveGameJson);
+			file.Close();
+		}
+	}
+
+	public static void ClearGame()
+	{
+		Godot.DirAccess.RemoveAbsolute(UserSavePath);
+	}
+
 	public static List<(CardPool cards, string path)> GetAvailableCardPools()
 	{
 		var cardPools = new List<(CardPool, string)>();
 
-		var directoryPaths = new string[] { GameDeckDirectory, UserDeckDirectory };
+		var directoryPaths = new string[] { Constants.GameDeckDirectory, Constants.UserDeckDirectory };
 		foreach (var directoryPath in directoryPaths)
 		{
 			var dir = DirAccess.Open(directoryPath);
@@ -75,8 +182,8 @@ public static class GameLoader
 
 		var cardPoolJson = JsonSerializer.Serialize(new SavedCardPool() { Cards = cards.Cards, Name = cards.Name });
 
-		DirAccess.MakeDirRecursiveAbsolute(UserDeckDirectory);
-		var filePath = Path.Combine(UserDeckDirectory, filename);
+		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDeckDirectory);
+		var filePath = Path.Combine(Constants.UserDeckDirectory, filename);
 		GD.Print("Saving card pool at ", filePath);
 
 		var file = Godot.FileAccess.Open(filePath, Godot.FileAccess.ModeFlags.Write);

@@ -40,5 +40,11 @@ custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Play Sound x3"
 
+[node name="DeckGeneratorButton" type="Button" parent="Control/Buttons"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Generate Test Deck"
+
 [connection signal="pressed" from="Control/Buttons/PlaySoundButton" to="." method="Click_PlaySound"]
 [connection signal="pressed" from="Control/Buttons/PlayMultipleButton" to="." method="Click_PlayManySounds"]
+[connection signal="pressed" from="Control/Buttons/DeckGeneratorButton" to="." method="Click_PlayManySounds"]

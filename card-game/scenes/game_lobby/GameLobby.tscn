@@ -1,0 +1,55 @@
+[gd_scene load_steps=4 format=3 uid="uid://di22clwjd5yiw"]
+
+[ext_resource type="Theme" uid="uid://bp6sa0wtarlmt" path="res://scenes/game_lobby/lobby_theme.tres" id="1_xe6ch"]
+[ext_resource type="Texture2D" uid="uid://b4wwccrfx058e" path="res://assets/sprites/progress-circle.png" id="2_6eo2a"]
+[ext_resource type="Script" path="res://scenes/game_lobby/GameLobby.cs" id="2_bfw0j"]
+
+[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel")]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 800.0
+offset_bottom = 600.0
+theme = ExtResource("1_xe6ch")
+script = ExtResource("2_bfw0j")
+GeneratingCardsPanel = NodePath("GeneratingCardsPanel")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0980392, 0.0980392, 0.156863, 1)
+
+[node name="GeneratingCardsPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -40.0
+offset_right = 150.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="GeneratingCardsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GeneratingCards" type="Label" parent="GeneratingCardsPanel/VBoxContainer"]
+layout_mode = 2
+text = "Generating Cards..."
+horizontal_alignment = 1
+
+[node name="SpinningProgressBar" type="TextureProgressBar" parent="GeneratingCardsPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+value = 100.0
+fill_mode = 4
+texture_progress = ExtResource("2_6eo2a")
+radial_fill_degrees = 60.0

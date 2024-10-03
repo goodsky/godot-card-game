@@ -37,7 +37,6 @@ Text = "FooBar the Great"
 MaxFontSize = 14
 TextBoxSize = Vector2(90, 17)
 Font = ExtResource("4_pnmb0")
-VerticalAlignment = 1
 
 [node name="Avatar" type="Sprite2D" parent="CardFront"]
 position = Vector2(0, -12)

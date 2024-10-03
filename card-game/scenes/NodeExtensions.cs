@@ -8,9 +8,9 @@ public struct CoroutineDelay
 {
     public double TimeSec { get; private set; }
 
-    public CoroutineDelay(double delay)
+    public CoroutineDelay(double delaySec)
     {
-        TimeSec = delay;
+        TimeSec = delaySec;
     }
 }
 
@@ -84,12 +84,12 @@ public static class NodeExtensions
         Color nodeColor = node.Modulate;
         float startA = nodeColor.A;
         float deltaA = alpha - startA;
-		for (float t = 0.0f; t < 1.0f; t = Mathf.Clamp(t + speed, 0.0f, 1.0f))
-		{
-			nodeColor.A = startA + (t * deltaA);
-			node.Modulate = nodeColor;
-			yield return null;
-		}
+        for (float t = 0.0f; t < 1.0f; t = Mathf.Clamp(t + speed, 0.0f, 1.0f))
+        {
+            nodeColor.A = startA + (t * deltaA);
+            node.Modulate = nodeColor;
+            yield return null;
+        }
 
         nodeColor.A = alpha;
         node.Modulate = nodeColor;

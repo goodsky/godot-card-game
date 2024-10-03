@@ -1,11 +1,5 @@
 using Godot;
 
-public enum GameScenes
-{
-	Menu,
-	Game,
-}
-
 public partial class SceneLoader : Node2D
 {
 	public static SceneLoader Instance { get; private set; }
@@ -20,31 +14,24 @@ public partial class SceneLoader : Node2D
 	public void LoadMainMenu()
 	{
 		RemoveAllChildren();
-
-		var mainMenu = Constants.MainMenuScene.Instantiate() as MainMenu;
-
+		var mainMenu = Constants.MainMenuScene.Instantiate<MainMenu>();
 		AddChild(mainMenu);
 	}
 
-	public void LoadMainGame(Deck sacrifices, Deck creatures)
+	public void LoadGameLobby()
 	{
 		RemoveAllChildren();
+		var gameLobby = Constants.GameLobbyScene.Instantiate<GameLobby>();
+		AddChild(gameLobby);
+	}
 
+	public void LoadMainGame(Deck sacrifices, Deck creatures, EnemyAI opponent)
+	{
+		RemoveAllChildren();
 		MainGame mainGame = Constants.MainGameScene.Instantiate<MainGame>();
 		mainGame.Sacrifices = sacrifices;
 		mainGame.Creatures = creatures;
-
-		// TODO: Load the Enemy AI from somewhere
-		var moves = new ScriptedMove[] {
-			new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),
-			new ScriptedMove(1, CardBloodCost.One, CardRarity.Common),
-			new ScriptedMove(3, CardBloodCost.Two),
-			new ScriptedMove(4, CardBloodCost.Two),
-			new ScriptedMove(4, CardBloodCost.Two),
-			new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
-		};
-		mainGame.Opponent = new EnemyAI(new CardPool(creatures.Cards, "EnemyDeck"), moves);
-
+		mainGame.Opponent = opponent;
 		AddChild(mainGame);
 	}
 

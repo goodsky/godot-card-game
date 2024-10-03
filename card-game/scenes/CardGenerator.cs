@@ -8,14 +8,14 @@ using Godot;
 public struct NewCardPoolArgs
 {
 	public int SacrificeCardCount { get; set; }
-	public Dictionary<CardBloodCost, int> CommonCardsCounts { get; set; } 
-	public Dictionary<CardBloodCost, int> UncommonCardsCounts { get; set; } 
-	public Dictionary<CardBloodCost, int> RareCardsCounts { get; set; } 
-} 
+	public Dictionary<CardBloodCost, int> CommonCardsCounts { get; set; }
+	public Dictionary<CardBloodCost, int> UncommonCardsCounts { get; set; }
+	public Dictionary<CardBloodCost, int> RareCardsCounts { get; set; }
+}
 
 public static class CardGenerator
 {
-	private static readonly string DeckGeneratorDataPath = "res://decks/generator/data.json";
+	private static readonly string DeckGeneratorDataPath = "res://cards/generator/data.json";
 
 	public class GeneratorData
 	{
@@ -181,7 +181,8 @@ public static class CardGenerator
 		var adjectives = GetAdjectivesForCardLevel(data, rarity);
 		var adjective = SelectRandom(adjectives);
 
-		var cardInfo =  new CardInfo {
+		var cardInfo = new CardInfo
+		{
 			Id = NextGeneratedCardId++,
 			Name = $"{adjective.Key} {noun.Key}",
 			AvatarResource = avatar,

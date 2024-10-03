@@ -1,0 +1,1182 @@
+{
+   "stats": {
+      "ability_costs": {
+         "attack": 2,
+         "health": 1
+      },
+      "point_limits": [
+         {
+            "cost": 0,
+            "rarity": 0,
+            "limit": 0
+         },
+         {
+            "cost": 0,
+            "rarity": 1,
+            "limit": 2
+         },
+         {
+            "cost": 0,
+            "rarity": 2,
+            "limit": 3
+         },
+         {
+            "cost": 0,
+            "rarity": 3,
+            "limit": 4
+         },
+         {
+            "cost": 1,
+            "rarity": 1,
+            "limit": 4
+         },
+         {
+            "cost": 1,
+            "rarity": 2,
+            "limit": 5
+         },
+         {
+            "cost": 1,
+            "rarity": 3,
+            "limit": 6
+         },
+         {
+            "cost": 2,
+            "rarity": 1,
+            "limit": 6
+         },
+         {
+            "cost": 2,
+            "rarity": 2,
+            "limit": 7
+         },
+         {
+            "cost": 2,
+            "rarity": 3,
+            "limit": 8
+         },
+         {
+            "cost": 3,
+            "rarity": 1,
+            "limit": 10
+         },
+         {
+            "cost": 3,
+            "rarity": 2,
+            "limit": 12
+         },
+         {
+            "cost": 3,
+            "rarity": 3,
+            "limit": 14
+         }
+      ]
+   },
+   "nouns": {
+      "Bug": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_bug_2.png",
+            "res://assets/sprites/avatars/avatar_bug_3.png",
+            "res://assets/sprites/avatars/avatar_bug_4.png",
+            "res://assets/sprites/avatars/avatar_bug_5.png",
+            "res://assets/sprites/avatars/avatar_bug_6.png"
+         ]
+      },
+      "Cat": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_cat_1.png",
+            "res://assets/sprites/avatars/avatar_cat_2.png",
+            "res://assets/sprites/avatars/avatar_cat_3.png"
+         ]
+      },
+      "Frog": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_frog_1.png",
+            "res://assets/sprites/avatars/avatar_frog_2.png",
+            "res://assets/sprites/avatars/avatar_frog_3.png"
+         ]
+      },
+      "Goat": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_goat_0.png",
+            "res://assets/sprites/avatars/avatar_goat_1.png",
+            "res://assets/sprites/avatars/avatar_goat_2.png"
+         ]
+      },
+      "Lizard": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_lizard_0.png",
+            "res://assets/sprites/avatars/avatar_lizard_1.png",
+            "res://assets/sprites/avatars/avatar_lizard_2.png"
+         ]
+      },
+      "Mouse": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_mouse_0.png",
+            "res://assets/sprites/avatars/avatar_mouse_1.png",
+            "res://assets/sprites/avatars/avatar_mouse_2.png"
+         ]
+      },
+      "Pig": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_pig_2.png",
+            "res://assets/sprites/avatars/avatar_pig_3.png",
+            "res://assets/sprites/avatars/avatar_pig_4.png"
+         ]
+      },
+      "Rabbit": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_rabbit_0.png",
+            "res://assets/sprites/avatars/avatar_rabbit_1.png",
+            "res://assets/sprites/avatars/avatar_rabbit_2.png"
+         ]
+      },
+      "Sheep": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_sheep_0.png",
+            "res://assets/sprites/avatars/avatar_sheep_1.png",
+            "res://assets/sprites/avatars/avatar_sheep_2.png"
+         ]
+      },
+      "Squirrel": {
+         "level": 0,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_squirrel_0.png",
+            "res://assets/sprites/avatars/avatar_squirrel_1.png",
+            "res://assets/sprites/avatars/avatar_squirrel_2.png",
+            "res://assets/sprites/avatars/avatar_squirrel_3.png"
+         ]
+      },
+      "Bat": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_bat_0.png",
+            "res://assets/sprites/avatars/avatar_bat_1.png",
+            "res://assets/sprites/avatars/avatar_bat_2.png"
+         ]
+      },
+      "Crow": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_crow_0.png",
+            "res://assets/sprites/avatars/avatar_crow_1.png",
+            "res://assets/sprites/avatars/avatar_crow_2.png"
+         ]
+      },
+      "Deer": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_deer_1.png",
+            "res://assets/sprites/avatars/avatar_deer_2.png",
+            "res://assets/sprites/avatars/avatar_deer_3.png"
+         ]
+      },
+      "Fox": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_fox_1.png",
+            "res://assets/sprites/avatars/avatar_fox_2.png",
+            "res://assets/sprites/avatars/avatar_fox_3.png"
+         ]
+      },
+      "Goblin": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_goblin_0.png",
+            "res://assets/sprites/avatars/avatar_goblin_1.png",
+            "res://assets/sprites/avatars/avatar_goblin_2.png"
+         ]
+      },
+      "Hawk": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_hawk_0.png",
+            "res://assets/sprites/avatars/avatar_hawk_1.png",
+            "res://assets/sprites/avatars/avatar_hawk_2.png"
+         ]
+      },
+      "Minion": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_minion_0.png",
+            "res://assets/sprites/avatars/avatar_minion_1.png",
+            "res://assets/sprites/avatars/avatar_minion_2.png"
+         ]
+      },
+      "Raven": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_raven_0.png",
+            "res://assets/sprites/avatars/avatar_raven_1.png",
+            "res://assets/sprites/avatars/avatar_raven_2.png"
+         ]
+      },
+      "Slime": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_slime_0.png",
+            "res://assets/sprites/avatars/avatar_slime_1.png",
+            "res://assets/sprites/avatars/avatar_slime_2.png"
+         ]
+      },
+      "Snake": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_snake_0.png",
+            "res://assets/sprites/avatars/avatar_snake_1.png",
+            "res://assets/sprites/avatars/avatar_snake_2.png"
+         ]
+      },
+      "Wolf": {
+         "level": 1,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_wolf_0.png",
+            "res://assets/sprites/avatars/avatar_wolf_1.png",
+            "res://assets/sprites/avatars/avatar_wolf_2.png"
+         ]
+      },
+      "Bear": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_bear_0.png",
+            "res://assets/sprites/avatars/avatar_bear_1.png",
+            "res://assets/sprites/avatars/avatar_bear_2.png"
+         ]
+      },
+      "Crocodile": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_crocodile_0.png",
+            "res://assets/sprites/avatars/avatar_crocodile_1.png",
+            "res://assets/sprites/avatars/avatar_crocodile_2.png"
+         ]
+      },
+      "Cyclops": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_cyclops_0.png",
+            "res://assets/sprites/avatars/avatar_cyclops_1.png",
+            "res://assets/sprites/avatars/avatar_cyclops_2.png"
+         ]
+      },
+      "Demon": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_demon_0.png",
+            "res://assets/sprites/avatars/avatar_demon_1.png",
+            "res://assets/sprites/avatars/avatar_demon_2.png"
+         ]
+      },
+      "Ghoul": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_ghoul_0.png",
+            "res://assets/sprites/avatars/avatar_ghoul_1.png",
+            "res://assets/sprites/avatars/avatar_ghoul_2.png"
+         ]
+      },
+      "Griffin": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_griffin_0.png",
+            "res://assets/sprites/avatars/avatar_griffin_1.png",
+            "res://assets/sprites/avatars/avatar_griffin_2.png"
+         ]
+      },
+      "Merfolk": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_merfolk_0.png",
+            "res://assets/sprites/avatars/avatar_merfolk_1.png",
+            "res://assets/sprites/avatars/avatar_merfolk_2.png"
+         ]
+      },
+      "Ogre": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_ogre_0.png",
+            "res://assets/sprites/avatars/avatar_ogre_1.png",
+            "res://assets/sprites/avatars/avatar_ogre_2.png"
+         ]
+      },
+      "Pegasus": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_pegasus_0.png",
+            "res://assets/sprites/avatars/avatar_pegasus_1.png",
+            "res://assets/sprites/avatars/avatar_pegasus_2.png"
+         ]
+      },
+      "Werewolf": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_werewolf_0.png",
+            "res://assets/sprites/avatars/avatar_werewolf_1.png",
+            "res://assets/sprites/avatars/avatar_werewolf_2.png"
+         ]
+      },
+      "Zombie": {
+         "level": 2,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_zombie_0.png",
+            "res://assets/sprites/avatars/avatar_zombie_1.png",
+            "res://assets/sprites/avatars/avatar_zombie_2.png"
+         ]
+      },
+      "Basilisk": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_basilisk_0.png",
+            "res://assets/sprites/avatars/avatar_basilisk_1.png",
+            "res://assets/sprites/avatars/avatar_basilisk_2.png"
+         ]
+      },
+      "Djinn": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_djinn_0.png",
+            "res://assets/sprites/avatars/avatar_djinn_1.png",
+            "res://assets/sprites/avatars/avatar_djinn_2.png"
+         ]
+      },
+      "Dragon": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_dragon_0.png",
+            "res://assets/sprites/avatars/avatar_dragon_1.png",
+            "res://assets/sprites/avatars/avatar_dragon_2.png"
+         ]
+      },
+      "Leviathan": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_leviathan_0.png",
+            "res://assets/sprites/avatars/avatar_leviathan_1.png",
+            "res://assets/sprites/avatars/avatar_leviathan_2.png"
+         ]
+      },
+      "Lich": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_lich_0.png",
+            "res://assets/sprites/avatars/avatar_lich_1.png",
+            "res://assets/sprites/avatars/avatar_lich_2.png"
+         ]
+      },
+      "Mage": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_mage_0.png",
+            "res://assets/sprites/avatars/avatar_mage_1.png",
+            "res://assets/sprites/avatars/avatar_mage_2.png"
+         ]
+      },
+      "Nightmare": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_nightmare_0.png",
+            "res://assets/sprites/avatars/avatar_nightmare_1.png",
+            "res://assets/sprites/avatars/avatar_nightmare_2.png"
+         ]
+      },
+      "Phoenix": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_phoenix_0.png",
+            "res://assets/sprites/avatars/avatar_phoenix_1.png",
+            "res://assets/sprites/avatars/avatar_phoenix_2.png"
+         ]
+      },
+      "Vampire": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_vampire_0.png",
+            "res://assets/sprites/avatars/avatar_vampire_1.png",
+            "res://assets/sprites/avatars/avatar_vampire_2.png"
+         ]
+      },
+      "Wraith": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_wraith_0.png",
+            "res://assets/sprites/avatars/avatar_wraith_1.png",
+            "res://assets/sprites/avatars/avatar_wraith_2.png"
+         ]
+      },
+      "Yeti": {
+         "level": 3,
+         "avatars": [
+            "res://assets/sprites/avatars/avatar_yeti_0.png",
+            "res://assets/sprites/avatars/avatar_yeti_1.png",
+            "res://assets/sprites/avatars/avatar_yeti_2.png"
+         ]
+      }
+   },
+   "adjectives": {
+      "Bumbling": {
+         "level": 0
+      },
+      "Clumsy": {
+         "level": 0
+      },
+      "Creeping": {
+         "level": 0
+      },
+      "Dull": {
+         "level": 0
+      },
+      "Grubby": {
+         "level": 0
+      },
+      "Lazy": {
+         "level": 0
+      },
+      "Nervous": {
+         "level": 0
+      },
+      "Pathetic": {
+         "level": 0
+      },
+      "Puny": {
+         "level": 0
+      },
+      "Scared": {
+         "level": 0
+      },
+      "Slow": {
+         "level": 0
+      },
+      "Small": {
+         "level": 0
+      },
+      "Stumbling": {
+         "level": 0
+      },
+      "Weak": {
+         "level": 0
+      },
+      "Wobbly": {
+         "level": 0
+      },
+      "Abyssal": {
+         "level": 1
+      },
+      "Accursed": {
+         "level": 1
+      },
+      "Adamant": {
+         "level": 1
+      },
+      "Agile": {
+         "level": 1
+      },
+      "Alluring": {
+         "level": 1
+      },
+      "Amber": {
+         "level": 1
+      },
+      "Ancillary": {
+         "level": 1
+      },
+      "Arcadian": {
+         "level": 1
+      },
+      "Arcane": {
+         "level": 1
+      },
+      "Arctic": {
+         "level": 1
+      },
+      "Ashen": {
+         "level": 1
+      },
+      "Astral": {
+         "level": 1
+      },
+      "Avenging": {
+         "level": 1
+      },
+      "Baleful": {
+         "level": 1
+      },
+      "Benevolent": {
+         "level": 1
+      },
+      "Bewitched": {
+         "level": 1
+      },
+      "Bleak": {
+         "level": 1
+      },
+      "Blighted": {
+         "level": 1
+      },
+      "Bold": {
+         "level": 1
+      },
+      "Bounded": {
+         "level": 1
+      },
+      "Boundless": {
+         "level": 1
+      },
+      "Brave": {
+         "level": 1
+      },
+      "Brilliant": {
+         "level": 1
+      },
+      "Brooding": {
+         "level": 1
+      },
+      "Burning": {
+         "level": 1
+      },
+      "Celestial": {
+         "level": 1
+      },
+      "Cerulean": {
+         "level": 1
+      },
+      "Chaotic": {
+         "level": 1
+      },
+      "Charmed": {
+         "level": 1
+      },
+      "Cloaked": {
+         "level": 1
+      },
+      "Clouded": {
+         "level": 1
+      },
+      "Concealed": {
+         "level": 1
+      },
+      "Corrupted": {
+         "level": 1
+      },
+      "Coveted": {
+         "level": 1
+      },
+      "Crested": {
+         "level": 1
+      },
+      "Crimson": {
+         "level": 1
+      },
+      "Cryptic": {
+         "level": 1
+      },
+      "Crystal": {
+         "level": 1
+      },
+      "Cunning": {
+         "level": 1
+      },
+      "Cursed": {
+         "level": 1
+      },
+      "Daring": {
+         "level": 1
+      },
+      "Dark": {
+         "level": 1
+      },
+      "Dazzling": {
+         "level": 1
+      },
+      "Deadly": {
+         "level": 1
+      },
+      "Demonic": {
+         "level": 1
+      },
+      "Desolate": {
+         "level": 1
+      },
+      "Devout": {
+         "level": 1
+      },
+      "Dire": {
+         "level": 1
+      },
+      "Dominant": {
+         "level": 1
+      },
+      "Doomed": {
+         "level": 1
+      },
+      "Draconic": {
+         "level": 1
+      },
+      "Dreaded": {
+         "level": 1
+      },
+      "Dreadful": {
+         "level": 1
+      },
+      "Dusty": {
+         "level": 1
+      },
+      "Dying": {
+         "level": 1
+      },
+      "Eerie": {
+         "level": 1
+      },
+      "Electric": {
+         "level": 1
+      },
+      "Elusive": {
+         "level": 1
+      },
+      "Elven": {
+         "level": 1
+      },
+      "Emerald": {
+         "level": 1
+      },
+      "Empowered": {
+         "level": 1
+      },
+      "Enchanted": {
+         "level": 1
+      },
+      "Endless": {
+         "level": 1
+      },
+      "Enigmatic": {
+         "level": 1
+      },
+      "Enraged": {
+         "level": 1
+      },
+      "Exalted": {
+         "level": 1
+      },
+      "Exotic": {
+         "level": 1
+      },
+      "Fabled": {
+         "level": 1
+      },
+      "Fearless": {
+         "level": 1
+      },
+      "Feral": {
+         "level": 1
+      },
+      "Fierce": {
+         "level": 1
+      },
+      "Fieriest": {
+         "level": 1
+      },
+      "Fiery": {
+         "level": 1
+      },
+      "Flaming": {
+         "level": 1
+      },
+      "Fleet": {
+         "level": 1
+      },
+      "Forgotten": {
+         "level": 1
+      },
+      "Formidable": {
+         "level": 1
+      },
+      "Forsaken": {
+         "level": 1
+      },
+      "Forsworn": {
+         "level": 1
+      },
+      "Fractured": {
+         "level": 1
+      },
+      "Frozen": {
+         "level": 1
+      },
+      "Furtive": {
+         "level": 1
+      },
+      "Ghastly": {
+         "level": 1
+      },
+      "Ghostly": {
+         "level": 1
+      },
+      "Gilded": {
+         "level": 1
+      },
+      "Glimmering": {
+         "level": 1
+      },
+      "Gloomy": {
+         "level": 1
+      },
+      "Glorious": {
+         "level": 1
+      },
+      "Golden": {
+         "level": 1
+      },
+      "Gory": {
+         "level": 1
+      },
+      "Grave": {
+         "level": 1
+      },
+      "Grim": {
+         "level": 1
+      },
+      "Grisly": {
+         "level": 1
+      },
+      "Hallowed": {
+         "level": 1
+      },
+      "Harmonious": {
+         "level": 1
+      },
+      "Haunted": {
+         "level": 1
+      },
+      "Heroic": {
+         "level": 1
+      },
+      "Hollow": {
+         "level": 1
+      },
+      "Honorable": {
+         "level": 1
+      },
+      "Hungry": {
+         "level": 1
+      },
+      "Icy": {
+         "level": 1
+      },
+      "Illustrious": {
+         "level": 1
+      },
+      "Impenetrable": {
+         "level": 1
+      },
+      "Imposing": {
+         "level": 1
+      },
+      "Inexorable": {
+         "level": 1
+      },
+      "Invincible": {
+         "level": 1
+      },
+      "Iridescent": {
+         "level": 1
+      },
+      "Jagged": {
+         "level": 1
+      },
+      "Keen": {
+         "level": 1
+      },
+      "Lethal": {
+         "level": 1
+      },
+      "Livid": {
+         "level": 1
+      },
+      "Lone": {
+         "level": 1
+      },
+      "Luminous": {
+         "level": 1
+      },
+      "Lurking": {
+         "level": 1
+      },
+      "Magnificent": {
+         "level": 1
+      },
+      "Majestic": {
+         "level": 1
+      },
+      "Malevolent": {
+         "level": 1
+      },
+      "Malicious": {
+         "level": 1
+      },
+      "Mighty": {
+         "level": 1
+      },
+      "Moonlit": {
+         "level": 1
+      },
+      "Mysterious": {
+         "level": 1
+      },
+      "Mystic": {
+         "level": 1
+      },
+      "Mystical": {
+         "level": 1
+      },
+      "Nefarious": {
+         "level": 1
+      },
+      "Nether": {
+         "level": 1
+      },
+      "Nimble": {
+         "level": 1
+      },
+      "Noble": {
+         "level": 1
+      },
+      "Obscure": {
+         "level": 1
+      },
+      "Obsidian": {
+         "level": 1
+      },
+      "Ominous": {
+         "level": 1
+      },
+      "Pale": {
+         "level": 1
+      },
+      "Parched": {
+         "level": 1
+      },
+      "Peerless": {
+         "level": 1
+      },
+      "Perilous": {
+         "level": 1
+      },
+      "Phantom": {
+         "level": 1
+      },
+      "Pious": {
+         "level": 1
+      },
+      "Plague-ridden": {
+         "level": 1
+      },
+      "Prowling": {
+         "level": 1
+      },
+      "Quick": {
+         "level": 1
+      },
+      "Quiet": {
+         "level": 1
+      },
+      "Radiant": {
+         "level": 1
+      },
+      "Ravenous": {
+         "level": 1
+      },
+      "Reckless": {
+         "level": 1
+      },
+      "Resilient": {
+         "level": 1
+      },
+      "Righteous": {
+         "level": 1
+      },
+      "Rugged": {
+         "level": 1
+      },
+      "Runic": {
+         "level": 1
+      },
+      "Sacred": {
+         "level": 1
+      },
+      "Savage": {
+         "level": 1
+      },
+      "Savory": {
+         "level": 1
+      },
+      "Scarred": {
+         "level": 1
+      },
+      "Secluded": {
+         "level": 1
+      },
+      "Seething": {
+         "level": 1
+      },
+      "Serene": {
+         "level": 1
+      },
+      "Shimmering": {
+         "level": 1
+      },
+      "Shrouded": {
+         "level": 1
+      },
+      "Silent": {
+         "level": 1
+      },
+      "Silver": {
+         "level": 1
+      },
+      "Sinister": {
+         "level": 1
+      },
+      "Sly": {
+         "level": 1
+      },
+      "Smoldering": {
+         "level": 1
+      },
+      "Sneaky": {
+         "level": 1
+      },
+      "Soaring": {
+         "level": 1
+      },
+      "Sorcerous": {
+         "level": 1
+      },
+      "Sorrowful": {
+         "level": 1
+      },
+      "Spectacular": {
+         "level": 1
+      },
+      "Spectral": {
+         "level": 1
+      },
+      "Spellbound": {
+         "level": 1
+      },
+      "Spiteful": {
+         "level": 1
+      },
+      "Stalwart": {
+         "level": 1
+      },
+      "Stark": {
+         "level": 1
+      },
+      "Steadfast": {
+         "level": 1
+      },
+      "Stealthy": {
+         "level": 1
+      },
+      "Stoic": {
+         "level": 1
+      },
+      "Stormy": {
+         "level": 1
+      },
+      "Swift": {
+         "level": 1
+      },
+      "Tempestuous": {
+         "level": 1
+      },
+      "Thorned": {
+         "level": 1
+      },
+      "Thundering": {
+         "level": 1
+      },
+      "Tranquil": {
+         "level": 1
+      },
+      "Turbulent": {
+         "level": 1
+      },
+      "Twilight": {
+         "level": 1
+      },
+      "Unbroken": {
+         "level": 1
+      },
+      "Unseen": {
+         "level": 1
+      },
+      "Untamed": {
+         "level": 1
+      },
+      "Valiant": {
+         "level": 1
+      },
+      "Vanished": {
+         "level": 1
+      },
+      "Vanquished": {
+         "level": 1
+      },
+      "Veiled": {
+         "level": 1
+      },
+      "Vengeful": {
+         "level": 1
+      },
+      "Venomous": {
+         "level": 1
+      },
+      "Vigilant": {
+         "level": 1
+      },
+      "Vigorous": {
+         "level": 1
+      },
+      "Vile": {
+         "level": 1
+      },
+      "Vivid": {
+         "level": 1
+      },
+      "Void": {
+         "level": 1
+      },
+      "Volatile": {
+         "level": 1
+      },
+      "War-torn": {
+         "level": 1
+      },
+      "Whispering": {
+         "level": 1
+      },
+      "Wild": {
+         "level": 1
+      },
+      "Wily": {
+         "level": 1
+      },
+      "Wretched": {
+         "level": 1
+      },
+      "Ancient": {
+         "level": 2
+      },
+      "Apocalyptic": {
+         "level": 2
+      },
+      "Barbaric": {
+         "level": 2
+      },
+      "Blazing": {
+         "level": 2
+      },
+      "Cataclysmic": {
+         "level": 2
+      },
+      "Colossal": {
+         "level": 2
+      },
+      "Divine": {
+         "level": 2
+      },
+      "Enormous": {
+         "level": 2
+      },
+      "Eternal": {
+         "level": 2
+      },
+      "Fearsome": {
+         "level": 2
+      },
+      "Frosty": {
+         "level": 2
+      },
+      "Gigantic": {
+         "level": 2
+      },
+      "Immense": {
+         "level": 2
+      },
+      "Imperial": {
+         "level": 2
+      },
+      "Infernal": {
+         "level": 2
+      },
+      "Legendary": {
+         "level": 2
+      },
+      "Menacing": {
+         "level": 2
+      },
+      "Monstrous": {
+         "level": 2
+      },
+      "Mythic": {
+         "level": 2
+      },
+      "Omnipotent": {
+         "level": 2
+      },
+      "Overwhelming": {
+         "level": 2
+      },
+      "Powerful": {
+         "level": 2
+      },
+      "Primal": {
+         "level": 2
+      },
+      "Primordial": {
+         "level": 2
+      },
+      "Relentless": {
+         "level": 2
+      },
+      "Shadowy": {
+         "level": 2
+      },
+      "Terrifying": {
+         "level": 2
+      },
+      "Timeless": {
+         "level": 2
+      },
+      "Titanic": {
+         "level": 2
+      },
+      "Transcendent": {
+         "level": 2
+      },
+      "Unfathomable": {
+         "level": 2
+      },
+      "Unstoppable": {
+         "level": 2
+      },
+      "Unyielding": {
+         "level": 2
+      },
+      "Voracious": {
+         "level": 2
+      },
+      "Wrathful": {
+         "level": 2
+      }
+   }
+}
