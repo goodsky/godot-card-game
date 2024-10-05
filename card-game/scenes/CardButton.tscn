@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://clmlln41m7x53"]
+
+[ext_resource type="Script" path="res://scenes/CardButton.cs" id="1_rpaj5"]
+[ext_resource type="PackedScene" uid="uid://ceperuwsg22ln" path="res://scenes/CardVisual.tscn" id="2_p6imu"]
+
+[node name="CardButton" type="Button" node_paths=PackedStringArray("Visual")]
+custom_minimum_size = Vector2(100, 130)
+script = ExtResource("1_rpaj5")
+Visual = NodePath("CardVisual")
+
+[node name="CardVisual" parent="." instance=ExtResource("2_p6imu")]
+position = Vector2(50, 65)

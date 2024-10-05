@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Text;
 
 public partial class InfoArea : Node2D
 {
@@ -27,13 +28,13 @@ public partial class InfoArea : Node2D
 	public Label DrawFromDeckLabel { get; set; }
 
 	[Export]
-	public DrawCardButton DrawFromDeckButton { get; set; }
+	public CardButton DrawFromDeckButton { get; set; }
 
 	[Export]
 	public Label DrawFromSacrificeLabel { get; set; }
 
 	[Export]
-	public DrawCardButton DrawFromSacrificeButton { get; set; }
+	public CardButton DrawFromSacrificeButton { get; set; }
 
 	[Export]
 	public Button EndTurnButton { get; set; }
@@ -46,10 +47,28 @@ public partial class InfoArea : Node2D
 	public override void _Ready()
 	{
 		Instance = this;
-		DrawFromDeckButton.Pressed += MainGame.Instance.DrawCardFromDeck;
-		DrawFromDeckLabel.Text = $"Creatures ({MainGame.Instance.Creatures?.Count})";
-		DrawFromSacrificeButton.Pressed += MainGame.Instance.DrawCardFromSacrificeDeck;
-		DrawFromSacrificeLabel.Text = $"Sacrifices ({MainGame.Instance.Sacrifices?.Count})";
+		if (DrawFromDeckButton != null)
+		{
+			DrawFromDeckButton.ShowCardBack = true;
+			DrawFromDeckButton.Pressed += MainGame.Instance.DrawCardFromDeck;
+			DrawFromDeckButton.MouseEntered += SetDrawFromDeckCardInfo;
+			DrawFromDeckButton.MouseExited += ResetDrawFromDeckCardInfo;
+			DrawFromDeckLabel.Text = $"Creatures ({MainGame.Instance.Creatures?.Count})";
+		}
+
+		if (DrawFromSacrificeButton != null)
+		{
+			DrawFromSacrificeButton.ShowCardBack = true;
+			DrawFromSacrificeButton.Pressed += MainGame.Instance.DrawCardFromSacrificeDeck;
+			DrawFromSacrificeButton.MouseEntered += SetDrawFromSacrificesCardInfo;
+			DrawFromSacrificeButton.MouseExited += ResetDrawFromSacrificesCardInfo;
+			DrawFromSacrificeLabel.Text = $"Sacrifices ({MainGame.Instance.Sacrifices?.Count})";
+
+			if (MainGame.Instance.Sacrifices?.Count == 0)
+			{
+				DrawFromSacrificeButton.SetCard(null);
+			}
+		}
 	}
 
 	public void OnGameStateTransition(GameState nextState, GameState lastState)
@@ -57,11 +76,18 @@ public partial class InfoArea : Node2D
 		switch (lastState)
 		{
 			case GameState.DrawCard:
+				if (MainGame.Instance.Creatures.Count == 0 &&
+					MainGame.Instance.Sacrifices.Count == 0)
+				{
+					GD.Print("No cards to draw! Continue on to combat.");
+					MainGame.Instance.SkipDrawingCard();
+				}
+
 				DrawFromDeckButton.SetDisabled(true);
-				DrawFromDeckButton.SetTopCard(MainGame.Instance.Creatures.PeekTop());
+				DrawFromDeckButton.SetCard(MainGame.Instance.Creatures.PeekTop());
 				DrawFromDeckLabel.Text = $"Creatures ({MainGame.Instance.Creatures?.Count})";
 				DrawFromSacrificeButton.SetDisabled(true);
-				DrawFromSacrificeButton.SetTopCard(MainGame.Instance.Sacrifices.PeekTop());
+				DrawFromSacrificeButton.SetCard(MainGame.Instance.Sacrifices.PeekTop());
 				DrawFromSacrificeLabel.Text = $"Sacrifices ({MainGame.Instance.Sacrifices?.Count})";
 				break;
 
@@ -76,10 +102,10 @@ public partial class InfoArea : Node2D
 				TurnLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Choose a card";
 				DrawFromDeckButton.SetDisabled(false);
-				DrawFromDeckButton.SetTopCard(MainGame.Instance.Creatures.PeekTop());
+				DrawFromDeckButton.SetCard(MainGame.Instance.Creatures.PeekTop());
 				DrawFromDeckLabel.Text = $"Creatures ({MainGame.Instance.Creatures?.Count})";
 				DrawFromSacrificeButton.SetDisabled(false);
-				DrawFromSacrificeButton.SetTopCard(MainGame.Instance.Sacrifices.PeekTop());
+				DrawFromSacrificeButton.SetCard(MainGame.Instance.Sacrifices.PeekTop());
 				DrawFromSacrificeLabel.Text = $"Sacrifices ({MainGame.Instance.Sacrifices?.Count})";
 				break;
 
@@ -116,6 +142,18 @@ public partial class InfoArea : Node2D
 		if (IsaacMode) return;
 		InfoLabel.Text = message;
 		_infoOwner = owner;
+	}
+
+	public void SetCardInfo(CardInfo cardInfo, object owner = null)
+	{
+		var infoStr = new StringBuilder();
+		infoStr.AppendLine($"[center][font_size=16]{cardInfo.Name}[/font_size][/center]");
+		infoStr.AppendLine("");
+		infoStr.AppendLine($"Attack: {cardInfo.Attack}");
+		infoStr.AppendLine($"Defense: {cardInfo.Health}");
+		infoStr.AppendLine($"Cost: {cardInfo.BloodCost}");
+		infoStr.AppendLine($"Rarity: {cardInfo.Rarity}");
+		SetInfoBar(infoStr.ToString(), owner);
 	}
 
 	public void ResetInfoBar(object owner = null)
@@ -157,5 +195,29 @@ public partial class InfoArea : Node2D
 	public void MouseExited_ResetInfo()
 	{
 		ResetInfoBar();
+	}
+
+	private void SetDrawFromDeckCardInfo()
+	{
+		if (DrawFromDeckButton.Disabled || DrawFromDeckButton.ShowCardBack || !DrawFromDeckButton.Info.HasValue) return;
+
+		SetCardInfo(DrawFromDeckButton.Info.Value, DrawFromDeckButton);
+	}
+
+	private void ResetDrawFromDeckCardInfo()
+	{
+		ResetInfoBar(DrawFromDeckButton);
+	}
+
+	private void SetDrawFromSacrificesCardInfo()
+	{
+		if (DrawFromSacrificeButton.Disabled || DrawFromSacrificeButton.ShowCardBack || !DrawFromSacrificeButton.Info.HasValue) return;
+
+		SetCardInfo(DrawFromSacrificeButton.Info.Value, DrawFromSacrificeButton);
+	}
+
+	private void ResetDrawFromSacrificesCardInfo()
+	{
+		ResetInfoBar(DrawFromSacrificeButton);
 	}
 }

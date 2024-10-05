@@ -117,7 +117,7 @@ public partial class ActiveCardState : Node2D
 
 			MainGame.Instance.Board.UpdatePayThePrice(ProposedSacrifices.Count);
 
-			if (ProposedSacrifices.Count >= (int)StagedCard.CardInfo.BloodCost)
+			if (ProposedSacrifices.Count >= (int)StagedCard.Info.BloodCost)
 			{
 				_resolveSacrificesCancellation?.Cancel();
 				_resolveSacrificesCancellation = new CancellationTokenSource();
@@ -174,9 +174,9 @@ public partial class ActiveCardState : Node2D
 	{
 		yield return new CoroutineDelay(1.0);
 
-		if (ProposedSacrifices.Count != (int)StagedCard.CardInfo.BloodCost)
+		if (ProposedSacrifices.Count != (int)StagedCard.Info.BloodCost)
 		{
-			GD.PushError($"Sacrifices do not equal Blood Cost while resolving. {string.Join(";", ProposedSacrifices.Select(c => c.Name))} for {StagedCard.CardInfo.BloodCost}");
+			GD.PushError($"Sacrifices do not equal Blood Cost while resolving. {string.Join(";", ProposedSacrifices.Select(c => c.Name))} for {StagedCard.Info.BloodCost}");
 		}
 
 		foreach (Card card in ProposedSacrifices)

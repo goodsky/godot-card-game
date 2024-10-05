@@ -6,17 +6,6 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Godot;
 
-public class GameProgress
-{
-	public int Level { get; set; }
-
-	public int Score { get; set; }
-
-	public CardPool CardPool { get; set; }
-
-	public List<CardInfo> DeckCards { get; set; }
-}
-
 public static class GameLoader
 {
 	private static readonly string UserSavePath = Path.Combine(Constants.UserDataDirectory, "game.json");
@@ -43,6 +32,9 @@ public static class GameLoader
 
 		[JsonPropertyName("deck")]
 		public List<int> DeckCardIds { get; set; }
+
+		[JsonPropertyName("phase")]
+		public LobbyState CurrentState { get; set; }
 	}
 
 	public static bool SavedGameExists()
@@ -94,6 +86,7 @@ public static class GameLoader
 			Score = saveGame.Score,
 			CardPool = cardPool,
 			DeckCards = deck,
+			CurrentState = saveGame.CurrentState,
 		};
 	}
 
@@ -106,6 +99,7 @@ public static class GameLoader
 			Score = game.Score,
 			CardPoolName = game.CardPool.Name,
 			DeckCardIds = game.DeckCards.Select(x => x.Id).ToList(),
+			CurrentState = game.CurrentState,
 		};
 
 		var saveGameJson = JsonSerializer.Serialize(saveGame);

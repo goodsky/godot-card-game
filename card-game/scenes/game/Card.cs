@@ -46,6 +46,11 @@ public struct CardInfo
 	public CardRarity Rarity { get; set; }
 }
 
+public class CardCombatInfo
+{
+	public int DamageReceived { get; set; }
+}
+
 public partial class Card : Node2D
 {
 	private static readonly RandomNumberGenerator Rand = new RandomNumberGenerator();
@@ -55,7 +60,7 @@ public partial class Card : Node2D
 	private bool _isSelected = false;
 	private bool _freeDragging = false; // This is only for Isaac mode right now
 
-	private CombatInfo _combatInfo;
+	private CardCombatInfo _combatInfo;
 
 	// When not dragging, the home drop node for this card to live at.
 	public CardDrop HomeCardDrop { get; set; }
@@ -66,28 +71,10 @@ public partial class Card : Node2D
 	// Optional offset for things like hovering over or wiggling.
 	public Vector2? TargetPositionOffset { get; set; }
 
-	public CardInfo CardInfo { get; private set; }
+	public CardInfo Info { get; set; }
 
 	[Export]
-	public Sprite2D CardFront { get; set; }
-
-	[Export]
-	public Sprite2D CardBack { get; set; }
-
-	[Export]
-	public Sprite2D Avatar { get; set; }
-
-	[Export]
-	public Sprite2D[] BloodCostIcons { get; set; }
-
-	[Export]
-	public CanvasText NameLabel { get; set; }
-
-	[Export]
-	public CanvasText AttackLabel { get; set; }
-
-	[Export]
-	public CanvasText HealthLabel { get; set; }
+	public CardVisual Visual { get; set; }
 
 	[Export]
 	public ClickableArea Area { get; set; }
@@ -97,10 +84,15 @@ public partial class Card : Node2D
 
 	public override void _Ready()
 	{
-		UpdateVisuals();
+		// Note: CardInfo must be set before adding Card to scene tree!
+		Visual.Update(Info, firstUpdate: true);
+		_combatInfo = new CardCombatInfo
+		{
+			DamageReceived = 0,
+		};
 
-		Area.AreaMouseOver += HoverOver;
-		Area.AreaMouseOut += HoverOut;
+		Area.AreaMouseOver += UpdateInfoArea;
+		Area.AreaMouseOut += ResetInfoArea;
 	}
 
 	public override void _Draw()
@@ -173,28 +165,14 @@ public partial class Card : Node2D
 		_isAnimating = isAnimating;
 	}
 
-	public void ShowCardBack(bool showBack)
-	{
-		CardBack.Visible = showBack;
-		CardFront.Visible = !showBack;
-	}
-
-	public void SetCardInfo(CardInfo cardInfo)
-	{
-		CardInfo = cardInfo;
-		Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
-
-		_combatInfo = new CombatInfo { Damage = 0 };
-
-		UpdateVisuals();
-	}
+	
 
 	public void DealDamage(int damage)
 	{
-		_combatInfo.Damage += damage;
-		UpdateVisuals();
+		_combatInfo.DamageReceived += damage;
+		Visual.Update(Info, _combatInfo);
 
-		if (CardInfo.Health - _combatInfo.Damage <= 0)
+		if (Info.Health - _combatInfo.DamageReceived <= 0)
 		{
 			Kill();
 
@@ -309,6 +287,17 @@ public partial class Card : Node2D
 		_isShaking = false;
 	}
 
+	public void UpdateInfoArea()
+	{
+		if (Visual.CardBack.Visible) return; // Don't spoil the surprise!
+		InfoArea.Instance.SetCardInfo(Info, this);
+	}
+
+	public void ResetInfoArea()
+	{
+		InfoArea.Instance.ResetInfoBar(this);
+	}
+
 	private IEnumerable ShakingCoroutine()
 	{
 		float shakeDelta = 0.015f;
@@ -328,26 +317,6 @@ public partial class Card : Node2D
 		Rotation = 0f;
 	}
 
-	private void HoverOver()
-	{
-		if (CardBack.Visible) return;
-
-		var cardInfo = new StringBuilder();
-		cardInfo.AppendLine($"[center][font_size=16]{CardInfo.Name}[/font_size][/center]");
-		cardInfo.AppendLine("");
-		cardInfo.AppendLine($"Attack: {CardInfo.Attack}");
-		cardInfo.AppendLine($"Defense: {CardInfo.Health}");
-		cardInfo.AppendLine($"Cost: {CardInfo.BloodCost}");
-		cardInfo.AppendLine($"Rarity: {CardInfo.Rarity}");
-
-		InfoArea.Instance.SetInfoBar(cardInfo.ToString(), this);
-	}
-
-	private void HoverOut()
-	{
-		InfoArea.Instance.ResetInfoBar(this);
-	}
-
 	private void DrawArrowToPosition(Vector2 targetGlobalPosition, Color color)
 	{
 		Vector2 delta = targetGlobalPosition - GlobalPosition;
@@ -360,43 +329,5 @@ public partial class Card : Node2D
 			delta + new Vector2(0, -35).Rotated(angle + (Mathf.Pi / 2) + (6 * Mathf.Pi / 5)),
 		};
 		DrawColoredPolygon(arrowHead, color);
-	}
-
-	private void UpdateVisuals()
-	{
-		NameLabel.Text = CardInfo.Name;
-		AttackLabel.Text = CardInfo.Attack.ToString();
-
-		switch (CardInfo.Rarity)
-		{
-			case CardRarity.Sacrifice:
-				CardFront.SelfModulate = new Color("88615f");
-				break;
-
-			case CardRarity.Common:
-				CardFront.SelfModulate = new Color("777168");
-				break;
-
-			case CardRarity.Uncommon:
-				CardFront.SelfModulate = new Color("5659ae");
-				break;
-
-			case CardRarity.Rare:
-				CardFront.SelfModulate = new Color(Rand.Randf() * .75f, Rand.Randf(), Rand.Randf() * .75f);
-				break;
-		}
-
-		int health = Math.Max(0, CardInfo.Health - _combatInfo?.Damage ?? 0);
-		HealthLabel.Text = health.ToString();
-
-		for (int i = 0; i < BloodCostIcons.Length; i++)
-		{
-			BloodCostIcons[i].Visible = i < ((int)CardInfo.BloodCost);
-		}
-	}
-
-	private class CombatInfo
-	{
-		public int Damage { get; set; }
 	}
 }

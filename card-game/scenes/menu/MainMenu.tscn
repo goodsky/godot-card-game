@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://dshe8g5x8nfjy"]
 
-[ext_resource type="Theme" uid="uid://deqinh8m1b4mg" path="res://scenes/menu/menu_theme.tres" id="1_4t1mi"]
+[ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="1_4t1mi"]
 [ext_resource type="Script" path="res://scenes/menu/MainMenu.cs" id="2_pm4uq"]
 [ext_resource type="Shader" path="res://scenes/menu/MainMenu.gdshader" id="3_un4i4"]
 [ext_resource type="Texture2D" uid="uid://clxskd1sucmmh" path="res://assets/sprites/menu-background.png" id="4_ya88u"]
@@ -54,13 +54,13 @@ vertical_alignment = 1
 layout_mode = 2
 focus_mode = 0
 disabled = true
-text = "Continue Game
+text = "Continue
 "
 
 [node name="NewGameButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
 focus_mode = 0
-text = "Start New Game"
+text = "New Game"
 
 [node name="SettingsButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2

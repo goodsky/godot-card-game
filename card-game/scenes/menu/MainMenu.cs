@@ -6,7 +6,7 @@ public partial class MainMenu : Control
 	public override void _Ready()
 	{
 		Button continueGameButton = FindChild("ContinueGameButton") as Button;
-		continueGameButton.Disabled = !GameLoader.SavedGameExists();
+		continueGameButton.Disabled = GameProgressManager.Instance.State == null;
 
 		Button[] allButtons = FindChildren("*Button").Select(x => x as Button).Where(x => x != null).ToArray();
 		foreach (Button button in allButtons)

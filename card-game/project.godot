@@ -18,6 +18,7 @@ config/icon="res://assets/icon.svg"
 [autoload]
 
 AudioManager="*res://scenes/AudioManager.cs"
+GameProgressManager="*res://scenes/GameProgressManager.cs"
 
 [display]
 

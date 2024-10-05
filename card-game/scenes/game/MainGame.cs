@@ -2,11 +2,7 @@ using Godot;
 using System;
 using System.Collections;
 using System.Linq;
-using System.Threading.Tasks;
 
-/**
- * Main Game Manager: Handles State Machine + Transitions
- */
 public enum GameState
 {
 	Initializing,
@@ -73,6 +69,12 @@ public partial class MainGame : Node2D
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
+				if (Creatures.Count == 0)
+				{
+					GD.Print("Deck empty!");
+					return;
+				}
+
 				var drawnCardInfo = Creatures.DrawFromTop();
 				InstantiateCardInHand(drawnCardInfo, Hand.GlobalPosition + new Vector2(300, 0));
 				TransitionToState(GameState.PlayCard);
@@ -90,6 +92,12 @@ public partial class MainGame : Node2D
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
+				if (Sacrifices.Count == 0)
+				{
+					GD.Print("Deck empty!");
+					return;
+				}
+
 				var drawnCardInfo = Sacrifices.DrawFromTop();
 				InstantiateCardInHand(drawnCardInfo, Hand.GlobalPosition + new Vector2(300, 0));
 				TransitionToState(GameState.PlayCard);
@@ -100,11 +108,19 @@ public partial class MainGame : Node2D
 		}
 	}
 
+	public void SkipDrawingCard()
+	{
+		if (Creatures.Count != 0 || Sacrifices.Count != 0)
+		{
+			GD.PushError("Skipped draw card state but cards are still available!");
+		}
+		TransitionToState(GameState.PlayCard);
+	}
 
 	public void PlayedCard(Card card, PlayArea playArea, CardDrop oldHome)
 	{
 		bool playAreaAlreadyHasCard = (playArea.CardCount == 2); // card cound is 2 because existing card + staged card
-		if (card.CardInfo.BloodCost == CardBloodCost.Zero)
+		if (card.Info.BloodCost == CardBloodCost.Zero)
 		{
 			card.TargetPosition = playArea.GlobalPosition;
 			TransitionToState(GameState.PlayCard);
@@ -266,9 +282,9 @@ public partial class MainGame : Node2D
 		var card = Constants.CardScene.Instantiate<Card>();
 		string nodeName = cardInfo.Name.Replace(" ", "_");
 		card.Name = $"{nodeName}_{DrawnCardCount++}";
+		card.Info = cardInfo;
 		card.GlobalPosition = deckGlobalPosition;
-
-		card.SetCardInfo(cardInfo);
+		
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
 		AudioManager.Instance.Play(Constants.Audio.CardWhoosh, tweak: true);
 
@@ -339,7 +355,7 @@ public partial class MainGame : Node2D
 		var blueMonsterCard = new CardInfo()
 		{
 			Id = DrawnCardCount,
-			Name = $"Blue Monster #{DrawnCardCount}",
+			Name = $"Blue Monster",
 			AvatarResource = blueMonsterAvatars[Random.Shared.Next(blueMonsterAvatars.Length)],
 			Attack = Random.Shared.Next(1, 6),
 			Health = Random.Shared.Next(1, 11),
@@ -380,6 +396,11 @@ public partial class MainGame : Node2D
 					card.StopShaking();
 				}
 			}
+		}
+
+		if (isAllFull)
+		{
+			AudioManager.Instance.Play(Constants.Audio.GameOver_Win, volume: .5f);
 		}
 	}
 	/** END Isaac Mode! */

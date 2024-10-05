@@ -1,0 +1,87 @@
+[gd_scene load_steps=13 format=3 uid="uid://ceperuwsg22ln"]
+
+[ext_resource type="Texture2D" uid="uid://bvl2bulw6ldxu" path="res://assets/sprites/card-background.png" id="1_qunm4"]
+[ext_resource type="PackedScene" uid="uid://demt8xneeboij" path="res://scenes/game/CanvasText.tscn" id="2_1lmow"]
+[ext_resource type="Script" path="res://scenes/CardVisual.cs" id="2_s21yx"]
+[ext_resource type="FontFile" uid="uid://dkmf6cewx3ufy" path="res://assets/fonts/droid-sans/DroidSans.ttf" id="3_w7sdl"]
+[ext_resource type="Texture2D" uid="uid://cvxf0itnk118u" path="res://assets/sprites/avatars/avatar_blue_monster_00.jpeg" id="4_tu1d2"]
+[ext_resource type="Script" path="res://scenes/game/SpriteBorder.cs" id="5_0wmxs"]
+[ext_resource type="Texture2D" uid="uid://g1tvugg8g4fv" path="res://assets/sprites/card-sword.png" id="6_cc42x"]
+[ext_resource type="FontFile" uid="uid://cqj4jrmv0k2pj" path="res://assets/fonts/poco/Poco.tres" id="7_5qi2e"]
+[ext_resource type="Texture2D" uid="uid://uelkx1cuv43c" path="res://assets/sprites/card-heart.png" id="8_spsp1"]
+[ext_resource type="Texture2D" uid="uid://bhthdaqtf0cdd" path="res://assets/sprites/card-cost.png" id="9_ub7tx"]
+[ext_resource type="Texture2D" uid="uid://c4garv105erm4" path="res://assets/sprites/card-back.png" id="11_mxocv"]
+[ext_resource type="Texture2D" uid="uid://cg0xksq5yfmro" path="res://assets/sprites/card-highlight.png" id="12_a3swt"]
+
+[node name="CardVisual" type="Node2D" node_paths=PackedStringArray("CardFront", "CardBack", "CardHighlight", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel")]
+script = ExtResource("2_s21yx")
+CardFront = NodePath("CardFront")
+CardBack = NodePath("CardBack")
+CardHighlight = NodePath("BorderHighlight")
+Avatar = NodePath("CardFront/Avatar")
+BloodCostIcons = [NodePath("CardFront/Card-cost-1"), NodePath("CardFront/Card-cost-2"), NodePath("CardFront/Card-cost-3")]
+NameLabel = NodePath("CardFront/CardTitle")
+AttackLabel = NodePath("CardFront/AttackStat")
+HealthLabel = NodePath("CardFront/HealthStat")
+
+[node name="CardFront" type="Sprite2D" parent="."]
+texture = ExtResource("1_qunm4")
+
+[node name="CardTitle" parent="CardFront" instance=ExtResource("2_1lmow")]
+position = Vector2(-45, -60)
+Text = "Blue Monster"
+MaxFontSize = 14
+TextBoxSize = Vector2(90, 17)
+Font = ExtResource("3_w7sdl")
+
+[node name="Avatar" type="Sprite2D" parent="CardFront"]
+position = Vector2(0, -12)
+texture = ExtResource("4_tu1d2")
+script = ExtResource("5_0wmxs")
+
+[node name="Card-sword" type="Sprite2D" parent="CardFront"]
+visible = false
+position = Vector2(-41, 45)
+texture = ExtResource("6_cc42x")
+
+[node name="AttackStat" parent="CardFront" instance=ExtResource("2_1lmow")]
+position = Vector2(-43, 25)
+Text = "0"
+MaxFontSize = 36
+TextBoxSize = Vector2(30, 50)
+Font = ExtResource("7_5qi2e")
+Color = Color(0.65098, 0, 0, 1)
+
+[node name="Card-shield" type="Sprite2D" parent="CardFront"]
+visible = false
+position = Vector2(40, 45)
+texture = ExtResource("8_spsp1")
+
+[node name="HealthStat" parent="CardFront" instance=ExtResource("2_1lmow")]
+position = Vector2(13, 25)
+Text = "1"
+MaxFontSize = 36
+TextBoxSize = Vector2(30, 50)
+Font = ExtResource("7_5qi2e")
+Alignment = 2
+Color = Color(0, 0, 0.7, 1)
+
+[node name="Card-cost-1" type="Sprite2D" parent="CardFront"]
+position = Vector2(38, 28)
+texture = ExtResource("9_ub7tx")
+
+[node name="Card-cost-2" type="Sprite2D" parent="CardFront"]
+position = Vector2(25, 28)
+texture = ExtResource("9_ub7tx")
+
+[node name="Card-cost-3" type="Sprite2D" parent="CardFront"]
+position = Vector2(12, 28)
+texture = ExtResource("9_ub7tx")
+
+[node name="CardBack" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("11_mxocv")
+
+[node name="BorderHighlight" type="Sprite2D" parent="."]
+visible = false
+texture = ExtResource("12_a3swt")

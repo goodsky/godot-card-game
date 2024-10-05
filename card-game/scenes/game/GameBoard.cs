@@ -91,7 +91,7 @@ public partial class GameBoard : Node2D
 					GD.PushError($"[UnexpectedState] Transitioned to PayPrice without a StagedCard.");
 					break;
 				}
-				PopUpPayThePricePanel(stagedCard.CardInfo.BloodCost);
+				PopUpPayThePricePanel(stagedCard.Info.BloodCost);
 				break;
 
 			case GameState.PlayerCombat:
@@ -127,9 +127,9 @@ public partial class GameBoard : Node2D
 	{
 		if (card == null || cardDrop == null) return false;
 
-		bool canAfford = PlayerCardCount >= (int)card.CardInfo.BloodCost;
+		bool canAfford = PlayerCardCount >= (int)card.Info.BloodCost;
 		bool isEmptyPlayArea = cardDrop is PlayArea && cardDrop.CardCount == 0;
-		bool isSacrificablePlayArea = cardDrop is PlayArea && (int)card.CardInfo.BloodCost > 0;
+		bool isSacrificablePlayArea = cardDrop is PlayArea && (int)card.Info.BloodCost > 0;
 
 		return canAfford && (isEmptyPlayArea || isSacrificablePlayArea);
 	}
@@ -242,7 +242,7 @@ public partial class GameBoard : Node2D
 		card.Name = $"e_{nodeName}_{EnemyCardCount++}";
 		card.GlobalPosition = lane.GlobalPosition + new Vector2(0, -150);
 
-		card.SetCardInfo(cardInfo);
+		card.Info = cardInfo;
 		ActiveCardState.Instance.SetCardDrop(card, lane);
 
 		return card;
@@ -289,7 +289,7 @@ public partial class GameBoard : Node2D
 
 			if (enemyCard != null)
 			{
-				int damage = enemyCard.CardInfo.Attack;
+				int damage = enemyCard.Info.Attack;
 				if (damage == 0) continue;
 
 				enemyCard.ZIndex = 10;
@@ -297,7 +297,7 @@ public partial class GameBoard : Node2D
 				if (playerCard != null)
 				{
 					yield return enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.08f);
-					GD.Print($"Dealt {damage} damage to {playerCard.CardInfo.Name}!");
+					GD.Print($"Dealt {damage} damage to {playerCard.Info.Name}!");
 
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamageCard_Low :
@@ -340,7 +340,7 @@ public partial class GameBoard : Node2D
 
 			if (playerCard != null)
 			{
-				int damage = playerCard.CardInfo.Attack;
+				int damage = playerCard.Info.Attack;
 				if (damage == 0) continue;
 
 				playerCard.ZIndex = 10;
@@ -348,7 +348,7 @@ public partial class GameBoard : Node2D
 				if (enemyCard != null)
 				{
 					yield return playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.08f);
-					GD.Print($"Dealt {damage} damage to {enemyCard.CardInfo.Name}!");
+					GD.Print($"Dealt {damage} damage to {enemyCard.Info.Name}!");
 
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamageCard_Low :
@@ -416,7 +416,7 @@ public partial class GameBoard : Node2D
 		public void Select()
 		{
 			int selectedSacrifices = ActiveCardState.Instance.ProposedSacrifices.Count;
-			int cost = (int)ActiveCardState.Instance.StagedCard.CardInfo.BloodCost;
+			int cost = (int)ActiveCardState.Instance.StagedCard.Info.BloodCost;
 
 			bool isInSameLaneAsPlayingCard = ActiveCardState.Instance.StagedCard.HomeCardDrop == Card.HomeCardDrop;
 
