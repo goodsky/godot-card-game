@@ -5,14 +5,16 @@
 [ext_resource type="Script" path="res://scenes/game_lobby/GameLobby.cs" id="2_bfw0j"]
 [ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="6_kcb8p"]
 
-[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "DraftCardsContainer", "PlayLevelPanel")]
+[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "PlayLevelPanel")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 800.0
 offset_bottom = 600.0
 theme = ExtResource("1_xe6ch")
 script = ExtResource("2_bfw0j")
+AutoStartingDeck = true
 GeneratingCardsPanel = NodePath("GeneratingCardsPanel")
+HelloDeckContainer = NodePath("HelloTeamContainer")
 DraftCardsContainer = NodePath("DraftCardsContainer")
 PlayLevelPanel = NodePath("PlayLevelPanel")
 
@@ -56,6 +58,37 @@ value = 100.0
 fill_mode = 4
 texture_progress = ExtResource("2_6eo2a")
 radial_fill_degrees = 60.0
+
+[node name="HelloTeamContainer" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="ChooseCardsPanel" type="PanelContainer" parent="HelloTeamContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="SayHello" type="Label" parent="HelloTeamContainer/ChooseCardsPanel"]
+layout_mode = 2
+text = "Say hello to your team!"
+horizontal_alignment = 1
+
+[node name="CardButtonContainer" type="HBoxContainer" parent="HelloTeamContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ContinueButton" type="Button" parent="HelloTeamContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("6_kcb8p")
+text = "Let's Go"
 
 [node name="DraftCardsContainer" type="VBoxContainer" parent="."]
 visible = false
@@ -127,4 +160,5 @@ layout_mode = 2
 theme = ExtResource("6_kcb8p")
 text = "Play Game"
 
+[connection signal="pressed" from="HelloTeamContainer/ContinueButton" to="." method="ContinueToSelectLevel"]
 [connection signal="pressed" from="PlayLevelPanel/VBoxContainer/Button" to="." method="StartGame"]

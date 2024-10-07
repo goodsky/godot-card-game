@@ -79,11 +79,11 @@ public static class NodeExtensions
         card?.SetAnimationControl(false);
     }
 
-    public static IEnumerable FadeTo(this CanvasItem node, float alpha, float speed)
+    public static IEnumerable FadeTo(this CanvasItem node, float endAlpha, float? startAlpha = null, float speed = 0.05f)
     {
         Color nodeColor = node.Modulate;
-        float startA = nodeColor.A;
-        float deltaA = alpha - startA;
+        float startA = startAlpha ?? nodeColor.A;
+        float deltaA = endAlpha - startA;
         for (float t = 0.0f; t < 1.0f; t = Mathf.Clamp(t + speed, 0.0f, 1.0f))
         {
             nodeColor.A = startA + (t * deltaA);
@@ -91,7 +91,7 @@ public static class NodeExtensions
             yield return null;
         }
 
-        nodeColor.A = alpha;
+        nodeColor.A = endAlpha;
         node.Modulate = nodeColor;
     }
 }

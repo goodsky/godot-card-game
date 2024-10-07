@@ -6,7 +6,7 @@ public partial class MainMenu : Control
 	public override void _Ready()
 	{
 		Button continueGameButton = FindChild("ContinueGameButton") as Button;
-		continueGameButton.Disabled = GameProgressManager.Instance.State == null;
+		continueGameButton.Disabled = GameManager.Instance.Progress == null;
 
 		Button[] allButtons = FindChildren("*Button").Select(x => x as Button).Where(x => x != null).ToArray();
 		foreach (Button button in allButtons)
@@ -24,7 +24,7 @@ public partial class MainMenu : Control
 	public void Click_StartNewGame()
 	{
 		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
-		SceneLoader.Instance.LoadGameLobby();
+		SceneLoader.Instance.LoadGameLobby(startNewGame: true);
 	}
 
 	public void Click_Settings()

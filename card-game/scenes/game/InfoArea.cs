@@ -49,7 +49,7 @@ public partial class InfoArea : Node2D
 		Instance = this;
 		if (DrawFromDeckButton != null)
 		{
-			DrawFromDeckButton.ShowCardBack = true;
+			DrawFromDeckButton.SetCard(MainGame.Instance.Creatures.PeekTop());
 			DrawFromDeckButton.Pressed += MainGame.Instance.DrawCardFromDeck;
 			DrawFromDeckButton.MouseEntered += SetDrawFromDeckCardInfo;
 			DrawFromDeckButton.MouseExited += ResetDrawFromDeckCardInfo;
@@ -58,7 +58,7 @@ public partial class InfoArea : Node2D
 
 		if (DrawFromSacrificeButton != null)
 		{
-			DrawFromSacrificeButton.ShowCardBack = true;
+			DrawFromSacrificeButton.SetCard(MainGame.Instance.Sacrifices.PeekTop());
 			DrawFromSacrificeButton.Pressed += MainGame.Instance.DrawCardFromSacrificeDeck;
 			DrawFromSacrificeButton.MouseEntered += SetDrawFromSacrificesCardInfo;
 			DrawFromSacrificeButton.MouseExited += ResetDrawFromSacrificesCardInfo;

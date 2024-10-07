@@ -16,7 +16,7 @@ public partial class SettingsPopUp : Control
 
 	public override void _Ready()
 	{
-		var settings = SettingsLoader.LoadSettings();
+		var settings = GameLoader.LoadSettings();
 
 		EffectsVolumeSlider.Value = settings.EffectsVolume;
 		MusicVolumeSlider.Value = settings.MusicVolume;
@@ -31,7 +31,7 @@ public partial class SettingsPopUp : Control
 	public override void _ExitTree()
 	{
 		GD.Print("Settings pop up removed");
-		SettingsLoader.SaveSettings((float)EffectsVolumeSlider.Value, (float)MusicVolumeSlider.Value);
+		GameLoader.SaveSettings((float)EffectsVolumeSlider.Value, (float)MusicVolumeSlider.Value);
 		GetTree().Paused = false;
 	}
 

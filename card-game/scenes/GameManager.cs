@@ -15,42 +15,44 @@ public class GameProgress
 }
 
 
-public partial class GameProgressManager : Node
+public partial class GameManager : Node
 {
-    public GameProgress State { get; private set; }
+    public GameProgress Progress { get; private set; }
 
-    public static GameProgressManager Instance { get; private set; }
+    public static GameManager Instance { get; private set; }
 
     public override void _Ready()
     {
         Instance = this;
 
+        InitializeSettings();
+
         if (GameLoader.SavedGameExists())
         {
-            State = GameLoader.LoadGame();
+            Progress = GameLoader.LoadGame();
         }
         else
         {
-            State = null;
+            Progress = null;
         }
     }
 
     public void SaveGame()
     {
-        if (State == null)
+        if (Progress == null)
         {
             GD.PushError("Cannot save game! No game is in progress.");
             return;
         }
 
-        GameLoader.SaveGame(State);
+        GameLoader.SaveGame(Progress);
     }
 
     public void StartNewGame(CardPool cardPool)
     {
-        State = new GameProgress
+        Progress = new GameProgress
         {
-            Level = 0,
+            Level = 1,
 			Score = 0,
 			CardPool = cardPool,
 			DeckCards = new List<CardInfo>(),
@@ -61,15 +63,27 @@ public partial class GameProgressManager : Node
 
     public void UpdateProgress(LobbyState currentState, int? level = null, int? score = null, List<CardInfo> updatedDeck = null)
     {
-        State = new GameProgress
+        Progress = new GameProgress
         {
             CurrentState = currentState,
-            Level = level ?? State.Level,
-            Score = score ?? State.Score,
-            DeckCards = updatedDeck ?? State.DeckCards,
-            CardPool = State.CardPool,
+            Level = level ?? Progress.Level,
+            Score = score ?? Progress.Score,
+            DeckCards = updatedDeck ?? Progress.DeckCards,
+            CardPool = Progress.CardPool,
         };
 
         SaveGame();
     }
+
+    public void ClearGame()
+    {
+        GameLoader.ClearGame();
+        Progress = null;
+    }
+
+    private void InitializeSettings()
+	{
+		var settings = GameLoader.LoadSettings();
+		AudioManager.Instance.UpdateEffectsVolume(settings.EffectsVolume);
+	}
 }

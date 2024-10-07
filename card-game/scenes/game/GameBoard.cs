@@ -192,12 +192,16 @@ public partial class GameBoard : Node2D
 	{
 		GameOverPanel.Modulate = new Color(1, 1, 1, 0);
 		GameOverPanel.Visible = true;
-		this.StartCoroutine(GameOverPanel.FadeTo(1f, 0.05f));
 
 		Label title = GameOverPanel.FindChild("Title") as Label;
+		Label subtitle = GameOverPanel.FindChild("Subtitle") as Label;
+		Button continueButton = GameOverPanel.FindChild("ContinueButton") as Button;
+
 		if (playerWon)
 		{
 			title.Text = "You Win!";
+			subtitle.Text = "";
+			continueButton.Visible = true;
 			title.AddThemeColorOverride("font_color", Colors.ForestGreen);
 
 			AudioManager.Instance.Play(Constants.Audio.GameOver_Win);
@@ -205,10 +209,14 @@ public partial class GameBoard : Node2D
 		else
 		{
 			title.Text = "You Lose";
+			subtitle.Text = "Try again?";
+			continueButton.Visible = false;
 			title.AddThemeColorOverride("font_color", Colors.DarkRed);
 
 			AudioManager.Instance.Play(Constants.Audio.GameOver_Lose);
 		}
+
+		this.StartCoroutine(GameOverPanel.FadeTo(1f, 0.05f));
 	}
 
 	private void DisableLanes()

@@ -16,10 +16,13 @@ public partial class CardButton : BaseButton
         MouseExited += MouseExit;
     }
 
-    public void SetDisabled(bool isDisabled)
+    public void SetDisabled(bool isDisabled, bool fade = true)
     {
         Disabled = isDisabled;
-        Visual.Modulate = isDisabled ? new Color(1, 1, 1, 0.5f) : new Color(1, 1, 1, 1);
+        if (fade)
+        {
+            Visual.Modulate = isDisabled ? new Color(1, 1, 1, 0.5f) : new Color(1, 1, 1, 1);
+        }
         Visual.SetHighlight(false);
     }
 

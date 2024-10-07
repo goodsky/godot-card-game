@@ -63,6 +63,13 @@ public partial class MainGame : Node2D
 		SceneLoader.Instance.LoadMainMenu();
 	}
 
+	public void Click_Continue()
+	{
+		GameProgress progress = GameManager.Instance.Progress;
+		GameManager.Instance.UpdateProgress(LobbyState.DraftCards, level: progress.Level + 1);
+		SceneLoader.Instance.LoadGameLobby();
+	}
+
 	public void DrawCardFromDeck()
 	{
 		GD.Print("Draw card from deck...");
@@ -202,7 +209,15 @@ public partial class MainGame : Node2D
 		{
 			case GameState.EnemyStageCard:
 				CurrentTurn++;
-				TransitionToState(GameState.DrawCard);
+
+				if (Creatures.Count > 0 || Sacrifices.Count > 0)
+				{
+					TransitionToState(GameState.DrawCard);
+				}
+				else
+				{
+					TransitionToState(GameState.PlayCard);
+				}
 
 				AudioManager.Instance.Play(Constants.Audio.TurnEnd);
 				break;
@@ -249,8 +264,11 @@ public partial class MainGame : Node2D
 
 	public void GameOver()
 	{
-		// bool playerWon = MainGame.Instance.HealthBar.PlayerPoints > 0;
-		GameLoader.ClearGame();
+		bool playerWon = Instance.HealthBar.PlayerPoints > 0;
+		if (!playerWon)
+		{
+			GameManager.Instance.ClearGame();
+		}
 
 		TransitionToState(GameState.GameOver);
 	}

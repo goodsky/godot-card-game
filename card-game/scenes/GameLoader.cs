@@ -9,6 +9,7 @@ using Godot;
 public static class GameLoader
 {
 	private static readonly string UserSavePath = Path.Combine(Constants.UserDataDirectory, "game.json");
+	private static readonly string UserSettingsPath = Path.Combine(Constants.UserDataDirectory, "settings.json");
 
 	public class SavedCardPool
 	{
@@ -36,6 +37,15 @@ public static class GameLoader
 		[JsonPropertyName("phase")]
 		public LobbyState CurrentState { get; set; }
 	}
+
+	public class SavedSettings
+    {
+        [JsonPropertyName("effectsVolume")]
+        public float EffectsVolume { get; set; }
+
+        [JsonPropertyName("musicVolume")]
+        public float MusicVolume { get; set; }
+    }
 
 	public static bool SavedGameExists()
 	{
@@ -118,7 +128,7 @@ public static class GameLoader
 
 	public static void ClearGame()
 	{
-		Godot.DirAccess.RemoveAbsolute(UserSavePath);
+		DirAccess.RemoveAbsolute(UserSavePath);
 	}
 
 	public static List<(CardPool cards, string path)> GetAvailableCardPools()
@@ -189,6 +199,48 @@ public static class GameLoader
 		file.StoreString(cardPoolJson);
 		file.Close();
 	}
+
+	public static SavedSettings LoadSettings()
+    {
+        try
+        {
+            var fileContent = Godot.FileAccess.GetFileAsString(UserSettingsPath);
+            return JsonSerializer.Deserialize<SavedSettings>(fileContent);
+        }
+        catch (Exception ex)
+        {
+            GD.Print($"Could not load settings file. Using the default. ", ex.Message);
+            return new SavedSettings
+            {
+                EffectsVolume = 1.0f,
+                MusicVolume = 1.0f,
+            };
+        }
+    }
+
+    public static void SaveSettings(
+        float effectsVolume,
+        float musicVolume)
+    {
+        var settings = new SavedSettings
+        {
+            EffectsVolume = Mathf.Clamp(effectsVolume, 0f, 1f),
+            MusicVolume = Mathf.Clamp(musicVolume, 0f, 1f),
+        };
+
+        var settingsJson = JsonSerializer.Serialize(settings);
+        DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+        var file = Godot.FileAccess.Open(UserSettingsPath, Godot.FileAccess.ModeFlags.Write);
+        if (file == null)
+        {
+            GD.PushError($"Failed to save settings at {UserSettingsPath}: {Godot.FileAccess.GetOpenError()}");
+        }
+        else
+        {
+            file.StoreString(settingsJson);
+            file.Close();
+        }
+    }
 
 	// Test code to validate the end to end serialization and deserialization of game data
 	public static void Debug_TestEndToEnd()

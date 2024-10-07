@@ -2,13 +2,13 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Godot;
 
 public enum LobbyState
 {
 	Initializing,
 	GenerateCardPool,
+	GenerateStartingDeck,
 	DraftCards,
 	SelectLevel,
 	PlayGame,
@@ -18,8 +18,19 @@ public partial class GameLobby : Control
 {
 	public LobbyState CurrentState { get; private set; } = LobbyState.Initializing;
 
+	public bool IsNewGame { get; set; } = false;
+
+	[Export]
+	public int StartingDeckSize { get; set; } = 5;
+
+	[Export]
+	public bool AutoStartingDeck { get; set; }
+
 	[Export]
 	public CanvasItem GeneratingCardsPanel { get; set; }
+
+	[Export]
+	public CanvasItem HelloDeckContainer { get; set; }
 
 	[Export]
 	public CanvasItem DraftCardsContainer { get; set; }
@@ -29,39 +40,38 @@ public partial class GameLobby : Control
 
 	public override void _Ready()
 	{
-		if (GameProgressManager.Instance.State == null)
+		if (IsNewGame || GameManager.Instance.Progress == null)
 		{
 			TransitionToState(LobbyState.GenerateCardPool);
 		}
 		else
 		{
-			TransitionToState(LobbyState.SelectLevel);
+			TransitionToState(GameManager.Instance.Progress.CurrentState);
 		}
 	}
 
 	public void DraftCard(CardInfo cardInfo)
 	{
-		const int STARTING_DECK_SIZE = 5;
 		switch (CurrentState)
 		{
 			case LobbyState.DraftCards:
-				var deck = GameProgressManager.Instance.State.DeckCards;
+				var deck = GameManager.Instance.Progress.DeckCards;
 				deck.Add(cardInfo);
 
-				if (GameProgressManager.Instance.State.Level == 0 &&
-					deck.Count < STARTING_DECK_SIZE)
+				if (GameManager.Instance.Progress.Level == 1 &&
+					deck.Count < StartingDeckSize)
 				{
 					TransitionToState(LobbyState.DraftCards);
 				}
 				else
 				{
-					GameProgressManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: deck);
+					GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: deck);
 					TransitionToState(LobbyState.SelectLevel);
 				}
 				break;
 
 			default:
-				throw new LobbyStateMachineException(nameof(SkipDraft), CurrentState);
+				throw new LobbyStateMachineException(nameof(DraftCard), CurrentState);
 		}
 	}
 
@@ -78,10 +88,23 @@ public partial class GameLobby : Control
 		}
 	}
 
+	public void ContinueToSelectLevel()
+	{
+		switch (CurrentState)
+		{
+			case LobbyState.GenerateStartingDeck:
+				TransitionToState(LobbyState.SelectLevel);
+				break;
+
+			default:
+				throw new LobbyStateMachineException(nameof(ContinueToSelectLevel), CurrentState);
+		}
+	}
+
 	public void StartGame()
 	{
-		CardPool cardPool = GameProgressManager.Instance.State.CardPool;
-		List<CardInfo> deck = GameProgressManager.Instance.State.DeckCards;
+		CardPool cardPool = GameManager.Instance.Progress.CardPool;
+		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
 
 		var sacrificeCards = deck.Where(c => c.Rarity == CardRarity.Sacrifice);
 		var creatureCards = deck.Where(c => c.Rarity != CardRarity.Sacrifice);
@@ -98,6 +121,7 @@ public partial class GameLobby : Control
 		};
 		var opponent = new EnemyAI(cardPool, moves);
 
+		GameManager.Instance.UpdateProgress(LobbyState.PlayGame);
 		SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, opponent);
 	}
 
@@ -112,6 +136,10 @@ public partial class GameLobby : Control
 				GeneratingCardsPanel.Visible = false;
 				break;
 
+			case LobbyState.GenerateStartingDeck:
+				await this.StartCoroutine(FadeOutStartingDeckCoroutine(fadeOutSpeed: 0.05f));
+				break;
+
 			case LobbyState.DraftCards:
 				await this.StartCoroutine(FadeOutDraftCardsCoroutine(fadeOutSpeed: 0.05f));
 				break;
@@ -123,16 +151,142 @@ public partial class GameLobby : Control
 				await this.StartCoroutine(GenerateCardPoolCoroutine(TimeSpan.FromSeconds(2.5)));
 				break;
 
+			case LobbyState.GenerateStartingDeck:
+				await this.StartCoroutine(GenerateStartingDeckCoroutine(fadeInSpeed: 0.05f));
+				break;
+
 			case LobbyState.DraftCards:
+				GameManager.Instance.UpdateProgress(LobbyState.DraftCards);
 				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f));
 				break;
 
 			case LobbyState.SelectLevel:
+				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel);
 				Label levelLabel = PlayLevelPanel.FindChild("LevelNumber") as Label;
-				levelLabel.Text = (GameProgressManager.Instance.State.Level + 1).ToString();
+				levelLabel.Text = GameManager.Instance.Progress.Level.ToString();
 				PlayLevelPanel.Visible = true;
 				break;
+
+			case LobbyState.PlayGame:
+				GameManager.Instance.UpdateProgress(LobbyState.PlayGame);
+				StartGame();
+				break;
 		}
+	}
+
+	private IEnumerable GenerateCardPoolCoroutine(TimeSpan delay)
+	{
+		TextureProgressBar spinner = GeneratingCardsPanel.FindChild("SpinningProgressBar") as TextureProgressBar;
+
+		yield return new CoroutineDelay(0.5);
+
+		GeneratingCardsPanel.Visible = true;
+		this.StartCoroutine(SpinProgressBarCoroutine(spinner, 5f));
+
+		DateTime start = DateTime.Now;
+		string cardPoolName = $"cards-{start:yyyyMMdd-HHmmss}";
+
+		var cardPool = CardGenerator.GenerateRandomCardPool(CardGenerator.DefaultArgs, cardPoolName);
+		GameLoader.SaveCardPool(cardPool, cardPoolName);
+		GameManager.Instance.StartNewGame(cardPool);
+
+		TimeSpan delaySoFar = DateTime.Now - start;
+		yield return new CoroutineDelay((delay - delaySoFar).TotalSeconds);
+
+		if (AutoStartingDeck)
+		{
+			TransitionToState(LobbyState.GenerateStartingDeck);
+		}
+		else
+		{
+			TransitionToState(LobbyState.DraftCards);
+		}	
+	}
+
+	private IEnumerable SpinProgressBarCoroutine(TextureProgressBar spinner, float speed)
+	{
+		while (GeneratingCardsPanel.Visible)
+		{
+			spinner.RadialInitialAngle += speed;
+			yield return null;
+		}
+	}
+
+	private IEnumerable GenerateStartingDeckCoroutine(float fadeInSpeed)
+	{
+		Node cardsContainer = HelloDeckContainer.FindChild("CardButtonContainer");
+		Label helloLabel = HelloDeckContainer.FindChild("SayHello") as Label;
+
+		foreach (Node child in cardsContainer.GetChildren())
+		{
+			child.QueueFree();
+		}
+
+		var labelOptions = new[] {
+			"Here is your new deck!",
+			"Say hello to your new team!",
+			"I have a good feeling about this deck!",
+			"Deck Generated. Let's Play!",
+			"These cards want to go with you.",
+			"Here is what you're starting with.",
+		};
+
+		helloLabel.Text = labelOptions[Random.Shared.Next(labelOptions.Length)];
+
+		var startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize);
+		GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: startingDeck);
+		
+		foreach (CardInfo cardInfo in startingDeck)
+		{
+			var card = Constants.CardButtonScene.Instantiate<CardButton>();
+			card.ShowCardBack = false;
+			card.SetDisabled(true, fade: false);
+			card.SetCard(cardInfo);
+			cardsContainer.AddChild(card);
+		}
+
+		HelloDeckContainer.Visible = true;
+		yield return HelloDeckContainer.FadeTo(1, startAlpha: 0, speed: fadeInSpeed);
+	}
+
+	private IEnumerable FadeOutStartingDeckCoroutine(float fadeOutSpeed)
+	{
+		yield return HelloDeckContainer.FadeTo(0, startAlpha: 1, speed: fadeOutSpeed);
+		HelloDeckContainer.Visible = false;
+	}
+
+	private IEnumerable DraftCardsCoroutine(float fadeInSpeed)
+	{
+		Node cardsContainer = DraftCardsContainer.FindChild("CardButtonContainer");
+		Button skipButton = DraftCardsContainer.FindChild("SkipButton") as Button;
+
+		foreach (Node child in cardsContainer.GetChildren())
+		{
+			child.QueueFree();
+		}
+
+		var progress = GameManager.Instance.Progress;
+		var candidateCards = SelectDraftPool(progress.CardPool, level: progress.Level, count: 3);
+		
+		foreach (CardInfo cardInfo in candidateCards)
+		{
+			var card = Constants.CardButtonScene.Instantiate<CardButton>();
+			card.ShowCardBack = false;
+			card.SetCard(cardInfo);
+			card.Pressed += () => DraftCard(cardInfo);
+			cardsContainer.AddChild(card);
+		}
+
+		skipButton.Visible = progress.Level > 1;
+
+		DraftCardsContainer.Visible = true;
+		yield return DraftCardsContainer.FadeTo(1, startAlpha: 0, speed: fadeInSpeed);
+	}
+
+	private IEnumerable FadeOutDraftCardsCoroutine(float fadeOutSpeed)
+	{
+		yield return DraftCardsContainer.FadeTo(0, startAlpha: 1, speed: fadeOutSpeed);
+		DraftCardsContainer.Visible = false;
 	}
 
 	private IEnumerable<CardInfo> SelectDraftPool(CardPool cardPool, int level, int count)
@@ -140,7 +294,7 @@ public partial class GameLobby : Control
 		const float UNCOMMON_RATE = 0.04f;
 		const float RARE_RATE = 0.02f;
 
-		int x = Math.Clamp(level, 0, 10);
+		int x = Math.Clamp(level - 1, 0, 10);
 		float uncommonThreshold = x * UNCOMMON_RATE;
 		float rareThreshold = x * RARE_RATE;
 
@@ -177,91 +331,64 @@ public partial class GameLobby : Control
 		for (int i = 0; i < count; i++)
 		{
 			int rndIdx = Random.Shared.Next(cardOptions.Count);
-			draftPool.Add(cardOptions[rndIdx]);
+			CardInfo candidate = cardOptions[rndIdx];
+			draftPool.Add(candidate);
 			cardOptions.RemoveAt(rndIdx);
+
+			// only one sacrifice per pool please
+			if (candidate.Rarity == CardRarity.Sacrifice)
+			{
+				cardOptions = cardOptions.Where(c => c.Rarity == rarity).ToList();
+				if (cardOptions.Count <= count)
+				{
+					draftPool.AddRange(cardOptions);
+					break;
+				}
+			}
 		}
 
 		return draftPool;
 	}
 
-	private IEnumerable GenerateCardPoolCoroutine(TimeSpan delay)
+	private List<CardInfo> GenerateStartingDeck(CardPool cardPool, int startingDeckSize)
 	{
-		TextureProgressBar spinner = GeneratingCardsPanel.FindChild("SpinningProgressBar") as TextureProgressBar;
+		var deck = new List<CardInfo>();
 
-		yield return new CoroutineDelay(0.5);
+		// 20-40% starting deck is sacrifices
+		// 20-40% starting deck is one cost cards
+		// remainder is random 2-3 cost cards
+		var rnd = new RandomNumberGenerator();
+		int sacrificeCount = Mathf.CeilToInt(rnd.RandfRange(0.2f, 0.4f) * startingDeckSize);
+		int oneCostCount = Mathf.CeilToInt(rnd.RandfRange(0.2f, 0.4f) * startingDeckSize);
+		int otherCount = startingDeckSize - sacrificeCount - oneCostCount;
 
-		GeneratingCardsPanel.Visible = true;
-		this.StartCoroutine(SpinProgressBarCoroutine(spinner, 5f));
+		GD.Print($"Starting deck: {sacrificeCount} sacrifices; {oneCostCount} one cost; {otherCount} other;");
 
-		DateTime start = DateTime.Now;
-		string cardPoolName = $"cards-{start:yyyyMMdd-HHmmss}";
-
-		var cardPool = CardGenerator.GenerateRandomCardPool(CardGenerator.DefaultArgs, cardPoolName);
-		GameLoader.SaveCardPool(cardPool, cardPoolName);
-		GameProgressManager.Instance.StartNewGame(cardPool);
-
-		TimeSpan delaySoFar = DateTime.Now - start;
-		yield return new CoroutineDelay((delay - delaySoFar).TotalSeconds);
-
-		TransitionToState(LobbyState.DraftCards);
-	}
-
-	private IEnumerable SpinProgressBarCoroutine(TextureProgressBar spinner, float speed)
-	{
-		while (GeneratingCardsPanel.Visible)
+		var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice).ToList();
+		for (int i = 0; i < sacrificeCount; i++)
 		{
-			spinner.RadialInitialAngle += speed;
-			yield return null;
-		}
-	}
-
-	private IEnumerable DraftCardsCoroutine(float fadeInSpeed)
-	{
-		Node cardsContainer = DraftCardsContainer.FindChild("CardButtonContainer");
-		Button skipButton = DraftCardsContainer.FindChild("SkipButton") as Button;
-
-		foreach (Node child in cardsContainer.GetChildren())
-		{
-			child.QueueFree();
+			int rndIdx = rnd.RandiRange(0, sacrificeCards.Count - 1);
+			deck.Add(sacrificeCards[rndIdx]);
+			sacrificeCards.RemoveAt(rndIdx);
 		}
 
-		var progress = GameProgressManager.Instance.State;
-		var candidateCards = SelectDraftPool(progress.CardPool, level: progress.Level, count: 3);
-		
-		foreach (CardInfo cardInfo in candidateCards)
+		var oneCostCards = cardPool.Cards.Where(c => c.BloodCost == CardBloodCost.One && c.Rarity == CardRarity.Common).ToList();
+		for (int i = 0; i < oneCostCount; i++)
 		{
-			var card = Constants.CardButtonScene.Instantiate<CardButton>();
-			card.ShowCardBack = false;
-			card.SetCard(cardInfo);
-			card.Pressed += () => DraftCard(cardInfo);
-			cardsContainer.AddChild(card);
+			int rndIdx = rnd.RandiRange(0, oneCostCards.Count - 1);
+			deck.Add(oneCostCards[rndIdx]);
+			oneCostCards.RemoveAt(rndIdx);
 		}
 
-		skipButton.Visible = progress.Level > 0;
-
-		DraftCardsContainer.Modulate = new Color(1, 1, 1, 0);
-		DraftCardsContainer.Visible = true;
-
-		for (float a = 0; a < 1; a += fadeInSpeed)
+		var otherCards = cardPool.Cards.Where(c => c.BloodCost != CardBloodCost.Zero && c.BloodCost != CardBloodCost.One && c.Rarity == CardRarity.Common).ToList();
+		for (int i = 0; i < otherCount; i++)
 		{
-			DraftCardsContainer.Modulate = new Color(1, 1, 1, a);
-			yield return null;
+			int rndIdx = rnd.RandiRange(0, otherCards.Count - 1);
+			deck.Add(otherCards[rndIdx]);
+			otherCards.RemoveAt(rndIdx);
 		}
-		DraftCardsContainer.Modulate = new Color(1, 1, 1, 1);
-	}
 
-	private IEnumerable FadeOutDraftCardsCoroutine(float fadeOutSpeed)
-	{
-		DraftCardsContainer.Modulate = new Color(1, 1, 1, 1);
-		DraftCardsContainer.Visible = true;
-
-		for (float a = 1; a > 0; a -= fadeOutSpeed)
-		{
-			DraftCardsContainer.Modulate = new Color(1, 1, 1, a);
-			yield return null;
-		}
-		DraftCardsContainer.Modulate = new Color(1, 1, 1, 0);
-		DraftCardsContainer.Visible = false;
+		return deck;
 	}
 }
 
