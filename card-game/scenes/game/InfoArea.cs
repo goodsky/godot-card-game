@@ -19,7 +19,10 @@ public partial class InfoArea : Node2D
 	public RichTextLabel InfoLabel { get; set; }
 
 	[Export]
-	public Label TurnLabel { get; set; }
+	public Label LevelLabel { get; set; }
+
+	[Export]
+	public Label GameStateLabel { get; set; }
 
 	[Export]
 	public Label GameStateDescriptionLabel { get; set; }
@@ -47,6 +50,12 @@ public partial class InfoArea : Node2D
 	public override void _Ready()
 	{
 		Instance = this;
+		
+		if (GameManager.Instance?.Progress != null)
+		{
+			LevelLabel.Text = $"Level {GameManager.Instance.Progress.Level}";
+		}
+
 		if (DrawFromDeckButton != null)
 		{
 			DrawFromDeckButton.SetCard(MainGame.Instance.Creatures.PeekTop());
@@ -99,7 +108,7 @@ public partial class InfoArea : Node2D
 		switch (nextState)
 		{
 			case GameState.DrawCard:
-				TurnLabel.Text = "Your Turn";
+				GameStateLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Choose a card";
 				DrawFromDeckButton.SetDisabled(false);
 				DrawFromDeckButton.SetCard(MainGame.Instance.Creatures.PeekTop());
@@ -110,28 +119,28 @@ public partial class InfoArea : Node2D
 				break;
 
 			case GameState.PlayCard:
-				TurnLabel.Text = "Your Turn";
+				GameStateLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Play cards then end turn";
 				EndTurnButton.Disabled = false;
 				break;
 
 			case GameState.PlayerCombat:
-				TurnLabel.Text = "Your Turn";
+				GameStateLabel.Text = "Your Turn";
 				GameStateDescriptionLabel.Text = "Your cards attack";
 				break;
 
 			case GameState.EnemyPlayCard:
-				TurnLabel.Text = "Enemy Turn";
+				GameStateLabel.Text = "Enemy Turn";
 				GameStateDescriptionLabel.Text = "Playing new cards";
 				break;
 
 			case GameState.EnemyCombat:
-				TurnLabel.Text = "Enemy Turn";
+				GameStateLabel.Text = "Enemy Turn";
 				GameStateDescriptionLabel.Text = "Opponent cards attack";
 				break;
 
 			case GameState.EnemyStageCard:
-				TurnLabel.Text = "Get Ready";
+				GameStateLabel.Text = "Get Ready";
 				GameStateDescriptionLabel.Text = "Your turn is next";
 				break;
 		}
@@ -168,7 +177,7 @@ public partial class InfoArea : Node2D
 	public void SetGameState(string stateName, string stateDescription)
 	{
 		if (IsaacMode) return;
-		TurnLabel.Text = stateName;
+		GameStateLabel.Text = stateName;
 		GameStateDescriptionLabel.Text = stateDescription;
 	}
 
