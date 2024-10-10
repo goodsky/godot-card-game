@@ -38,6 +38,12 @@ public partial class GameLobby : Control
 	[Export]
 	public CanvasItem PlayLevelPanel { get; set; }
 
+	[Export]
+	public BaseButton BackButton { get; set; }
+
+	[Export]
+	public BaseButton ShowDeckButton { get; set; }
+
 	public override void _Ready()
 	{
 		if (IsNewGame || GameManager.Instance.Progress == null)
@@ -101,6 +107,17 @@ public partial class GameLobby : Control
 		}
 	}
 
+	public void Click_DeckButton()
+	{
+		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
+		DeckPopUp.PopUp(this, deck);
+	}
+
+	public void Click_GoBack()
+	{
+		SceneLoader.Instance.LoadMainMenu();
+	}
+
 	public void StartGame()
 	{
 		CardPool cardPool = GameManager.Instance.Progress.CardPool;
@@ -138,6 +155,8 @@ public partial class GameLobby : Control
 
 			case LobbyState.GenerateStartingDeck:
 				await this.StartCoroutine(FadeOutStartingDeckCoroutine(fadeOutSpeed: 0.05f));
+				BackButton.Visible = true;
+				ShowDeckButton.Visible = true;
 				break;
 
 			case LobbyState.DraftCards:
@@ -148,6 +167,8 @@ public partial class GameLobby : Control
 		switch (nextState)
 		{
 			case LobbyState.GenerateCardPool:
+				BackButton.Visible = false;
+				ShowDeckButton.Visible = false;
 				await this.StartCoroutine(GenerateCardPoolCoroutine(TimeSpan.FromSeconds(2.5)));
 				break;
 

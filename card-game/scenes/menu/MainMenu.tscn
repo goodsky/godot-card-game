@@ -1,4 +1,4 @@
-[gd_scene load_steps=6 format=3 uid="uid://dshe8g5x8nfjy"]
+[gd_scene load_steps=7 format=3 uid="uid://dshe8g5x8nfjy"]
 
 [ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="1_4t1mi"]
 [ext_resource type="Script" path="res://scenes/menu/MainMenu.cs" id="2_pm4uq"]
@@ -7,6 +7,23 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7470t"]
 shader = ExtResource("3_un4i4")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_eataj"]
+bg_color = Color(0.72549, 0.505882, 0.313726, 1)
+border_width_left = 4
+border_width_top = 2
+border_width_right = 4
+border_width_bottom = 2
+border_color = Color(0.25098, 0.133333, 0.0156863, 1)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+expand_margin_left = 8.0
+expand_margin_top = 8.0
+expand_margin_right = 8.0
+expand_margin_bottom = 8.0
 
 [node name="MainMenu" type="Control"]
 custom_minimum_size = Vector2(800, 600)
@@ -44,11 +61,20 @@ layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
 
-[node name="Label" type="Label" parent="CenterContainer/MainButtonsBox"]
+[node name="TitleContainer" type="PanelContainer" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2
-text = "Card Game"
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_eataj")
+
+[node name="Label" type="Label" parent="CenterContainer/MainButtonsBox/TitleContainer"]
+layout_mode = 2
+text = "Card
+Craft"
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="Buffer" type="Control" parent="CenterContainer/MainButtonsBox"]
+layout_mode = 2
 
 [node name="ContinueGameButton" type="Button" parent="CenterContainer/MainButtonsBox"]
 layout_mode = 2

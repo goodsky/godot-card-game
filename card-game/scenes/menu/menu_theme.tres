@@ -1,6 +1,7 @@
-[gd_resource type="Theme" load_steps=10 format=3 uid="uid://c2w4nv3ah6i3c"]
+[gd_resource type="Theme" load_steps=11 format=3 uid="uid://c2w4nv3ah6i3c"]
 
 [ext_resource type="FontFile" uid="uid://cqj4jrmv0k2pj" path="res://assets/fonts/poco/Poco.tres" id="1_mncfl"]
+[ext_resource type="FontFile" uid="uid://bdmp3p71mgudh" path="res://assets/fonts/connection_ii/ConnectionII.otf" id="2_d832v"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uxnqp"]
 content_margin_left = 16.0
@@ -109,4 +110,5 @@ Label/colors/font_shadow_color = Color(0.0235294, 0.0235294, 0.0235294, 1)
 Label/constants/shadow_offset_x = 3
 Label/constants/shadow_offset_y = 2
 Label/font_sizes/font_size = 64
+Label/fonts/font = ExtResource("2_d832v")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_ndai3")

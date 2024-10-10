@@ -16,6 +16,7 @@ public static class Constants
 	public static readonly PackedScene CardButtonScene = GD.Load<PackedScene>("res://scenes/CardButton.tscn");
 	public static readonly PackedScene SettingsPopUp = GD.Load<PackedScene>("res://scenes/SettingsPopUp.tscn");
 	public static readonly PackedScene ConfirmPopUp = GD.Load<PackedScene>("res://scenes/ConfirmPopUp.tscn");
+	public static readonly PackedScene DeckPopUp = GD.Load<PackedScene>("res://scenes/DeckPopUp.tscn");
 	public static readonly PackedScene MainGameScene = GD.Load<PackedScene>("res://scenes/game/MainGame.tscn");
 	public static readonly PackedScene MainMenuScene = GD.Load<PackedScene>("res://scenes/menu/MainMenu.tscn");
 	public static readonly PackedScene GameLobbyScene = GD.Load<PackedScene>("res://scenes/game_lobby/GameLobby.tscn");

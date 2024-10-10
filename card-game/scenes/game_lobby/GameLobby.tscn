@@ -1,11 +1,15 @@
-[gd_scene load_steps=5 format=3 uid="uid://di22clwjd5yiw"]
+[gd_scene load_steps=9 format=3 uid="uid://di22clwjd5yiw"]
 
 [ext_resource type="Theme" uid="uid://bp6sa0wtarlmt" path="res://scenes/game_lobby/lobby_theme.tres" id="1_xe6ch"]
 [ext_resource type="Texture2D" uid="uid://b4wwccrfx058e" path="res://assets/sprites/progress-circle.png" id="2_6eo2a"]
 [ext_resource type="Script" path="res://scenes/game_lobby/GameLobby.cs" id="2_bfw0j"]
+[ext_resource type="Texture2D" uid="uid://cbmvvafyfjkrf" path="res://assets/sprites/back-arrow.png" id="5_q7sn7"]
+[ext_resource type="Texture2D" uid="uid://b5rcevf0s8w0p" path="res://assets/sprites/back-arrow-2.png" id="6_2aff0"]
 [ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="6_kcb8p"]
+[ext_resource type="Texture2D" uid="uid://c63reeulblwrp" path="res://assets/sprites/deck-icon.png" id="7_r3x1p"]
+[ext_resource type="Texture2D" uid="uid://xl83ydp2ptv" path="res://assets/sprites/deck-icon-2.png" id="8_xpivi"]
 
-[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "PlayLevelPanel")]
+[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "PlayLevelPanel", "BackButton", "ShowDeckButton")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 800.0
@@ -17,6 +21,8 @@ GeneratingCardsPanel = NodePath("GeneratingCardsPanel")
 HelloDeckContainer = NodePath("HelloTeamContainer")
 DraftCardsContainer = NodePath("DraftCardsContainer")
 PlayLevelPanel = NodePath("PlayLevelPanel")
+BackButton = NodePath("BackButton")
+ShowDeckButton = NodePath("DeckButton")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -160,5 +166,25 @@ layout_mode = 2
 theme = ExtResource("6_kcb8p")
 text = "Play Game"
 
+[node name="BackButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 22.0
+offset_top = 484.0
+offset_right = 122.0
+offset_bottom = 584.0
+texture_normal = ExtResource("5_q7sn7")
+texture_hover = ExtResource("6_2aff0")
+
+[node name="DeckButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 671.0
+offset_top = 487.0
+offset_right = 771.0
+offset_bottom = 587.0
+texture_normal = ExtResource("7_r3x1p")
+texture_hover = ExtResource("8_xpivi")
+
 [connection signal="pressed" from="HelloTeamContainer/ContinueButton" to="." method="ContinueToSelectLevel"]
 [connection signal="pressed" from="PlayLevelPanel/VBoxContainer/Button" to="." method="StartGame"]
+[connection signal="pressed" from="BackButton" to="." method="Click_GoBack"]
+[connection signal="pressed" from="DeckButton" to="." method="Click_DeckButton"]
