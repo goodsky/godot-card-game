@@ -31,6 +31,10 @@ window/stretch/mode="viewport"
 
 project/assembly_name="Card-game"
 
+[filesystem]
+
+import/blender/enabled=false
+
 [input]
 
 click={

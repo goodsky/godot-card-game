@@ -67,24 +67,24 @@ public static class CardGenerator
 		SacrificeCardCount = 10,
 		CommonCardsCounts = new Dictionary<CardBloodCost, int>
 		{
-			{ CardBloodCost.Zero, 7 },
-			{ CardBloodCost.One, 6 },
-			{ CardBloodCost.Two, 6 },
-			{ CardBloodCost.Three, 5 },
+			{ CardBloodCost.Zero, 3 },
+			{ CardBloodCost.One, 10 },
+			{ CardBloodCost.Two, 10 },
+			{ CardBloodCost.Three, 10 },
 		},
 		UncommonCardsCounts = new Dictionary<CardBloodCost, int>
 		{
-			{ CardBloodCost.Zero, 2 },
-			{ CardBloodCost.One, 3 },
-			{ CardBloodCost.Two, 3 },
-			{ CardBloodCost.Three, 3 },
+			{ CardBloodCost.Zero, 3 },
+			{ CardBloodCost.One, 5 },
+			{ CardBloodCost.Two, 5 },
+			{ CardBloodCost.Three, 5 },
 		},
 		RareCardsCounts = new Dictionary<CardBloodCost, int>
 		{
 			{ CardBloodCost.Zero, 1 },
-			{ CardBloodCost.One, 1 },
-			{ CardBloodCost.Two, 1 },
-			{ CardBloodCost.Three, 2 },
+			{ CardBloodCost.One, 3 },
+			{ CardBloodCost.Two, 3 },
+			{ CardBloodCost.Three, 3 },
 		},
 	};
 

@@ -1,4 +1,4 @@
-namespace Cardgame.Tests;
+namespace CardGame.Tests;
 
 public class EnemyAITests
 {
@@ -14,7 +14,7 @@ public class EnemyAITests
     {
         int cardId = 7;
         var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
-        var moves = new ScriptedMove[] {
+        var moves = new List<ScriptedMove> {
             new ScriptedMove(0, cardId),
         };
 
@@ -33,7 +33,7 @@ public class EnemyAITests
     public void ResolvesCorrectCost(CardBloodCost cost)
     {
         var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
-        var moves = new ScriptedMove[] {
+        var moves = new List<ScriptedMove> {
             new ScriptedMove(0, cost),
         };
 
@@ -52,7 +52,7 @@ public class EnemyAITests
     public void ResolvesCorrectCostAndRarity(CardBloodCost cost, CardRarity rarity)
     {
         var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
-        var moves = new ScriptedMove[] {
+        var moves = new List<ScriptedMove> {
             new ScriptedMove(0, cost, rarity),
         };
 
@@ -78,7 +78,7 @@ public class EnemyAITests
             }
         }
 
-        var ai = new EnemyAI(cards, moves.ToArray());
+        var ai = new EnemyAI(cards, moves);
         for (int turn = 0; turn < 4; turn++)
         {
             List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(turn, new bool[4]);
@@ -98,7 +98,7 @@ public class EnemyAITests
     public void RespectsOccupiedLanes()
     {
         var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
-        var moves = new ScriptedMove[] {
+        var moves = new List<ScriptedMove> {
             new ScriptedMove(0, CardBloodCost.Zero),
         };
 
@@ -108,7 +108,7 @@ public class EnemyAITests
             Array.Fill(laneHasCard, true);
             laneHasCard[openLane] = false;
 
-            var ai = new EnemyAI(cards, moves.ToArray());
+            var ai = new EnemyAI(cards, moves);
             List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(0, laneHasCard);
 
             Assert.Single(resolvedMoves);
@@ -122,13 +122,13 @@ public class EnemyAITests
         var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
 
         int expectedLane = 3;
-        var moves = new ScriptedMove[] {
+        var moves = new List<ScriptedMove> {
             new ScriptedMove(0, CardBloodCost.Zero, lane: expectedLane),
             new ScriptedMove(1, CardBloodCost.Zero, lane: expectedLane),
             new ScriptedMove(2, CardBloodCost.Zero, lane: expectedLane),
         };
 
-        var ai = new EnemyAI(cards, moves.ToArray());
+        var ai = new EnemyAI(cards, moves);
         for (int turn = 0; turn < 3; turn++)
         {
             List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(turn, new bool[4]);
@@ -142,14 +142,14 @@ public class EnemyAITests
     public void ScriptedLanesWaitToBeAvailable()
     {
         var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
-        var moves = new ScriptedMove[] {
+        var moves = new List<ScriptedMove> {
             new ScriptedMove(0, CardBloodCost.Zero, lane: 0),
             new ScriptedMove(0, CardBloodCost.Zero, lane: 1),
             new ScriptedMove(0, CardBloodCost.Zero, lane: 2),
             new ScriptedMove(0, CardBloodCost.Zero, lane: 3),
         };
 
-        var ai = new EnemyAI(cards, moves.ToArray());
+        var ai = new EnemyAI(cards, moves);
         for (int openLane = 0; openLane < 4; openLane++)
         {
             bool[] laneHasCard = new bool[4];

@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 public enum GameState
@@ -338,7 +339,7 @@ public partial class MainGame : Node2D
 				Sacrifices = new Deck(sacrificeCards);
 				Creatures = new Deck(creatureCards);
 
-				var moves = new ScriptedMove[] {
+				var moves = new List<ScriptedMove> {
 					new ScriptedMove(0, CardBloodCost.Zero, CardRarity.Common),
 					new ScriptedMove(1, CardBloodCost.One, CardRarity.Common),
 					new ScriptedMove(3, CardBloodCost.Two),

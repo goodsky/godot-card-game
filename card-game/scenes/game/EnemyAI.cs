@@ -7,14 +7,14 @@ using Godot;
 public class EnemyAI
 {
     private CardPool _cardPool;
-    private ScriptedMove[] _moves;
+    private List<ScriptedMove> _moves;
 
-    public EnemyAI(CardPool cards, ScriptedMove[] moves)
+    public EnemyAI(CardPool cards, List<ScriptedMove> moves)
     {
         _cardPool = cards;
         _moves = moves;
 
-        for (int i = 0; i < moves.Length; i++)
+        for (int i = 0; i < moves.Count; i++)
         {
             _moves[i].Resolved = false;
         }
