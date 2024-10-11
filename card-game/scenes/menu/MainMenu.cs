@@ -24,7 +24,14 @@ public partial class MainMenu : Control
 	public void Click_StartNewGame()
 	{
 		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
-		SceneLoader.Instance.LoadGameLobby(startNewGame: true);
+		if (GameManager.Instance.Progress != null)
+		{
+			ConfirmPopUp.PopUp(this, "Are you sure you want to overwrite your previous save?", confirm: () => SceneLoader.Instance.LoadGameLobby(startNewGame: true));
+		}
+		else
+		{
+			SceneLoader.Instance.LoadGameLobby(startNewGame: true);
+		}
 	}
 
 	public void Click_Settings()
