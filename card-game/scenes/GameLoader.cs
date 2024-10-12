@@ -36,6 +36,12 @@ public static class GameLoader
 
 		[JsonPropertyName("phase")]
 		public LobbyState CurrentState { get; set; }
+
+		[JsonPropertyName("rs")]
+		public int Seed { get; set; }
+
+		[JsonPropertyName("rn")]
+		public int SeedN { get; set; }
 	}
 
 	public class SavedSettings
@@ -52,18 +58,18 @@ public static class GameLoader
 		return Godot.FileAccess.FileExists(UserSavePath);
 	}
 
-	public static GameProgress LoadGame()
+	public static (GameProgress, RandomGenerator) LoadGame()
 	{
 		if (!SavedGameExists())
 		{
-			return null;
+			return (null, null);
 		}
 
 		var fileContent = Godot.FileAccess.GetFileAsString(UserSavePath);
 		if (string.IsNullOrEmpty(fileContent))
 		{
 			GD.PrintErr($"Failed to load saved game from {UserSavePath}. Error=\"{Godot.FileAccess.GetOpenError()}\"");
-			return null;
+			return (null, null);
 		}
 
 		var saveGame = JsonSerializer.Deserialize<SavedGame>(fileContent);
@@ -73,7 +79,7 @@ public static class GameLoader
 		if (cardPool == null)
 		{
 			GD.PushError($"Could not find card pool for save game!");
-			return null;
+			return (null, null);
 		}
 
 		List<CardInfo> deck = new List<CardInfo>();
@@ -90,14 +96,21 @@ public static class GameLoader
 			}
 		}
 
-		return new GameProgress
-		{
-			Level = saveGame.Level,
-			Score = saveGame.Score,
-			CardPool = cardPool,
-			DeckCards = deck,
-			CurrentState = saveGame.CurrentState,
-		};
+		GD.Print($"Loaded Game Seed: {saveGame.Seed}[{saveGame.SeedN}]");
+
+		return (
+			new GameProgress
+			{
+				Level = saveGame.Level,
+				Score = saveGame.Score,
+				CardPool = cardPool,
+				DeckCards = deck,
+				CurrentState = saveGame.CurrentState,
+				Seed = saveGame.Seed,
+				SeedN = saveGame.SeedN,
+			},
+			new RandomGenerator(saveGame.Seed, saveGame.SeedN)
+		);
 	}
 
 	public static void SaveGame(GameProgress game)
@@ -110,7 +123,11 @@ public static class GameLoader
 			CardPoolName = game.CardPool.Name,
 			DeckCardIds = game.DeckCards.Select(x => x.Id).ToList(),
 			CurrentState = game.CurrentState,
+			Seed = game.Seed,
+			SeedN = game.SeedN,
 		};
+
+		GD.Print($"Saving Game Seed: {saveGame.Seed}[{saveGame.SeedN}]");
 
 		var saveGameJson = JsonSerializer.Serialize(saveGame);
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);

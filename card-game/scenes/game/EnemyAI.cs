@@ -8,11 +8,13 @@ public class EnemyAI
 {
     private CardPool _cardPool;
     private List<ScriptedMove> _moves;
+    private RandomGenerator _rnd;
 
-    public EnemyAI(CardPool cards, List<ScriptedMove> moves)
+    public EnemyAI(CardPool cards, List<ScriptedMove> moves, RandomGenerator rnd)
     {
         _cardPool = cards;
         _moves = moves;
+        _rnd = new RandomGenerator(rnd.Seed, rnd.N); // copy so other game state doesn't affect this
 
         for (int i = 0; i < moves.Count; i++)
         {
@@ -50,7 +52,7 @@ public class EnemyAI
             else
             {
                 int openLanes = backLaneHasCard.Count((hasCard) => !hasCard);
-                int laneIdx = Random.Shared.Next(openLanes);
+                int laneIdx = _rnd.Next(openLanes);
                 for (lane = 0; lane < backLaneHasCard.Length; lane++)
                 {
                     if (backLaneHasCard[lane]) continue;
@@ -120,7 +122,7 @@ public class EnemyAI
         }
 
         CardInfo[] cards = possibleCards.ToArray();
-        return cards[Random.Shared.Next(cards.Length)];
+        return cards[_rnd.Next(cards.Length)];
     }
 }
 

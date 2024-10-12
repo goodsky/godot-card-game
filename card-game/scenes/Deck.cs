@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 public class Deck
@@ -7,10 +6,10 @@ public class Deck
 
     public int Count => Cards.Count;
 
-    public Deck(IEnumerable<CardInfo> cards)
+    public Deck(IEnumerable<CardInfo> cards, RandomGenerator rnd = null)
     {
         Cards = new List<CardInfo>(cards);
-        ShuffleCards();
+        ShuffleCards(rnd ?? new RandomGenerator());
     }
 
     public CardInfo? PeekTop()
@@ -38,7 +37,7 @@ public class Deck
         return cardInfo;
     }
 
-    private void ShuffleCards()
+    private void ShuffleCards(RandomGenerator rnd)
     {
         var swap = (int src, int dst) =>
         {
@@ -49,7 +48,7 @@ public class Deck
 
         for (int i = Cards.Count - 1; i >= 1; i--)
         {
-            int j = Random.Shared.Next(i + 1);
+            int j = rnd.Next(i + 1);
             swap(i, j);
         }
     }

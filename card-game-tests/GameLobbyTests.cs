@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace CardGame.Tests;
 
 public class GameLobbyTests
@@ -9,12 +7,6 @@ public class GameLobbyTests
     public GameLobbyTests(ITestOutputHelper output)
     {
         _output = output;
-    }
-
-    [Fact]
-    public void SelectDraftPoolTest()
-    {
-
     }
 
     [Fact]

@@ -12,12 +12,18 @@ public class GameProgress
 	public List<CardInfo> DeckCards { get; set; }
 
     public LobbyState CurrentState { get; set; }
+
+    public int Seed { get; set; }
+
+    public int SeedN { get; set; }
 }
 
 
 public partial class GameManager : Node
 {
     public GameProgress Progress { get; private set; }
+
+    public RandomGenerator Random { get; private set;}
 
     public static GameManager Instance { get; private set; }
 
@@ -29,12 +35,18 @@ public partial class GameManager : Node
 
         if (GameLoader.SavedGameExists())
         {
-            Progress = GameLoader.LoadGame();
+            (Progress, Random) = GameLoader.LoadGame();
         }
         else
         {
             Progress = null;
+            Random = new RandomGenerator();
         }
+    }
+
+    public void RefreshSavedGame()
+    {
+        (Progress, Random) = GameLoader.LoadGame();
     }
 
     public void SaveGame()
@@ -50,19 +62,30 @@ public partial class GameManager : Node
 
     public void StartNewGame(CardPool cardPool)
     {
+        Random = new RandomGenerator();
         Progress = new GameProgress
         {
             Level = 1,
 			Score = 0,
 			CardPool = cardPool,
 			DeckCards = new List<CardInfo>(),
+            Seed = Random.Seed,
+            SeedN = Random.N,
         };
 
         // Note: don't save until the new deck is created
     }
 
-    public void UpdateProgress(LobbyState currentState, int? level = null, int? score = null, List<CardInfo> updatedDeck = null)
+    // A few rules for updating progress becuase of the Random Seed
+    //   * Save before using generating any random values - we want it to line up after loading a save
+    public void UpdateProgress(LobbyState currentState, int? level = null, int? score = null, List<CardInfo> updatedDeck = null, bool updateSeed = false, bool resetSeed = false)
     {
+        if (resetSeed)
+        {
+            updateSeed = true;
+            Random = new RandomGenerator();
+        }
+
         Progress = new GameProgress
         {
             CurrentState = currentState,
@@ -70,6 +93,8 @@ public partial class GameManager : Node
             Score = score ?? Progress.Score,
             DeckCards = updatedDeck ?? Progress.DeckCards,
             CardPool = Progress.CardPool,
+            Seed = updateSeed ? Random.Seed: Progress.Seed,
+            SeedN = updateSeed ? Random.N : Progress.SeedN,
         };
 
         SaveGame();
@@ -79,6 +104,7 @@ public partial class GameManager : Node
     {
         GameLoader.ClearGame();
         Progress = null;
+        Random = null;
     }
 
     private void InitializeSettings()

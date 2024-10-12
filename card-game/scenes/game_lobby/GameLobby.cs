@@ -107,6 +107,19 @@ public partial class GameLobby : Control
 		}
 	}
 
+	public void PlayGame()
+	{
+		switch (CurrentState)
+		{
+			case LobbyState.SelectLevel:
+				TransitionToState(LobbyState.PlayGame);
+				break;
+
+			default:
+				throw new LobbyStateMachineException(nameof(PlayGame), CurrentState);
+		}
+	}
+
 	public void Click_DeckButton()
 	{
 		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
@@ -116,23 +129,6 @@ public partial class GameLobby : Control
 	public void Click_GoBack()
 	{
 		SceneLoader.Instance.LoadMainMenu();
-	}
-
-	public void StartGame()
-	{
-		CardPool cardPool = GameManager.Instance.Progress.CardPool;
-		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
-
-		var sacrificeCards = deck.Where(c => c.Rarity == CardRarity.Sacrifice);
-		var creatureCards = deck.Where(c => c.Rarity != CardRarity.Sacrifice);
-		var sacrificeDeck = new Deck(sacrificeCards);
-		var creatureDeck = new Deck(creatureCards);
-
-		var progress = GameManager.Instance.Progress;
-		var opponent = GenerateEnemyAI(cardPool, progress.Level, new RandomNumberGenerator());
-
-		GameManager.Instance.UpdateProgress(LobbyState.PlayGame);
-		SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, opponent);
 	}
 
 	private async void TransitionToState(LobbyState nextState)
@@ -170,22 +166,40 @@ public partial class GameLobby : Control
 				break;
 
 			case LobbyState.DraftCards:
-				GameManager.Instance.UpdateProgress(LobbyState.DraftCards);
+				GameManager.Instance.UpdateProgress(LobbyState.DraftCards, updateSeed: true);
 				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f));
 				break;
 
 			case LobbyState.SelectLevel:
-				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel);
+				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updateSeed: true);
 				Label levelLabel = PlayLevelPanel.FindChild("LevelNumber") as Label;
 				levelLabel.Text = GameManager.Instance.Progress.Level.ToString();
 				PlayLevelPanel.Visible = true;
 				break;
 
 			case LobbyState.PlayGame:
-				GameManager.Instance.UpdateProgress(LobbyState.PlayGame);
+				GameManager.Instance.UpdateProgress(LobbyState.PlayGame, updateSeed: true);
 				StartGame();
 				break;
 		}
+	}
+
+	private void StartGame()
+	{
+		CardPool cardPool = GameManager.Instance.Progress.CardPool;
+		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
+		RandomGenerator rnd = GameManager.Instance.Random;
+		GD.Print("Starting game with seed", rnd.Seed);
+
+		var sacrificeCards = deck.Where(c => c.Rarity == CardRarity.Sacrifice);
+		var creatureCards = deck.Where(c => c.Rarity != CardRarity.Sacrifice);
+		var sacrificeDeck = new Deck(sacrificeCards, rnd);
+		var creatureDeck = new Deck(creatureCards, rnd);
+
+		var progress = GameManager.Instance.Progress;
+		var opponent = GenerateEnemyAI(cardPool, progress.Level, rnd);
+
+		SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, opponent);
 	}
 
 	private IEnumerable GenerateCardPoolCoroutine(TimeSpan delay)
@@ -245,9 +259,10 @@ public partial class GameLobby : Control
 			"Here is what you're starting with.",
 		};
 
-		helloLabel.Text = labelOptions[Random.Shared.Next(labelOptions.Length)];
+		RandomGenerator rnd = GameManager.Instance.Random;
+		helloLabel.Text = labelOptions[rnd.Next(labelOptions.Length)];
 
-		var startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize);
+		var startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize, rnd);
 		GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: startingDeck);
 		
 		foreach (CardInfo cardInfo in startingDeck)
@@ -280,7 +295,8 @@ public partial class GameLobby : Control
 		}
 
 		var progress = GameManager.Instance.Progress;
-		var candidateCards = SelectDraftPool(progress.CardPool, level: progress.Level, count: 3, rnd: new RandomNumberGenerator());
+		var rnd = GameManager.Instance.Random;
+		var candidateCards = SelectDraftPool(progress.CardPool, level: progress.Level, count: 3, rnd: rnd);
 		
 		foreach (CardInfo cardInfo in candidateCards)
 		{
@@ -303,7 +319,7 @@ public partial class GameLobby : Control
 		DraftCardsContainer.Visible = false;
 	}
 
-	public static IEnumerable<CardInfo> SelectDraftPool(CardPool cardPool, int level, int count, RandomNumberGenerator rnd)
+	public static IEnumerable<CardInfo> SelectDraftPool(CardPool cardPool, int level, int count, RandomGenerator rnd)
 	{
 		const float UNCOMMON_RATE = 0.04f;
 		const float RARE_RATE = 0.02f;
@@ -317,6 +333,8 @@ public partial class GameLobby : Control
 			new[] { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare },
 			rnd
 		);
+
+		GD.Print($"Selecting Draft Pool: seed={rnd.Seed}[{rnd.N}]; rarity = {rarity}; rarity probabilities=[{commonProbability:0.00}, {uncommonProbability:0.00}, {rareProbability:0.00}]");
 
 		var cardOptions = cardPool.Cards
 			.Where(c => c.Rarity == rarity || (rarity == CardRarity.Common && c.Rarity == CardRarity.Sacrifice))
@@ -335,7 +353,7 @@ public partial class GameLobby : Control
 		var draftPool = new List<CardInfo>();
 		for (int i = 0; i < count; i++)
 		{
-			int rndIdx = rnd.RandiRange(0, cardOptions.Count - 1);
+			int rndIdx = rnd.Next(cardOptions.Count);
 			CardInfo candidate = cardOptions[rndIdx];
 			draftPool.Add(candidate);
 			cardOptions.RemoveAt(rndIdx);
@@ -355,16 +373,15 @@ public partial class GameLobby : Control
 		return draftPool;
 	}
 
-	public static List<CardInfo> GenerateStartingDeck(CardPool cardPool, int startingDeckSize)
+	public static List<CardInfo> GenerateStartingDeck(CardPool cardPool, int startingDeckSize, RandomGenerator rnd)
 	{
 		var deck = new List<CardInfo>();
 
 		// 20-40% starting deck is sacrifices
 		// 20-40% starting deck is one cost cards
 		// remainder is random 2-3 cost cards
-		var rnd = new RandomNumberGenerator();
-		int sacrificeCount = Mathf.CeilToInt(rnd.RandfRange(0.2f, 0.4f) * startingDeckSize);
-		int oneCostCount = Mathf.CeilToInt(rnd.RandfRange(0.2f, 0.4f) * startingDeckSize);
+		int sacrificeCount = Mathf.CeilToInt(rnd.Nextf(0.2f, 0.4f) * startingDeckSize);
+		int oneCostCount = Mathf.CeilToInt(rnd.Nextf(0.2f, 0.4f) * startingDeckSize);
 		int otherCount = startingDeckSize - sacrificeCount - oneCostCount;
 
 		GD.Print($"Starting deck: {sacrificeCount} sacrifices; {oneCostCount} one cost; {otherCount} other;");
@@ -372,7 +389,7 @@ public partial class GameLobby : Control
 		var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice).ToList();
 		for (int i = 0; i < sacrificeCount; i++)
 		{
-			int rndIdx = rnd.RandiRange(0, sacrificeCards.Count - 1);
+			int rndIdx = rnd.Next(sacrificeCards.Count);
 			deck.Add(sacrificeCards[rndIdx]);
 			sacrificeCards.RemoveAt(rndIdx);
 		}
@@ -380,7 +397,7 @@ public partial class GameLobby : Control
 		var oneCostCards = cardPool.Cards.Where(c => c.BloodCost == CardBloodCost.One && c.Rarity == CardRarity.Common).ToList();
 		for (int i = 0; i < oneCostCount; i++)
 		{
-			int rndIdx = rnd.RandiRange(0, oneCostCards.Count - 1);
+			int rndIdx = rnd.Next(oneCostCards.Count);
 			deck.Add(oneCostCards[rndIdx]);
 			oneCostCards.RemoveAt(rndIdx);
 		}
@@ -388,7 +405,7 @@ public partial class GameLobby : Control
 		var otherCards = cardPool.Cards.Where(c => c.BloodCost != CardBloodCost.Zero && c.BloodCost != CardBloodCost.One && c.Rarity == CardRarity.Common).ToList();
 		for (int i = 0; i < otherCount; i++)
 		{
-			int rndIdx = rnd.RandiRange(0, otherCards.Count - 1);
+			int rndIdx = rnd.Next(otherCards.Count);
 			deck.Add(otherCards[rndIdx]);
 			otherCards.RemoveAt(rndIdx);
 		}
@@ -396,7 +413,7 @@ public partial class GameLobby : Control
 		return deck;
 	}
 
-	public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomNumberGenerator rnd)
+	public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
 	{
 		const int TOTAL_CARDS_RATE = 1;
 		int totalCards = LinearScale(level, TOTAL_CARDS_RATE, min: 4, max: 12, y_intercept: 4, random_amount: 1, rnd: rnd);
@@ -416,7 +433,7 @@ public partial class GameLobby : Control
 		var twoCostProbabilities = new[] {   0.00f, 0.05f, 0.25f, 0.45f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f };
 		var threeCostProbabilities = new[] { 0.00f, 0.00f, 0.00f, 0.05f, 0.05f, 0.10f, 0.20f, 0.30f, 0.40f, 0.50f };
 
-		GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
+		GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
 
 		int turnId = 0;
 		var moves = new List<ScriptedMove>();
@@ -457,7 +474,7 @@ public partial class GameLobby : Control
 			turnId++;
 		}
 
-		return new EnemyAI(cardPool, moves);
+		return new EnemyAI(cardPool, moves, rnd);
 	}
 
 	public static float LinearScalef(
@@ -468,12 +485,12 @@ public partial class GameLobby : Control
 		float x_intercept = 0,
 		float y_intercept = 0,
 		float random_amount = 0,
-		RandomNumberGenerator rnd = null)
+		RandomGenerator rnd = null)
 	{
 		float y = (x - x_intercept) * rate + y_intercept;
 		if (rnd != null)
 		{
-			y += rnd.RandfRange(-random_amount, random_amount);
+			y += rnd.Nextf(-random_amount, random_amount);
 		}
 
 		return Mathf.Clamp(y, min, max);
@@ -487,15 +504,15 @@ public partial class GameLobby : Control
 		int x_intercept = 0,
 		int y_intercept = 0,
 		int random_amount = 0,
-		RandomNumberGenerator rnd = null)
+		RandomGenerator rnd = null)
 	{
 		float y = LinearScalef(x, rate, min, max, x_intercept, y_intercept, random_amount, rnd);
 		return Math.Clamp(Mathf.RoundToInt(y + 1e-6f), min, max);
 	}
 
-	public static T PickOption<T>(float[] probabilities, T[] values, RandomNumberGenerator rnd)
+	public static T PickOption<T>(float[] probabilities, T[] values, RandomGenerator rnd)
 	{
-		float value = rnd.Randf();
+		float value = rnd.Nextf(0f, 1f);
 		float sum = 0f;
 		for (int i = 0; i < probabilities.Length; i++)
 		{

@@ -66,8 +66,6 @@ public partial class MainGame : Node2D
 
 	public void Click_Continue()
 	{
-		GameProgress progress = GameManager.Instance.Progress;
-		GameManager.Instance.UpdateProgress(LobbyState.DraftCards, level: progress.Level + 1);
 		SceneLoader.Instance.LoadGameLobby();
 	}
 
@@ -266,7 +264,12 @@ public partial class MainGame : Node2D
 	public void GameOver()
 	{
 		bool playerWon = Instance.HealthBar.PlayerPoints > 0;
-		if (!playerWon)
+		if (playerWon)
+		{
+			GameProgress progress = GameManager.Instance.Progress;
+			GameManager.Instance.UpdateProgress(LobbyState.DraftCards, level: progress.Level + 1, resetSeed: true);
+		}
+		else
 		{
 			GameManager.Instance.ClearGame();
 		}
@@ -347,7 +350,7 @@ public partial class MainGame : Node2D
 					new ScriptedMove(4, CardBloodCost.Two),
 					new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
 				};
-				Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves);
+				Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves, new RandomGenerator());
 			}
 
 			yield return new CoroutineDelay(0.234f);

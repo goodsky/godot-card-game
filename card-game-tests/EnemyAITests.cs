@@ -18,7 +18,7 @@ public class EnemyAITests
             new ScriptedMove(0, cardId),
         };
 
-        var ai = new EnemyAI(cards, moves);
+        var ai = new EnemyAI(cards, moves, new RandomGenerator());
         List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(0, new bool[4]);
 
         Assert.Single(resolvedMoves);
@@ -37,7 +37,7 @@ public class EnemyAITests
             new ScriptedMove(0, cost),
         };
 
-        var ai = new EnemyAI(cards, moves);
+        var ai = new EnemyAI(cards, moves, new RandomGenerator());
         List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(0, new bool[4]);
 
         Assert.Single(resolvedMoves);
@@ -56,7 +56,7 @@ public class EnemyAITests
             new ScriptedMove(0, cost, rarity),
         };
 
-        var ai = new EnemyAI(cards, moves);
+        var ai = new EnemyAI(cards, moves, new RandomGenerator());
         List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(0, new bool[4]);
 
         Assert.Single(resolvedMoves);
@@ -78,7 +78,7 @@ public class EnemyAITests
             }
         }
 
-        var ai = new EnemyAI(cards, moves);
+        var ai = new EnemyAI(cards, moves, new RandomGenerator());
         for (int turn = 0; turn < 4; turn++)
         {
             List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(turn, new bool[4]);
@@ -108,7 +108,7 @@ public class EnemyAITests
             Array.Fill(laneHasCard, true);
             laneHasCard[openLane] = false;
 
-            var ai = new EnemyAI(cards, moves);
+            var ai = new EnemyAI(cards, moves, new RandomGenerator());
             List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(0, laneHasCard);
 
             Assert.Single(resolvedMoves);
@@ -128,7 +128,7 @@ public class EnemyAITests
             new ScriptedMove(2, CardBloodCost.Zero, lane: expectedLane),
         };
 
-        var ai = new EnemyAI(cards, moves);
+        var ai = new EnemyAI(cards, moves, new RandomGenerator());
         for (int turn = 0; turn < 3; turn++)
         {
             List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(turn, new bool[4]);
@@ -149,7 +149,7 @@ public class EnemyAITests
             new ScriptedMove(0, CardBloodCost.Zero, lane: 3),
         };
 
-        var ai = new EnemyAI(cards, moves);
+        var ai = new EnemyAI(cards, moves, new RandomGenerator());
         for (int openLane = 0; openLane < 4; openLane++)
         {
             bool[] laneHasCard = new bool[4];

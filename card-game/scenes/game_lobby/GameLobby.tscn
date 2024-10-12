@@ -185,6 +185,7 @@ texture_normal = ExtResource("7_r3x1p")
 texture_hover = ExtResource("8_xpivi")
 
 [connection signal="pressed" from="HelloTeamContainer/ContinueButton" to="." method="ContinueToSelectLevel"]
-[connection signal="pressed" from="PlayLevelPanel/VBoxContainer/Button" to="." method="StartGame"]
+[connection signal="pressed" from="DraftCardsContainer/SkipButton" to="." method="SkipDraft"]
+[connection signal="pressed" from="PlayLevelPanel/VBoxContainer/Button" to="." method="PlayGame"]
 [connection signal="pressed" from="BackButton" to="." method="Click_GoBack"]
 [connection signal="pressed" from="DeckButton" to="." method="Click_DeckButton"]

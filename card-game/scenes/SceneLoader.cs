@@ -19,6 +19,9 @@ public partial class SceneLoader : Node2D
 
 	public void LoadGameLobby(bool startNewGame = false)
 	{
+		// Reset the random seed to the saved version
+		GameManager.Instance.RefreshSavedGame();
+
 		RemoveAllChildren();
 		var gameLobby = Constants.GameLobbyScene.Instantiate<GameLobby>();
 		gameLobby.IsNewGame = startNewGame;
