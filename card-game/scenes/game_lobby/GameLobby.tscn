@@ -1,16 +1,15 @@
-[gd_scene load_steps=10 format=3 uid="uid://di22clwjd5yiw"]
+[gd_scene load_steps=9 format=3 uid="uid://di22clwjd5yiw"]
 
 [ext_resource type="Theme" uid="uid://bp6sa0wtarlmt" path="res://scenes/game_lobby/lobby_theme.tres" id="1_xe6ch"]
 [ext_resource type="Texture2D" uid="uid://b4wwccrfx058e" path="res://assets/sprites/progress-circle.png" id="2_6eo2a"]
 [ext_resource type="Script" path="res://scenes/game_lobby/GameLobby.cs" id="2_bfw0j"]
-[ext_resource type="PackedScene" uid="uid://do6jdc0kwqer0" path="res://scenes/game_lobby/SelectLevelPanel.tscn" id="5_kpnyn"]
 [ext_resource type="Texture2D" uid="uid://cbmvvafyfjkrf" path="res://assets/sprites/back-arrow.png" id="5_q7sn7"]
 [ext_resource type="Texture2D" uid="uid://b5rcevf0s8w0p" path="res://assets/sprites/back-arrow-2.png" id="6_2aff0"]
 [ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="6_kcb8p"]
 [ext_resource type="Texture2D" uid="uid://c63reeulblwrp" path="res://assets/sprites/deck-icon.png" id="7_r3x1p"]
 [ext_resource type="Texture2D" uid="uid://xl83ydp2ptv" path="res://assets/sprites/deck-icon-2.png" id="8_xpivi"]
 
-[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "BackButton", "ShowDeckButton")]
+[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "RemoveCardContainer", "SelectLevelContainer", "BackButton", "ShowDeckButton")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 800.0
@@ -21,6 +20,8 @@ AutoStartingDeck = true
 GeneratingCardsPanel = NodePath("GeneratingCardsPanel")
 HelloDeckContainer = NodePath("HelloTeamContainer")
 DraftCardsContainer = NodePath("DraftCardsContainer")
+RemoveCardContainer = NodePath("RemoveCardContainer")
+SelectLevelContainer = NodePath("SelectLevelContainer")
 BackButton = NodePath("BackButton")
 ShowDeckButton = NodePath("DeckButton")
 
@@ -111,7 +112,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="GeneratingCards" type="Label" parent="DraftCardsContainer/ChooseCardsPanel"]
+[node name="AddCardLabel" type="Label" parent="DraftCardsContainer/ChooseCardsPanel"]
 layout_mode = 2
 text = "Add a card to your deck..."
 horizontal_alignment = 1
@@ -128,7 +129,49 @@ size_flags_horizontal = 4
 theme = ExtResource("6_kcb8p")
 text = "Skip"
 
+[node name="RemoveCardContainer" type="VBoxContainer" parent="."]
+visible = false
+layout_mode = 2
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 32
+alignment = 1
+
+[node name="RemoveCardsPanel" type="PanelContainer" parent="RemoveCardContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RemoveCardContainer/RemoveCardsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RedRemoveLabel" type="Label" parent="RemoveCardContainer/RemoveCardsPanel/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.996078, 0, 0, 1)
+text = "Remove"
+horizontal_alignment = 1
+
+[node name="RemoveSuffixLabel" type="Label" parent="RemoveCardContainer/RemoveCardsPanel/HBoxContainer"]
+layout_mode = 2
+text = "a card from your deck..."
+horizontal_alignment = 1
+
+[node name="CardButtonContainer" type="HBoxContainer" parent="RemoveCardContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="SkipButton" type="Button" parent="RemoveCardContainer"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+size_flags_horizontal = 4
+theme = ExtResource("6_kcb8p")
+text = "Skip"
+
 [node name="SelectLevelContainer" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 2
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -160,15 +203,6 @@ layout_mode = 2
 theme_override_constants/separation = 32
 alignment = 1
 
-[node name="PlayLevelPanel" parent="SelectLevelContainer/SelectLevelContainer" instance=ExtResource("5_kpnyn")]
-layout_mode = 2
-
-[node name="PlayLevelPanel2" parent="SelectLevelContainer/SelectLevelContainer" instance=ExtResource("5_kpnyn")]
-layout_mode = 2
-
-[node name="PlayLevelPanel3" parent="SelectLevelContainer/SelectLevelContainer" instance=ExtResource("5_kpnyn")]
-layout_mode = 2
-
 [node name="BackButton" type="TextureButton" parent="."]
 layout_mode = 0
 offset_left = 22.0
@@ -188,6 +222,7 @@ texture_normal = ExtResource("7_r3x1p")
 texture_hover = ExtResource("8_xpivi")
 
 [connection signal="pressed" from="HelloTeamContainer/ContinueButton" to="." method="ContinueToSelectLevel"]
-[connection signal="pressed" from="DraftCardsContainer/SkipButton" to="." method="SkipDraft"]
+[connection signal="pressed" from="DraftCardsContainer/SkipButton" to="." method="ContinueToSelectLevel"]
+[connection signal="pressed" from="RemoveCardContainer/SkipButton" to="." method="ContinueToSelectLevel"]
 [connection signal="pressed" from="BackButton" to="." method="Click_GoBack"]
 [connection signal="pressed" from="DeckButton" to="." method="Click_DeckButton"]

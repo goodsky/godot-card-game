@@ -28,13 +28,13 @@ public partial class SceneLoader : Node2D
 		AddChild(gameLobby);
 	}
 
-	public void LoadMainGame(Deck sacrifices, Deck creatures, EnemyAI opponent)
+	public void LoadMainGame(Deck sacrifices, Deck creatures, GameLevel level)
 	{
 		RemoveAllChildren();
 		MainGame mainGame = Constants.MainGameScene.Instantiate<MainGame>();
 		mainGame.Sacrifices = sacrifices;
 		mainGame.Creatures = creatures;
-		mainGame.Opponent = opponent;
+		mainGame.GameLevel = level;
 		AddChild(mainGame);
 	}
 

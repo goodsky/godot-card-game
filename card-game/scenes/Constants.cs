@@ -20,6 +20,7 @@ public static class Constants
 	public static readonly PackedScene MainGameScene = GD.Load<PackedScene>("res://scenes/game/MainGame.tscn");
 	public static readonly PackedScene MainMenuScene = GD.Load<PackedScene>("res://scenes/menu/MainMenu.tscn");
 	public static readonly PackedScene GameLobbyScene = GD.Load<PackedScene>("res://scenes/game_lobby/GameLobby.tscn");
+	public static readonly PackedScene SelectLevelScene = GD.Load<PackedScene>("res://scenes/game_lobby/SelectLevelPanel.tscn");
 
 	public static readonly string ErrorAvatarPath = "res://assets/sprites/avatars/avatar_blue_monster_00.jpeg";
 

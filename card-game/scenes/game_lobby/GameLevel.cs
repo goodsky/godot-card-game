@@ -10,6 +10,8 @@ public enum LevelReward
 {
     AddResource,
     AddCreature,
+    AddUncommonCreature,
+    AddRareCreature,
     RemoveCard,
     IncreaseHandSize,
 }
