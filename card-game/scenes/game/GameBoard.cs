@@ -108,7 +108,7 @@ public partial class GameBoard : Node2D
 
 			case GameState.EnemyStageCard:
 				int turn = MainGame.Instance.CurrentTurn;
-				List<PlayedCard> moves = MainGame.Instance.Opponent.GetMovesForTurn(turn, StagedLaneHasCard);
+				List<PlayedCard> moves = MainGame.Instance.GameLevel.AI.GetMovesForTurn(turn, StagedLaneHasCard);
 				coroutine = this.StartCoroutine(OpponentStageCardsCoroutine(moves));
 				break;
 

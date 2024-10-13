@@ -10,15 +10,23 @@ public class EnemyAI
     private List<ScriptedMove> _moves;
     private RandomGenerator _rnd;
 
+    public int MaxTurn { get; private set; }
+
     public EnemyAI(CardPool cards, List<ScriptedMove> moves, RandomGenerator rnd)
     {
         _cardPool = cards;
         _moves = moves;
         _rnd = new RandomGenerator(rnd.Seed, rnd.N); // copy so other game state doesn't affect this
 
-        for (int i = 0; i < moves.Count; i++)
+        Initialize();
+    }
+
+    public void Initialize()
+    {
+        for (int i = 0; i < _moves.Count; i++)
         {
             _moves[i].Resolved = false;
+            MaxTurn = Math.Max(MaxTurn, _moves[i].Turn);
         }
     }
 
@@ -121,8 +129,7 @@ public class EnemyAI
             return null;
         }
 
-        CardInfo[] cards = possibleCards.ToArray();
-        return cards[_rnd.Next(cards.Length)];
+        return _rnd.SelectRandom(possibleCards);
     }
 }
 

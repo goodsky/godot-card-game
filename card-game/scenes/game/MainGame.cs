@@ -47,7 +47,7 @@ public partial class MainGame : Node2D
 
 	public Deck Sacrifices { get; set; }
 
-	public EnemyAI Opponent { get; set; }
+	public GameLevel GameLevel { get; set; }
 
 	public override void _EnterTree()
 	{
@@ -267,7 +267,19 @@ public partial class MainGame : Node2D
 		if (playerWon)
 		{
 			GameProgress progress = GameManager.Instance.Progress;
-			GameManager.Instance.UpdateProgress(LobbyState.DraftCards, level: progress.Level + 1, resetSeed: true);
+
+			var rewardToStateMap = new Dictionary<LevelReward, LobbyState>
+			{
+				{ LevelReward.AddResource, LobbyState.DraftResource },
+				{ LevelReward.AddCreature, LobbyState.DraftCreature },
+				{ LevelReward.AddUncommonCreature, LobbyState.DraftUncommonCreature },
+				{ LevelReward.AddRareCreature, LobbyState.DraftRareCreature },
+				{ LevelReward.RemoveCard, LobbyState.RemoveCard },
+				{ LevelReward.IncreaseHandSize, LobbyState.IncreaseHandSize },
+			};
+
+			LobbyState nextLobbyState = rewardToStateMap[GameLevel.Reward];
+			GameManager.Instance.UpdateProgress(nextLobbyState, level: progress.Level + 1);
 		}
 		else
 		{
@@ -306,7 +318,7 @@ public partial class MainGame : Node2D
 		card.Name = $"{nodeName}_{DrawnCardCount++}";
 		card.Info = cardInfo;
 		card.GlobalPosition = deckGlobalPosition;
-		
+
 		ActiveCardState.Instance.SetCardDrop(card, Hand);
 		AudioManager.Instance.Play(Constants.Audio.CardWhoosh, tweak: true);
 
@@ -331,14 +343,15 @@ public partial class MainGame : Node2D
 			const int StartingHandSize = 3;
 			CurrentTurn = 0;
 
-			if (Creatures == null)
+			if (GameLevel == null)
 			{
-				GD.PushError("No Deck set! Initializing to the Starter Deck.");
+				GD.PushError("No Level Set! Initializing to the Test Level.");
 
 				// TODO: Load a deck instead of the whole card pool
 				var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
 				var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice);
 				var creatureCards = cardPool.Cards.Where(c => c.Rarity != CardRarity.Sacrifice);
+
 				Sacrifices = new Deck(sacrificeCards);
 				Creatures = new Deck(creatureCards);
 
@@ -350,7 +363,15 @@ public partial class MainGame : Node2D
 					new ScriptedMove(4, CardBloodCost.Two),
 					new ScriptedMove(5, CardBloodCost.Three, CardRarity.Rare),
 				};
-				Opponent = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves, new RandomGenerator());
+
+				GameLevel = new GameLevel
+				{
+					Level = 42,
+					Seed = 13337,
+					AI = new EnemyAI(new CardPool(creatureCards, "EnemyDeck"), moves, new RandomGenerator()),
+					Difficulty = LevelDifficulty.Medium,
+					Reward = LevelReward.AddCreature,
+				};
 			}
 
 			yield return new CoroutineDelay(0.234f);

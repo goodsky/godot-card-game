@@ -9,8 +9,13 @@ public enum LobbyState
 	Initializing,
 	GenerateCardPool,
 	GenerateStartingDeck,
-	DraftCards,
 	SelectLevel,
+	DraftResource,
+	DraftCreature,
+	DraftUncommonCreature,
+	DraftRareCreature,
+	RemoveCard,
+	IncreaseHandSize,
 	PlayGame,
 }
 
@@ -36,7 +41,10 @@ public partial class GameLobby : Control
 	public CanvasItem DraftCardsContainer { get; set; }
 
 	[Export]
-	public CanvasItem PlayLevelPanel { get; set; }
+	public CanvasItem RemoveCardContainer { get; set; }
+
+	[Export]
+	public CanvasItem SelectLevelContainer { get; set; }
 
 	[Export]
 	public BaseButton BackButton { get; set; }
@@ -60,14 +68,17 @@ public partial class GameLobby : Control
 	{
 		switch (CurrentState)
 		{
-			case LobbyState.DraftCards:
+			case LobbyState.DraftResource:
+			case LobbyState.DraftCreature:
+			case LobbyState.DraftUncommonCreature:
+			case LobbyState.DraftRareCreature:
 				var deck = GameManager.Instance.Progress.DeckCards;
 				deck.Add(cardInfo);
 
 				if (GameManager.Instance.Progress.Level == 1 &&
 					deck.Count < StartingDeckSize)
 				{
-					TransitionToState(LobbyState.DraftCards);
+					TransitionToState(LobbyState.DraftCreature);
 				}
 				else
 				{
@@ -81,16 +92,20 @@ public partial class GameLobby : Control
 		}
 	}
 
-	public void SkipDraft()
+	public void RemoveCard(CardInfo cardInfo)
 	{
 		switch (CurrentState)
 		{
-			case LobbyState.DraftCards:
+			case LobbyState.RemoveCard:
+				var deck = GameManager.Instance.Progress.DeckCards;
+				deck.Remove(cardInfo);
+
+				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: deck);
 				TransitionToState(LobbyState.SelectLevel);
 				break;
 
 			default:
-				throw new LobbyStateMachineException(nameof(SkipDraft), CurrentState);
+				throw new LobbyStateMachineException(nameof(RemoveCard), CurrentState);
 		}
 	}
 
@@ -99,6 +114,11 @@ public partial class GameLobby : Control
 		switch (CurrentState)
 		{
 			case LobbyState.GenerateStartingDeck:
+			case LobbyState.DraftResource:
+			case LobbyState.DraftCreature:
+			case LobbyState.DraftUncommonCreature:
+			case LobbyState.DraftRareCreature:
+			case LobbyState.RemoveCard:
 				TransitionToState(LobbyState.SelectLevel);
 				break;
 
@@ -107,16 +127,19 @@ public partial class GameLobby : Control
 		}
 	}
 
-	public void PlayGame()
+	public void SelectLevel(GameLevel level)
 	{
 		switch (CurrentState)
 		{
 			case LobbyState.SelectLevel:
+				// Reset the random seed to the one that generated this level
+				// Note: the StartGame method will then regenerate this level again
+				GameManager.Instance.ResetRandomSeed(level.Seed);
 				TransitionToState(LobbyState.PlayGame);
 				break;
 
 			default:
-				throw new LobbyStateMachineException(nameof(PlayGame), CurrentState);
+				throw new LobbyStateMachineException(nameof(SelectLevel), CurrentState);
 		}
 	}
 
@@ -148,10 +171,17 @@ public partial class GameLobby : Control
 				ShowDeckButton.Visible = true;
 				break;
 
-			case LobbyState.DraftCards:
+			case LobbyState.DraftResource:
+			case LobbyState.DraftCreature:
+			case LobbyState.DraftUncommonCreature:
+			case LobbyState.DraftRareCreature:
 				await this.StartCoroutine(FadeOutDraftCardsCoroutine(fadeOutSpeed: 0.05f));
 				break;
-		} 
+
+			case LobbyState.RemoveCard:
+				await this.StartCoroutine(FadeOutRemoveCardCoroutine(fadeOutSpeed: 0.05f));
+				break;
+		}
 
 		switch (nextState)
 		{
@@ -165,16 +195,34 @@ public partial class GameLobby : Control
 				await this.StartCoroutine(GenerateStartingDeckCoroutine(fadeInSpeed: 0.05f));
 				break;
 
-			case LobbyState.DraftCards:
-				GameManager.Instance.UpdateProgress(LobbyState.DraftCards, updateSeed: true);
-				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f));
-				break;
-
 			case LobbyState.SelectLevel:
 				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updateSeed: true);
-				Label levelLabel = PlayLevelPanel.FindChild("LevelNumber") as Label;
-				levelLabel.Text = GameManager.Instance.Progress.Level.ToString();
-				PlayLevelPanel.Visible = true;
+				await this.StartCoroutine(SelectLevelsCoroutine(fadeInSpeed: 0.05f));
+				break;
+
+			case LobbyState.DraftResource:
+				GameManager.Instance.UpdateProgress(LobbyState.DraftResource, updateSeed: true);
+				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f, CardRarity.Sacrifice));
+				break;
+
+			case LobbyState.DraftCreature:
+				GameManager.Instance.UpdateProgress(LobbyState.DraftCreature, updateSeed: true);
+				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f, CardRarity.Common));
+				break;
+
+			case LobbyState.DraftUncommonCreature:
+				GameManager.Instance.UpdateProgress(LobbyState.DraftUncommonCreature, updateSeed: true);
+				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f, CardRarity.Uncommon));
+				break;
+
+			case LobbyState.DraftRareCreature:
+				GameManager.Instance.UpdateProgress(LobbyState.DraftRareCreature, updateSeed: true);
+				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f, CardRarity.Rare));
+				break;
+
+			case LobbyState.RemoveCard:
+				GameManager.Instance.UpdateProgress(LobbyState.RemoveCard, updateSeed: true);
+				await this.StartCoroutine(RemoveCardCoroutine(fadeInSpeed: 0.05f));
 				break;
 
 			case LobbyState.PlayGame:
@@ -186,20 +234,18 @@ public partial class GameLobby : Control
 
 	private void StartGame()
 	{
-		CardPool cardPool = GameManager.Instance.Progress.CardPool;
-		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
+		GameProgress progress = GameManager.Instance.Progress;
 		RandomGenerator rnd = GameManager.Instance.Random;
 		GD.Print("Starting game with seed", rnd.Seed);
 
-		var sacrificeCards = deck.Where(c => c.Rarity == CardRarity.Sacrifice);
-		var creatureCards = deck.Where(c => c.Rarity != CardRarity.Sacrifice);
+		var gameLevel = GenerateGameLevel(progress.CardPool, progress.Level, rnd.Seed);
+
+		var sacrificeCards = progress.DeckCards.Where(c => c.Rarity == CardRarity.Sacrifice);
+		var creatureCards = progress.DeckCards.Where(c => c.Rarity != CardRarity.Sacrifice);
 		var sacrificeDeck = new Deck(sacrificeCards, rnd);
 		var creatureDeck = new Deck(creatureCards, rnd);
 
-		var progress = GameManager.Instance.Progress;
-		var opponent = GenerateEnemyAI(cardPool, progress.Level, rnd);
-
-		SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, opponent);
+		SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, gameLevel);
 	}
 
 	private IEnumerable GenerateCardPoolCoroutine(TimeSpan delay)
@@ -227,8 +273,8 @@ public partial class GameLobby : Control
 		}
 		else
 		{
-			TransitionToState(LobbyState.DraftCards);
-		}	
+			TransitionToState(LobbyState.DraftCreature);
+		}
 	}
 
 	private IEnumerable SpinProgressBarCoroutine(TextureProgressBar spinner, float speed)
@@ -264,7 +310,7 @@ public partial class GameLobby : Control
 
 		var startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize, rnd);
 		GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: startingDeck);
-		
+
 		foreach (CardInfo cardInfo in startingDeck)
 		{
 			var card = Constants.CardButtonScene.Instantiate<CardButton>();
@@ -284,7 +330,36 @@ public partial class GameLobby : Control
 		HelloDeckContainer.Visible = false;
 	}
 
-	private IEnumerable DraftCardsCoroutine(float fadeInSpeed)
+	private IEnumerable SelectLevelsCoroutine(float fadeInSpeed)
+	{
+		// This acts like a "preview of possible levels" - so we try a bunch of random seeds 
+		// But only the one the user selects will be saved as the random seed for the level
+		Node levelsContainer = SelectLevelContainer.FindChild("SelectLevelContainer");
+		Label levelLabel = SelectLevelContainer.FindChild("LevelLabel") as Label;
+		levelLabel.Text = GameManager.Instance.Progress.Level.ToString();
+
+		foreach (Node child in levelsContainer.GetChildren())
+		{
+			child.QueueFree();
+		}
+
+		GameProgress progress = GameManager.Instance.Progress;
+		RandomGenerator rnd = GameManager.Instance.Random;
+		List<GameLevel> levels = GenerateGameLevelPool(progress.CardPool, progress.Level, rnd);
+
+		foreach (GameLevel level in levels)
+		{
+			var levelPanel = Constants.SelectLevelScene.Instantiate<SelectLevelPanel>();
+			levelPanel.Configure(level.Difficulty, level.Reward, () => SelectLevel(level));
+
+			levelsContainer.AddChild(levelPanel);
+		}
+
+		SelectLevelContainer.Visible = true;
+		yield return SelectLevelContainer.FadeTo(1, startAlpha: 0, speed: fadeInSpeed);
+	}
+
+	private IEnumerable DraftCardsCoroutine(float fadeInSpeed, CardRarity rarity)
 	{
 		Node cardsContainer = DraftCardsContainer.FindChild("CardButtonContainer");
 		Button skipButton = DraftCardsContainer.FindChild("SkipButton") as Button;
@@ -296,8 +371,8 @@ public partial class GameLobby : Control
 
 		var progress = GameManager.Instance.Progress;
 		var rnd = GameManager.Instance.Random;
-		var candidateCards = SelectDraftPool(progress.CardPool, level: progress.Level, count: 3, rnd: rnd);
-		
+		var candidateCards = SelectRandomCards(progress.CardPool.Cards, count: 3, rnd, rarity);
+
 		foreach (CardInfo cardInfo in candidateCards)
 		{
 			var card = Constants.CardButtonScene.Instantiate<CardButton>();
@@ -319,25 +394,43 @@ public partial class GameLobby : Control
 		DraftCardsContainer.Visible = false;
 	}
 
-	public static IEnumerable<CardInfo> SelectDraftPool(CardPool cardPool, int level, int count, RandomGenerator rnd)
+	private IEnumerable RemoveCardCoroutine(float fadeInSpeed)
 	{
-		const float UNCOMMON_RATE = 0.04f;
-		const float RARE_RATE = 0.02f;
+		Node cardsContainer = RemoveCardContainer.FindChild("CardButtonContainer");
+		Button skipButton = RemoveCardContainer.FindChild("SkipButton") as Button;
 
-		float uncommonProbability = LinearScalef(level, UNCOMMON_RATE, min: 0.00f, max: 0.40f, x_intercept: 1);
-		float rareProbability = LinearScalef(level, RARE_RATE, min: 0.00f, max: 0.20f, x_intercept: 1);
-		float commonProbability = 1f - uncommonProbability - rareProbability;
+		foreach (Node child in cardsContainer.GetChildren())
+		{
+			child.QueueFree();
+		}
 
-		CardRarity rarity = PickOption(
-			new[] { commonProbability, uncommonProbability, rareProbability },
-			new[] { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare },
-			rnd
-		);
+		var progress = GameManager.Instance.Progress;
+		var rnd = GameManager.Instance.Random;
+		var candidateCards = SelectRandomCards(progress.DeckCards, count: 5, rnd);
 
-		GD.Print($"Selecting Draft Pool: seed={rnd.Seed}[{rnd.N}]; rarity = {rarity}; rarity probabilities=[{commonProbability:0.00}, {uncommonProbability:0.00}, {rareProbability:0.00}]");
+		foreach (CardInfo cardInfo in candidateCards)
+		{
+			var card = Constants.CardButtonScene.Instantiate<CardButton>();
+			card.ShowCardBack = false;
+			card.SetCard(cardInfo);
+			card.Pressed += () => RemoveCard(cardInfo);
+			cardsContainer.AddChild(card);
+		}
 
-		var cardOptions = cardPool.Cards
-			.Where(c => c.Rarity == rarity || (rarity == CardRarity.Common && c.Rarity == CardRarity.Sacrifice))
+		RemoveCardContainer.Visible = true;
+		yield return RemoveCardContainer.FadeTo(1, startAlpha: 0, speed: fadeInSpeed);
+	}
+
+	private IEnumerable FadeOutRemoveCardCoroutine(float fadeOutSpeed)
+	{
+		yield return RemoveCardContainer.FadeTo(0, startAlpha: 1, speed: fadeOutSpeed);
+		RemoveCardContainer.Visible = false;
+	}
+
+	public static IEnumerable<CardInfo> SelectRandomCards(List<CardInfo> cards, int count, RandomGenerator rnd, CardRarity? rarity = null)
+	{
+		var cardOptions = cards
+			.Where(c => rarity == null || c.Rarity == rarity)
 			.ToList();
 
 		if (cardOptions.Count == 0)
@@ -357,17 +450,6 @@ public partial class GameLobby : Control
 			CardInfo candidate = cardOptions[rndIdx];
 			draftPool.Add(candidate);
 			cardOptions.RemoveAt(rndIdx);
-
-			// only one sacrifice per pool please
-			if (candidate.Rarity == CardRarity.Sacrifice)
-			{
-				cardOptions = cardOptions.Where(c => c.Rarity == rarity).ToList();
-				if (cardOptions.Count <= count)
-				{
-					draftPool.AddRange(cardOptions);
-					break;
-				}
-			}
 		}
 
 		return draftPool;
@@ -413,6 +495,191 @@ public partial class GameLobby : Control
 		return deck;
 	}
 
+	public static List<GameLevel> GenerateGameLevelPool(CardPool cardPool, int level, RandomGenerator rnd)
+	{
+		int levelCount = level < 4 ? 2 : PickOption(new[] { 0.5f, 0.5f }, new[] { 2, 3 }, rnd);
+
+		var ais = new List<GameLevel>();
+		while (ais.Count < levelCount)
+		{
+			int seed = rnd.Next();
+			var gameLevel = GenerateGameLevel(cardPool, level, seed);
+
+			if (gameLevel.Difficulty == LevelDifficulty.FailedGuardrail)
+			{
+				continue;
+			}
+
+			ais.Add(gameLevel);
+		}
+
+		return ais;
+	}
+
+	public static GameLevel GenerateGameLevel(CardPool cardPool, int level, int seed)
+	{
+		var rnd = new RandomGenerator(seed);
+		var ai = GenerateEnemyAI(cardPool, level, rnd);
+		var difficulty = CalculateLevelDifficulty(cardPool, ai, level);
+		var reward = GenerateLevelReward(difficulty, rnd);
+
+		ai.Initialize();
+		return new GameLevel
+		{
+			Level = level,
+			Seed = seed,
+			AI = ai,
+			Difficulty = difficulty,
+			Reward = reward,
+		};
+	}
+
+	private struct LevelState
+	{
+		public int Turn { get; set; }
+		public int TotalAttack { get; set; }
+		public int TotalHealth { get; set; }
+		public int TotalCards { get; set; }
+	}
+	private class DifficultyMarker
+	{
+		public string Name { get; set; }
+		public LevelDifficulty Marker { get; set; }
+		public Func<LevelState, bool> Check { get; set; }
+	}
+	public static LevelDifficulty CalculateLevelDifficulty(CardPool cardPool, EnemyAI ai, int level)
+	{
+		var markers = new[] {
+			/* Invalid Level Markers */
+			new DifficultyMarker {
+				Name = "Must play a card before turn 2",
+				Marker = LevelDifficulty.FailedGuardrail,
+				Check = (step) => step.Turn == 1 && step.TotalCards == 0,
+			},
+			new DifficultyMarker {
+				Name = "Must play at least 1 attack before turn 3",
+				Marker = LevelDifficulty.FailedGuardrail,
+				Check = (step) => step.Turn == 2 && step.TotalAttack == 0,
+			},
+			new DifficultyMarker {
+				Name = "Don't play more than two cards the first turn",
+				Marker = LevelDifficulty.FailedGuardrail,
+				Check = (step) => step.Turn == 0 && step.TotalCards > 2,
+			},
+			/* Hard Level Markers */
+			new DifficultyMarker {
+				Name = "Played 5 attack before turn 2",
+				Marker = LevelDifficulty.Hard,
+				Check = (step) => step.Turn == 1 && step.TotalAttack >= 5,
+			},
+			new DifficultyMarker {
+				Name = "Played 4 cards before turn 2",
+				Marker = LevelDifficulty.Hard,
+				Check = (step) => step.Turn == 1 && step.TotalCards >= 4,
+			},
+			new DifficultyMarker {
+				Name = "Played 10 attack before turn 4",
+				Marker = LevelDifficulty.Hard,
+				Check = (step) => step.Turn == 3 && step.TotalAttack >= 12,
+			},
+			new DifficultyMarker {
+				Name = "Played 8 cards before turn 4",
+				Marker = LevelDifficulty.Hard,
+				Check = (step) => step.Turn == 3 && step.TotalCards >= 8,
+			},
+			/* Medium Level Markers */
+			new DifficultyMarker {
+				Name = "Played 3 attack before turn 2",
+				Marker = LevelDifficulty.Medium,
+				Check = (step) => step.Turn == 1 && step.TotalAttack >= 3,
+			},
+			new DifficultyMarker {
+				Name = "Played 3 cards before turn 2",
+				Marker = LevelDifficulty.Medium,
+				Check = (step) => step.Turn == 1 && step.TotalCards >= 3,
+			},
+			new DifficultyMarker {
+				Name = "Played 6 attack before turn 4",
+				Marker = LevelDifficulty.Medium,
+				Check = (step) => step.Turn == 3 && step.TotalAttack >= 6,
+			},
+			new DifficultyMarker {
+				Name = "Played 6 cards before turn 4",
+				Marker = LevelDifficulty.Medium,
+				Check = (step) => step.Turn == 3 && step.TotalCards >= 6,
+			},
+		};
+
+		var markerCount = new Dictionary<LevelDifficulty, int>() { { LevelDifficulty.Easy, 0 }, { LevelDifficulty.Medium, 0 }, { LevelDifficulty.Hard, 0 }, { LevelDifficulty.FailedGuardrail, 0 } };
+		var state = new LevelState();
+		for (int turnId = 0; turnId <= ai.MaxTurn; turnId++)
+		{
+			state.Turn = turnId;
+			List<PlayedCard> playedCards = ai.GetMovesForTurn(turnId, new bool[4]);
+			foreach (var playedCard in playedCards)
+			{
+				CardInfo cardInfo = playedCard.Card;
+				state.TotalAttack += cardInfo.Attack;
+				state.TotalHealth += cardInfo.Health;
+				state.TotalCards++;
+			}
+
+			foreach (DifficultyMarker marker in markers)
+			{
+				if (marker.Check(state))
+				{
+					GD.Print($"Generated Level has hit marker: {marker.Name}");
+					markerCount[marker.Marker] += 1;
+				}
+			}
+		}
+
+		if (markerCount[LevelDifficulty.FailedGuardrail] > 0)
+		{
+			return LevelDifficulty.FailedGuardrail;
+		}
+		else if (markerCount[LevelDifficulty.Hard] > 0)
+		{
+			return LevelDifficulty.Hard;
+		}
+		else if (markerCount[LevelDifficulty.Medium] > 0)
+		{
+			return LevelDifficulty.Medium;
+		}
+		else
+		{
+			return LevelDifficulty.Easy;
+		}
+	}
+
+	public static LevelReward GenerateLevelReward(LevelDifficulty difficulty, RandomGenerator rnd)
+	{
+		if (difficulty == LevelDifficulty.Hard)
+		{
+			return PickOption(
+				new[] { 0.20f, 0.40f, 0.20f, 0.10f, 0.10f },
+				new[] { LevelReward.AddCreature, LevelReward.AddUncommonCreature, LevelReward.AddRareCreature, LevelReward.RemoveCard, LevelReward.IncreaseHandSize },
+				rnd
+			);
+		}
+		else if (difficulty == LevelDifficulty.Medium)
+		{
+			return PickOption(
+				new[] { 0.50f, 0.15f, 0.05f, 0.25f, 0.05f },
+				new[] { LevelReward.AddCreature, LevelReward.AddUncommonCreature, LevelReward.AddRareCreature, LevelReward.RemoveCard, LevelReward.IncreaseHandSize },
+				rnd
+			);
+		}
+		else
+		{
+			return PickOption(
+				new[] { 0.20f, 0.80f },
+				new[] { LevelReward.AddResource, LevelReward.AddCreature },
+				rnd
+			);
+		}
+	}
+
 	public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
 	{
 		const int TOTAL_CARDS_RATE = 1;
@@ -421,7 +688,7 @@ public partial class GameLobby : Control
 		float oneCardsProbability = LinearScalef(level, 0f, min: 0.50f, max: 0.50f, y_intercept: 0.50f, x_intercept: 1);
 		float twoCardsProbability = LinearScalef(level, 0.05f, min: 0.00f, max: 0.20f, x_intercept: 2);
 		float threeCardsProbability = LinearScalef(level, 0.025f, min: 0.00f, max: 0.15f, x_intercept: 6);
-		float fourCardsProbability = LinearScalef(level, 0.025f, min: 0.00f, max: 0.10f,x_intercept: 8);
+		float fourCardsProbability = LinearScalef(level, 0.025f, min: 0.00f, max: 0.10f, x_intercept: 8);
 		float zeroCardsProbability = 1f - oneCardsProbability - twoCardsProbability - threeCardsProbability - fourCardsProbability;
 
 		float uncommonProbability = LinearScalef(level, 0.025f, min: 0, max: .25f);
@@ -429,8 +696,8 @@ public partial class GameLobby : Control
 		float commonProbability = 1f - uncommonProbability - rareProbability;
 
 		// probability of card cost per turn Idx
-		var oneCostProbabilities = new[] {   0.05f, 0.50f, 0.50f, 0.50f, 0.45f, 0.40f, 0.30f, 0.20f, 0.10f, 0.00f };
-		var twoCostProbabilities = new[] {   0.00f, 0.05f, 0.25f, 0.45f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f };
+		var oneCostProbabilities = new[] { 0.05f, 0.50f, 0.50f, 0.50f, 0.45f, 0.40f, 0.30f, 0.20f, 0.10f, 0.00f };
+		var twoCostProbabilities = new[] { 0.00f, 0.05f, 0.25f, 0.45f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f };
 		var threeCostProbabilities = new[] { 0.00f, 0.00f, 0.00f, 0.05f, 0.05f, 0.10f, 0.20f, 0.30f, 0.40f, 0.50f };
 
 		GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");

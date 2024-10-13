@@ -19,3 +19,5 @@ shadow_offset = Vector2(3, 3)
 Label/font_sizes/font_size = 28
 Label/fonts/font = ExtResource("1_bmmou")
 PanelContainer/styles/panel = SubResource("StyleBoxFlat_oyw32")
+SmallLabel/base_type = &"Label"
+SmallLabel/font_sizes/font_size = 18

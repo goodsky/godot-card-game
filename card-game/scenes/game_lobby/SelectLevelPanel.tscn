@@ -1,0 +1,231 @@
+[gd_scene load_steps=12 format=3 uid="uid://bu5bini478kpe"]
+
+[ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="1_0p40j"]
+[ext_resource type="Theme" uid="uid://bp6sa0wtarlmt" path="res://scenes/game_lobby/lobby_theme.tres" id="1_trbci"]
+[ext_resource type="Script" path="res://scenes/game_lobby/SelectLevelPanel.cs" id="2_mggi1"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_68eg0"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0, 0.666667, 0.0313726, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fsqpl"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.772549, 0.8, 0.00784314, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_p3yyv"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.835294, 0.137255, 0.227451, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rsn27"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.533333, 0.380392, 0.372549, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dg1f2"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.466667, 0.443137, 0.407843, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g4g6f"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.811765, 0.764706, 0.25098, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mqi1a"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.87451, 0.482353, 0.458824, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2uoue"]
+content_margin_left = 8.0
+content_margin_top = 8.0
+content_margin_right = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.635294, 0.45098, 0.870588, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[node name="PlayLevelPanel" type="PanelContainer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = -71.0
+offset_right = 120.0
+offset_bottom = 71.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_trbci")
+script = ExtResource("2_mggi1")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="DifficultyHBox" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="DifficultyPrefix" type="Label" parent="VBoxContainer/DifficultyHBox"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "Difficulty:"
+
+[node name="Easy" type="PanelContainer" parent="VBoxContainer/DifficultyHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_68eg0")
+
+[node name="EasyLabel" type="Label" parent="VBoxContainer/DifficultyHBox/Easy"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0.00784314, 0.223529, 0.0470588, 1)
+text = "Easy"
+
+[node name="Medium" type="PanelContainer" parent="VBoxContainer/DifficultyHBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_fsqpl")
+
+[node name="MediumLabel" type="Label" parent="VBoxContainer/DifficultyHBox/Medium"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0.278431, 0.223529, 0.0196078, 1)
+text = "Medium"
+
+[node name="Hard" type="PanelContainer" parent="VBoxContainer/DifficultyHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_p3yyv")
+
+[node name="HardLabel" type="Label" parent="VBoxContainer/DifficultyHBox/Hard"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0.254902, 0.0196078, 0.0470588, 1)
+text = "Hard"
+
+[node name="RewardHBox" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+
+[node name="RewardPrefix" type="Label" parent="VBoxContainer/RewardHBox"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+text = "Reward:"
+
+[node name="AddResource" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_rsn27")
+
+[node name="AddResourceLabel" type="Label" parent="VBoxContainer/RewardHBox/AddResource"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Resource+"
+
+[node name="NewCard" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dg1f2")
+
+[node name="NewCardLabel" type="Label" parent="VBoxContainer/RewardHBox/NewCard"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "New Card"
+
+[node name="NewCardUncommon" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4g6f")
+
+[node name="NewCardLabel" type="Label" parent="VBoxContainer/RewardHBox/NewCardUncommon"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0.207843, 0.219608, 0.0235294, 1)
+text = "New Card"
+
+[node name="NewCardRare" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_g4g6f")
+
+[node name="NewCardLabel" type="Label" parent="VBoxContainer/RewardHBox/NewCardRare"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0.207843, 0.219608, 0.0235294, 1)
+text = "New Card"
+
+[node name="RemoveCard" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mqi1a")
+
+[node name="RemoveCardLabel" type="Label" parent="VBoxContainer/RewardHBox/RemoveCard"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Remove Card"
+
+[node name="HandSize" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+visible = false
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_2uoue")
+
+[node name="HandSizeLabel" type="Label" parent="VBoxContainer/RewardHBox/HandSize"]
+layout_mode = 2
+theme_type_variation = &"SmallLabel"
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+text = "Hand Size+"
+
+[node name="Button" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme = ExtResource("1_0p40j")
+text = "Choose Level"
