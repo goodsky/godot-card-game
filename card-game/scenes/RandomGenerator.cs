@@ -1,4 +1,7 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class RandomGenerator
 {
@@ -19,6 +22,12 @@ public class RandomGenerator
         }
     }
 
+    public int Next()
+    {
+        ++N;
+        return _rnd.Next();
+    }
+
     public int Next(int max)
     {
         ++N;
@@ -35,5 +44,24 @@ public class RandomGenerator
     {
         ++N;
         return _rnd.NextSingle() * (max - min) + min;
+    }
+
+    public T SelectRandom<T>(IEnumerable<T> e)
+    {
+        ++N;
+        var list = e.ToList();
+        return list[_rnd.Next(list.Count)];
+    }
+
+    public T SelectRandom<T>(List<T> list)
+    {
+        ++N;
+        return list[_rnd.Next(list.Count)];
+    }
+
+    public T SelectRandom<T>(T[] arr)
+    {
+        ++N;
+        return arr[_rnd.Next(arr.Length)];
     }
 }

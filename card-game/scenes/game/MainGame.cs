@@ -267,7 +267,7 @@ public partial class MainGame : Node2D
 		if (playerWon)
 		{
 			GameProgress progress = GameManager.Instance.Progress;
-			GameManager.Instance.UpdateProgress(LobbyState.DraftCards, level: progress.Level + 1, resetSeed: true);
+			GameManager.Instance.UpdateProgress(LobbyState.DraftCreature, level: progress.Level + 1, resetSeed: true);
 		}
 		else
 		{

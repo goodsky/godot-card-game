@@ -9,8 +9,11 @@ public enum LobbyState
 	Initializing,
 	GenerateCardPool,
 	GenerateStartingDeck,
-	DraftCards,
 	SelectLevel,
+	DraftResource,
+	DraftCreature,
+	RemoveCard,
+	IncreaseHandSize,
 	PlayGame,
 }
 
@@ -36,7 +39,7 @@ public partial class GameLobby : Control
 	public CanvasItem DraftCardsContainer { get; set; }
 
 	[Export]
-	public CanvasItem PlayLevelPanel { get; set; }
+	public CanvasItem SelectLevelContainer { get; set; }
 
 	[Export]
 	public BaseButton BackButton { get; set; }
@@ -60,14 +63,14 @@ public partial class GameLobby : Control
 	{
 		switch (CurrentState)
 		{
-			case LobbyState.DraftCards:
+			case LobbyState.DraftCreature:
 				var deck = GameManager.Instance.Progress.DeckCards;
 				deck.Add(cardInfo);
 
 				if (GameManager.Instance.Progress.Level == 1 &&
 					deck.Count < StartingDeckSize)
 				{
-					TransitionToState(LobbyState.DraftCards);
+					TransitionToState(LobbyState.DraftCreature);
 				}
 				else
 				{
@@ -85,7 +88,7 @@ public partial class GameLobby : Control
 	{
 		switch (CurrentState)
 		{
-			case LobbyState.DraftCards:
+			case LobbyState.DraftCreature:
 				TransitionToState(LobbyState.SelectLevel);
 				break;
 
@@ -148,7 +151,7 @@ public partial class GameLobby : Control
 				ShowDeckButton.Visible = true;
 				break;
 
-			case LobbyState.DraftCards:
+			case LobbyState.DraftCreature:
 				await this.StartCoroutine(FadeOutDraftCardsCoroutine(fadeOutSpeed: 0.05f));
 				break;
 		} 
@@ -165,16 +168,14 @@ public partial class GameLobby : Control
 				await this.StartCoroutine(GenerateStartingDeckCoroutine(fadeInSpeed: 0.05f));
 				break;
 
-			case LobbyState.DraftCards:
-				GameManager.Instance.UpdateProgress(LobbyState.DraftCards, updateSeed: true);
-				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f));
-				break;
-
 			case LobbyState.SelectLevel:
 				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updateSeed: true);
-				Label levelLabel = PlayLevelPanel.FindChild("LevelNumber") as Label;
-				levelLabel.Text = GameManager.Instance.Progress.Level.ToString();
-				PlayLevelPanel.Visible = true;
+				await this.StartCoroutine(SelectLevelsCoroutine(fadeInSpeed: 0.05f));
+				break;
+
+			case LobbyState.DraftCreature:
+				GameManager.Instance.UpdateProgress(LobbyState.DraftCreature, updateSeed: true);
+				await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f));
 				break;
 
 			case LobbyState.PlayGame:
@@ -227,7 +228,7 @@ public partial class GameLobby : Control
 		}
 		else
 		{
-			TransitionToState(LobbyState.DraftCards);
+			TransitionToState(LobbyState.DraftCreature);
 		}	
 	}
 
@@ -282,6 +283,15 @@ public partial class GameLobby : Control
 	{
 		yield return HelloDeckContainer.FadeTo(0, startAlpha: 1, speed: fadeOutSpeed);
 		HelloDeckContainer.Visible = false;
+	}
+
+	private IEnumerable SelectLevelsCoroutine(float fadeInSpeed)
+	{
+		// This acts like a "preview of possible levels" - so we try a bunch of random seeds 
+		// But only the one the user selects will be saved as the random seed for the level
+		Node levelsContainer = SelectLevelContainer.FindChild("LevelLabel");
+		Label levelLabel = SelectLevelContainer.FindChild("LevelNumber") as Label;
+		levelLabel.Text = GameManager.Instance.Progress.Level.ToString();
 	}
 
 	private IEnumerable DraftCardsCoroutine(float fadeInSpeed)
@@ -411,6 +421,80 @@ public partial class GameLobby : Control
 		}
 
 		return deck;
+	}
+
+	public static List<GameLevel> GenerateGameLevelPool(CardPool cardPool, int level, int count, RandomGenerator rnd)
+	{
+		var ais = new List<GameLevel>();
+		while (ais.Count < count)
+		{
+			int seed = rnd.Next();
+			var gameLevel = GenerateGameLevel(cardPool, level, seed);
+
+			if (gameLevel.Difficulty == LevelDifficulty.FailedGuardrail)
+			{
+				continue;
+			}
+
+			ais.Add(gameLevel);
+		}
+
+		return ais;
+	}
+
+	public static GameLevel GenerateGameLevel(CardPool cardPool, int level, int seed)
+	{
+		var rnd = new RandomGenerator(seed);
+		var ai = GenerateEnemyAI(cardPool, level, rnd);
+		var difficulty = CalculateLevelDifficulty(cardPool, ai, level);
+		var reward = GenerateLevelReward(difficulty, rnd);
+
+		return new GameLevel
+		{
+			Level = level,
+			Seed = seed,
+			AI = ai,
+			Difficulty = difficulty,
+			Reward = LevelReward.AddCreature,
+		};
+	}
+
+	private struct LevelState
+	{
+		public int Turn { get; set; }
+		public int TotalAttack { get; set; }
+		public int TotalDefense { get; set; }
+		public int TotalCards { get; set; }
+	}
+	private class DifficultyMarker
+	{
+		public string Name { get; set; }
+		public LevelDifficulty Marker { get; set; }
+		public Func<LevelState, bool> Check { get; set; }
+	}
+	public static LevelDifficulty CalculateLevelDifficulty(CardPool cardPool, EnemyAI ai, int level)
+	{
+		var markers = new[] {
+			new DifficultyMarker {
+				Name = "Must Play Cards Before Turn 3",
+				Marker = LevelDifficulty.FailedGuardrail,
+				Check = (step) => step.Turn == 2 && step.TotalCards == 0,
+			},
+		};
+
+		var markerCount = new Dictionary<LevelDifficulty, int>();
+		var state = new LevelState();
+		for (int turnId = 0; turnId <= ai.MaxTurn; turnId++)
+		{
+			state
+			List<PlayedCard> playedCards = ai.GetMovesForTurn(turnId, new bool[4]);
+			
+		}
+	}
+
+	public static LevelReward GenerateLevelReward(LevelDifficulty difficulty, RandomGenerator rnd)
+	{
+		return LevelReward.AddCreature,
 	}
 
 	public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
