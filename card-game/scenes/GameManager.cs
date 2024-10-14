@@ -7,6 +7,8 @@ public class GameProgress
 
     public int Score { get; set; }
 
+    public int HandSize { get; set; }
+
     public CardPool CardPool { get; set; }
 
     public List<CardInfo> DeckCards { get; set; }
@@ -63,6 +65,7 @@ public partial class GameManager : Node
         {
             Level = 1,
             Score = 0,
+            HandSize = 2,
             CardPool = cardPool,
             DeckCards = new List<CardInfo>(),
             Seed = Random.Seed,
@@ -72,7 +75,14 @@ public partial class GameManager : Node
         // Note: don't save until the new deck is created
     }
 
-    public void UpdateProgress(LobbyState currentState, int? level = null, int? score = null, List<CardInfo> updatedDeck = null, bool updateSeed = false, bool resetSeed = false)
+    public void UpdateProgress(
+        LobbyState currentState,
+        int? level = null,
+        int? score = null,
+        int? handSize = null,
+        List<CardInfo> updatedDeck = null,
+        bool updateSeed = false,
+        bool resetSeed = false)
     {
         // It's super important that you save a game seed before generating random values for a scene that can be reloaded.
         // The current implementation relies on random seeds generating the same values after load!
@@ -87,6 +97,7 @@ public partial class GameManager : Node
             CurrentState = currentState,
             Level = level ?? Progress.Level,
             Score = score ?? Progress.Score,
+            HandSize = handSize ?? Progress.HandSize,
             DeckCards = updatedDeck ?? Progress.DeckCards,
             CardPool = Progress.CardPool,
             Seed = updateSeed ? Random.Seed : Progress.Seed,

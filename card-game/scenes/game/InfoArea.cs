@@ -51,7 +51,7 @@ public partial class InfoArea : Node2D
 	{
 		Instance = this;
 		
-		if (GameManager.Instance?.Progress != null)
+		if (LevelLabel != null)
 		{
 			LevelLabel.Text = $"Level {GameManager.Instance.Progress.Level}";
 		}

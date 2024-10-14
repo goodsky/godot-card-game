@@ -340,7 +340,6 @@ public partial class MainGame : Node2D
 		}
 		else
 		{
-			const int StartingHandSize = 3;
 			CurrentTurn = 0;
 
 			if (GameLevel == null)
@@ -372,10 +371,12 @@ public partial class MainGame : Node2D
 					Difficulty = LevelDifficulty.Medium,
 					Reward = LevelReward.AddCreature,
 				};
+
+				GameManager.Instance.StartNewGame(cardPool);
 			}
 
 			yield return new CoroutineDelay(0.234f);
-			for (int i = 0; i < StartingHandSize; i++)
+			for (int i = 0; i < GameManager.Instance.Progress.HandSize; i++)
 			{
 				var drawnCardInfo = Creatures.DrawFromTop();
 				InstantiateCardInHand(drawnCardInfo, Hand.GlobalPosition + new Vector2(250, 65));

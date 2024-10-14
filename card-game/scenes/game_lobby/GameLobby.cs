@@ -26,7 +26,7 @@ public partial class GameLobby : Control
 	public bool IsNewGame { get; set; } = false;
 
 	[Export]
-	public int StartingDeckSize { get; set; } = 5;
+	public int StartingDeckSize { get; set; } = 6;
 
 	[Export]
 	public bool AutoStartingDeck { get; set; }
@@ -42,6 +42,9 @@ public partial class GameLobby : Control
 
 	[Export]
 	public CanvasItem RemoveCardContainer { get; set; }
+
+	[Export]
+	public CanvasItem StatUpPanel { get; set; }
 
 	[Export]
 	public CanvasItem SelectLevelContainer { get; set; }
@@ -166,7 +169,7 @@ public partial class GameLobby : Control
 				break;
 
 			case LobbyState.GenerateStartingDeck:
-				await this.StartCoroutine(FadeOutStartingDeckCoroutine(fadeOutSpeed: 0.05f));
+				await this.StartCoroutine(FadeOutStartingDeckCoroutine(fadeOutSpeed: 0.025f));
 				BackButton.Visible = true;
 				ShowDeckButton.Visible = true;
 				break;
@@ -175,11 +178,15 @@ public partial class GameLobby : Control
 			case LobbyState.DraftCreature:
 			case LobbyState.DraftUncommonCreature:
 			case LobbyState.DraftRareCreature:
-				await this.StartCoroutine(FadeOutDraftCardsCoroutine(fadeOutSpeed: 0.05f));
+				await this.StartCoroutine(FadeOutDraftCardsCoroutine(fadeOutSpeed: 0.025f));
 				break;
 
 			case LobbyState.RemoveCard:
-				await this.StartCoroutine(FadeOutRemoveCardCoroutine(fadeOutSpeed: 0.05f));
+				await this.StartCoroutine(FadeOutRemoveCardCoroutine(fadeOutSpeed: 0.025f));
+				break;
+
+			case LobbyState.IncreaseHandSize:
+				await this.StartCoroutine(FadeOutStatUpCoroutine(fadeOutSpeed: 0.025f));
 				break;
 		}
 
@@ -223,6 +230,12 @@ public partial class GameLobby : Control
 			case LobbyState.RemoveCard:
 				GameManager.Instance.UpdateProgress(LobbyState.RemoveCard, updateSeed: true);
 				await this.StartCoroutine(RemoveCardCoroutine(fadeInSpeed: 0.05f));
+				break;
+
+			case LobbyState.IncreaseHandSize:
+				int currentHandSize = GameManager.Instance.Progress.HandSize;
+				GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updateSeed: true, handSize: currentHandSize + 1);
+				await this.StartCoroutine(StatUpCoroutine(fadeInSpeed: 0.05f, "Hand Size Up!"));
 				break;
 
 			case LobbyState.PlayGame:
@@ -308,7 +321,17 @@ public partial class GameLobby : Control
 		RandomGenerator rnd = GameManager.Instance.Random;
 		helloLabel.Text = labelOptions[rnd.Next(labelOptions.Length)];
 
-		var startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize, rnd);
+		List<CardInfo> startingDeck;
+		bool startingDeckIsAcceptable = false;
+		do
+		{
+			startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize, rnd);
+
+			int startingDeckAttack = startingDeck.Sum(info => info.Attack);
+			startingDeckIsAcceptable = startingDeckAttack >= 3;
+		}
+		while (!startingDeckIsAcceptable);
+
 		GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: startingDeck);
 
 		foreach (CardInfo cardInfo in startingDeck)
@@ -427,6 +450,22 @@ public partial class GameLobby : Control
 		RemoveCardContainer.Visible = false;
 	}
 
+	private IEnumerable StatUpCoroutine(float fadeInSpeed, string message)
+	{
+		Label label = StatUpPanel.FindChild("MessageLabel") as Label;
+
+		label.Text = message;
+
+		StatUpPanel.Visible = true;
+		yield return StatUpPanel.FadeTo(1, startAlpha: 0, speed: fadeInSpeed);
+	}
+
+	private IEnumerable FadeOutStatUpCoroutine(float fadeOutSpeed)
+	{
+		yield return StatUpPanel.FadeTo(0, startAlpha: 1, speed: fadeOutSpeed);
+		StatUpPanel.Visible = false;
+	}
+
 	public static IEnumerable<CardInfo> SelectRandomCards(List<CardInfo> cards, int count, RandomGenerator rnd, CardRarity? rarity = null)
 	{
 		var cardOptions = cards
@@ -459,10 +498,10 @@ public partial class GameLobby : Control
 	{
 		var deck = new List<CardInfo>();
 
-		// 20-40% starting deck is sacrifices
+		// 3 sacrifices (so you can afford a 3 cost card)
 		// 20-40% starting deck is one cost cards
 		// remainder is random 2-3 cost cards
-		int sacrificeCount = Mathf.CeilToInt(rnd.Nextf(0.2f, 0.4f) * startingDeckSize);
+		int sacrificeCount = 3;
 		int oneCostCount = Mathf.CeilToInt(rnd.Nextf(0.2f, 0.4f) * startingDeckSize);
 		int otherCount = startingDeckSize - sacrificeCount - oneCostCount;
 
@@ -499,21 +538,39 @@ public partial class GameLobby : Control
 	{
 		int levelCount = level < 4 ? 2 : PickOption(new[] { 0.5f, 0.5f }, new[] { 2, 3 }, rnd);
 
-		var ais = new List<GameLevel>();
-		while (ais.Count < levelCount)
+		var gameLevels = new List<GameLevel>();
+		while (gameLevels.Count < levelCount)
 		{
 			int seed = rnd.Next();
 			var gameLevel = GenerateGameLevel(cardPool, level, seed);
 
-			if (gameLevel.Difficulty == LevelDifficulty.FailedGuardrail)
+			if (gameLevel.Difficulty == LevelDifficulty.FailedGuardrail ||
+				(level == 1 && gameLevel.Difficulty != LevelDifficulty.Easy) ||
+				(level <= 3 && gameLevel.Difficulty == LevelDifficulty.Hard))
 			{
 				continue;
 			}
 
-			ais.Add(gameLevel);
+			gameLevels.Add(gameLevel);
 		}
 
-		return ais;
+		// Deduplicate levels that appear the same (sorry duplicate levels)
+		for (int i = gameLevels.Count - 1; i > 0; i--)
+		{
+			for (int j = 0; j < i; j++)
+			{
+				var level1 = gameLevels[i];
+				var level2 = gameLevels[j];
+				if (level1.Difficulty == level2.Difficulty &&
+					level1.Reward == level2.Reward)
+				{
+					GD.Print("Removing Duplicate Level #", i);
+					gameLevels.RemoveAt(i);
+				}
+			}
+		}
+
+		return gameLevels;
 	}
 
 	public static GameLevel GenerateGameLevel(CardPool cardPool, int level, int seed)

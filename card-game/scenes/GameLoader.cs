@@ -28,6 +28,9 @@ public static class GameLoader
 		[JsonPropertyName("score")]
 		public int Score { get; set; }
 
+		[JsonPropertyName("hand")]
+		public int HandSize { get; set; }
+
 		[JsonPropertyName("cards")]
 		public string CardPoolName { get; set; }
 
@@ -103,6 +106,7 @@ public static class GameLoader
 			{
 				Level = saveGame.Level,
 				Score = saveGame.Score,
+				HandSize = saveGame.HandSize,
 				CardPool = cardPool,
 				DeckCards = deck,
 				CurrentState = saveGame.CurrentState,
@@ -115,11 +119,11 @@ public static class GameLoader
 
 	public static void SaveGame(GameProgress game)
 	{
-		GD.Print("Saving game.");
 		var saveGame = new SavedGame
 		{
 			Level = game.Level,
 			Score = game.Score,
+			HandSize = game.HandSize,
 			CardPoolName = game.CardPool.Name,
 			DeckCardIds = game.DeckCards.Select(x => x.Id).ToList(),
 			CurrentState = game.CurrentState,
@@ -127,7 +131,7 @@ public static class GameLoader
 			SeedN = game.SeedN,
 		};
 
-		GD.Print($"Saving Game Seed: {saveGame.Seed}[{saveGame.SeedN}]");
+		GD.Print($"Saving Game. Seed = {saveGame.Seed}[{saveGame.SeedN}]");
 
 		var saveGameJson = JsonSerializer.Serialize(saveGame);
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
@@ -175,7 +179,7 @@ public static class GameLoader
 
 	public static CardPool LoadCardPool(string cardPoolPath)
 	{
-		GD.Print("Loading card pool at ", cardPoolPath);
+		// GD.Print("Loading card pool at ", cardPoolPath);
 
 		var fileContent = Godot.FileAccess.GetFileAsString(cardPoolPath);
 		if (string.IsNullOrEmpty(fileContent))
