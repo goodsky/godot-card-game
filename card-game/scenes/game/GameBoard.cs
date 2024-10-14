@@ -195,12 +195,14 @@ public partial class GameBoard : Node2D
 
 		Label title = GameOverPanel.FindChild("Title") as Label;
 		Label subtitle = GameOverPanel.FindChild("Subtitle") as Label;
+		Button mainMenuButton = GameOverPanel.FindChild("MainMenuButton") as Button;
 		Button continueButton = GameOverPanel.FindChild("ContinueButton") as Button;
 
 		if (playerWon)
 		{
 			title.Text = "You Win!";
-			subtitle.Text = "";
+			subtitle.Text = "Claim your reward";
+			mainMenuButton.Visible = false;
 			continueButton.Visible = true;
 			title.AddThemeColorOverride("font_color", Colors.ForestGreen);
 
@@ -209,7 +211,8 @@ public partial class GameBoard : Node2D
 		else
 		{
 			title.Text = "You Lose";
-			subtitle.Text = "Try again?";
+			subtitle.Text = "";
+			mainMenuButton.Visible = true;
 			continueButton.Visible = false;
 			title.AddThemeColorOverride("font_color", Colors.DarkRed);
 

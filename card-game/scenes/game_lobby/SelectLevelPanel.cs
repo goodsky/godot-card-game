@@ -43,6 +43,8 @@ public partial class SelectLevelPanel : PanelContainer
 		rewardBubbles[_reward].Visible = true;
 
 		button.Pressed += _onSelected;
+		button.Pressed += () => AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
+		button.MouseEntered += () => HoverOverButton();
 	}
 
 	// Must call this before adding to the scene tree!
@@ -51,5 +53,10 @@ public partial class SelectLevelPanel : PanelContainer
 		_difficulty = difficulty;
 		_reward = reward;
 		_onSelected = onSelected;
+	}
+
+	public void HoverOverButton()
+	{
+		AudioManager.Instance.Play(Constants.Audio.BalloonSnap, pitch: 1.0f, volume: 0.5f);
 	}
 }

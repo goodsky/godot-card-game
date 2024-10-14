@@ -37,6 +37,12 @@ public partial class DeckPopUp : Control
 
 	private void Click_Cancel()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 		QueueFree();
+	}
+
+	public void HoverOverButton()
+	{
+		AudioManager.Instance.Play(Constants.Audio.BalloonSnap, pitch: 1.0f, volume: 0.5f);
 	}
 }

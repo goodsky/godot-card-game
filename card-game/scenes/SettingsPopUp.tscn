@@ -101,16 +101,14 @@ alignment = 2
 [node name="MainMenuButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-text = "Main Menu"
-
-[node name="Buffer" type="Control" parent="PanelContainer/VBoxContainer/ButtonContainer"]
-layout_mode = 2
 size_flags_horizontal = 3
+text = "Quit"
 
 [node name="CancelButton" type="Button" parent="PanelContainer/VBoxContainer/ButtonContainer"]
 custom_minimum_size = Vector2(170, 0)
 layout_mode = 2
-text = "Back"
+size_flags_horizontal = 3
+text = "Done"
 
 [connection signal="drag_ended" from="PanelContainer/VBoxContainer/EffectsVolumeContainer/EffectVolumeSlider" to="." method="UpdateEffectsVolume"]
 [connection signal="drag_ended" from="PanelContainer/VBoxContainer/MusicVolumeContainer/MusicVolumeSlider" to="." method="UpdateMusicVolume"]

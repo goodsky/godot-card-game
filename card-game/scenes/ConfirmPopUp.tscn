@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://dwfawy33b7k8x"]
 
-[ext_resource type="Theme" path="res://scenes/menu/menu_theme.tres" id="1_6irg2"]
+[ext_resource type="Theme" uid="uid://c2w4nv3ah6i3c" path="res://scenes/menu/menu_theme.tres" id="1_6irg2"]
 [ext_resource type="Script" path="res://scenes/ConfirmPopUp.cs" id="2_aqfvw"]
-[ext_resource type="Theme" path="res://scenes/menu/menu_small_label.tres" id="2_svpfo"]
+[ext_resource type="FontFile" uid="uid://dkmf6cewx3ufy" path="res://assets/fonts/droid-sans/DroidSans.ttf" id="3_r66lw"]
 
 [node name="ConfirmPopUp" type="Control" node_paths=PackedStringArray("BackgroundFade", "MessageLabel", "ConfirmButton", "CancelButton")]
 process_mode = 3
@@ -35,10 +35,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -155.0
-offset_top = -52.0
-offset_right = 155.0
-offset_bottom = 52.0
+offset_left = -180.0
+offset_top = -64.0
+offset_right = 180.0
+offset_bottom = 64.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -49,9 +49,15 @@ layout_mode = 2
 custom_minimum_size = Vector2(300, 0)
 layout_mode = 2
 size_flags_vertical = 3
-theme = ExtResource("2_svpfo")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/shadow_offset_x = 0
+theme_override_constants/shadow_offset_y = 0
+theme_override_constants/outline_size = 0
+theme_override_constants/shadow_outline_size = 0
+theme_override_constants/line_spacing = 0
+theme_override_fonts/font = ExtResource("3_r66lw")
 theme_override_font_sizes/font_size = 24
-text = "Are you sure you want to do that?"
+text = "Are you sure you want to quit?"
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3

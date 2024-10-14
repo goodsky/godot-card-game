@@ -57,6 +57,12 @@ public partial class GameLobby : Control
 
 	public override void _Ready()
 	{
+		BaseButton[] allButtons = FindChildren("*Button").Select(x => x as BaseButton).Where(x => x != null).ToArray();
+		foreach (BaseButton button in allButtons)
+		{
+			button.MouseEntered += () => HoverOverButton(button);
+		}
+
 		if (IsNewGame || GameManager.Instance.Progress == null)
 		{
 			TransitionToState(LobbyState.GenerateCardPool);
@@ -69,6 +75,8 @@ public partial class GameLobby : Control
 
 	public void DraftCard(CardInfo cardInfo)
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
+
 		switch (CurrentState)
 		{
 			case LobbyState.DraftResource:
@@ -97,6 +105,8 @@ public partial class GameLobby : Control
 
 	public void RemoveCard(CardInfo cardInfo)
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
+
 		switch (CurrentState)
 		{
 			case LobbyState.RemoveCard:
@@ -114,6 +124,8 @@ public partial class GameLobby : Control
 
 	public void ContinueToSelectLevel()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
+
 		switch (CurrentState)
 		{
 			case LobbyState.GenerateStartingDeck:
@@ -132,6 +144,8 @@ public partial class GameLobby : Control
 
 	public void SelectLevel(GameLevel level)
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
+		
 		switch (CurrentState)
 		{
 			case LobbyState.SelectLevel:
@@ -148,13 +162,23 @@ public partial class GameLobby : Control
 
 	public void Click_DeckButton()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 		List<CardInfo> deck = GameManager.Instance.Progress.DeckCards;
 		DeckPopUp.PopUp(this, deck);
 	}
 
 	public void Click_GoBack()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 		SceneLoader.Instance.LoadMainMenu();
+	}
+
+	public void HoverOverButton(BaseButton button)
+	{
+		if (!button.Disabled)
+		{
+			AudioManager.Instance.Play(Constants.Audio.BalloonSnap, pitch: 1.0f, volume: 0.5f);
+		}
 	}
 
 	private async void TransitionToState(LobbyState nextState)

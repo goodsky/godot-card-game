@@ -15,7 +15,13 @@ public partial class ConfirmPopUp : Control
 	[Export]
 	public Button CancelButton { get; set; }
 
-	public override void _Input(InputEvent inputEvent)
+    public override void _Ready()
+    {
+        ConfirmButton.MouseEntered += HoverOverButton;
+        CancelButton.MouseEntered += HoverOverButton;
+    }
+
+    public override void _Input(InputEvent inputEvent)
 	{
 		if (inputEvent.IsActionPressed("ui_cancel"))
 		{
@@ -30,6 +36,7 @@ public partial class ConfirmPopUp : Control
 		confirmPopUp.MessageLabel.Text = message;
 		confirmPopUp.ConfirmButton.Text = confirmText;
 		confirmPopUp.ConfirmButton.Pressed += confirm;
+		confirmPopUp.ConfirmButton.Pressed += () => AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 
 		if (cancel != null)
 		{
@@ -39,7 +46,13 @@ public partial class ConfirmPopUp : Control
 		{
 			confirmPopUp.CancelButton.Pressed += () => confirmPopUp.QueueFree();
 		}
+		confirmPopUp.CancelButton.Pressed += () => AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 
 		root.AddChild(confirmPopUp);
+	}
+
+	public void HoverOverButton()
+	{
+		AudioManager.Instance.Play(Constants.Audio.BalloonSnap, pitch: 1.0f, volume: 0.5f);
 	}
 }

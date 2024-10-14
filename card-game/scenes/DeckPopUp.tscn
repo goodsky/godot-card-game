@@ -67,4 +67,5 @@ layout_mode = 2
 size_flags_horizontal = 4
 text = "Done"
 
+[connection signal="mouse_entered" from="PanelContainer/VBoxContainer/Button" to="." method="HoverOverButton"]
 [connection signal="pressed" from="PanelContainer/VBoxContainer/Button" to="." method="Click_Cancel"]

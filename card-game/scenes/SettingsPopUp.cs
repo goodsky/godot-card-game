@@ -14,12 +14,18 @@ public partial class SettingsPopUp : Control
 	[Export]
 	public Button MainMenuButton { get; set; }
 
+	[Export]
+	public Button BackButton { get; set; }
+
 	public override void _Ready()
 	{
 		var settings = GameLoader.LoadSettings();
 
 		EffectsVolumeSlider.Value = settings.EffectsVolume;
 		MusicVolumeSlider.Value = settings.MusicVolume;
+
+		MainMenuButton.MouseEntered += HoverOverButton;
+		BackButton.MouseEntered += HoverOverButton;
 	}
 
 	public override void _EnterTree()
@@ -64,9 +70,10 @@ public partial class SettingsPopUp : Control
 
 	private void Click_MainMenu()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 		ConfirmPopUp.PopUp(
 			MainGame.Instance.PopUpParent,
-			"Are you sure you want to abandon this game?",
+			"Are you sure you want to quit?",
 			() => SceneLoader.Instance.LoadMainMenu(),
 			confirmText: "Quit",
 			fadeBackground: true);
@@ -74,6 +81,12 @@ public partial class SettingsPopUp : Control
 
 	private void Click_Cancel()
 	{
+		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
 		QueueFree();
+	}
+
+	public void HoverOverButton()
+	{
+		AudioManager.Instance.Play(Constants.Audio.BalloonSnap, pitch: 1.0f, volume: 0.5f);
 	}
 }
