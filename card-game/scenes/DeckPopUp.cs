@@ -19,7 +19,7 @@ public partial class DeckPopUp : Control
 
 	public static void PopUp(Node root, IEnumerable<CardInfo> deckCards, bool fadeBackground = false)
 	{
-		GD.Print("Pop up Deck Dialog");
+		Log.Info("Pop up Deck Dialog");
 		var deckPopUp = Constants.DeckPopUp.Instantiate<DeckPopUp>();
 		deckPopUp.BackgroundFade.Visible = fadeBackground;
 

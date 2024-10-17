@@ -165,7 +165,7 @@ public partial class Card : Node2D
 		_isAnimating = isAnimating;
 	}
 
-	
+
 
 	public void DealDamage(int damage)
 	{
@@ -200,11 +200,11 @@ public partial class Card : Node2D
 
 		// When using touch screens - sometimes the global mouse position does not match card position
 		float mouseToCardDelta = GlobalPosition.DistanceTo(GetGlobalMousePosition());
-		// GD.Print($"Start dragging {Name}; My Position: {GlobalPosition}; Mouse Position: {GetGlobalMousePosition()}; DistanceTo: {mouseToCardDelta};");
+		// Log.Info($"Start dragging {Name}; My Position: {GlobalPosition}; Mouse Position: {GetGlobalMousePosition()}; DistanceTo: {mouseToCardDelta};");
 		if (mouseToCardDelta > 75f)
 		{
 			GetViewport().WarpMouse(GlobalPosition);
-			GD.Print("Moving mouse inside of new dragging card", Name);
+			Log.Info("Moving mouse inside of new dragging card", Name);
 		}
 
 		ZIndex = 10;
@@ -232,11 +232,11 @@ public partial class Card : Node2D
 	{
 		yield return this.FadeTo(0.0f, 0.05f);
 
-		GD.Print($"Card Killed : {Name}");
+		Log.Info($"Card Killed : {Name}");
 		Node parent = GetParent()?.GetParent();
 		if (parent is CardDrop cardDrop)
 		{
-			GD.Print($"Removing from CardDrop {cardDrop.Name}");
+			Log.Info($"Removing from CardDrop {cardDrop.Name}");
 			cardDrop.TryRemoveCard(this);
 		}
 		QueueFree();

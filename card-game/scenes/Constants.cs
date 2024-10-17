@@ -9,6 +9,7 @@ public static class Constants
 	public static readonly string GameDeckDirectory = "res://cards";
 	public static readonly string UserDeckDirectory = "user://cards";
 	public static readonly string UserDataDirectory = "user://data";
+	public static readonly string UserLogsDirectory = "user://logs";
 
 	public static readonly string StarterDeckResourcePath = "user://cards/test.cards.json";
 

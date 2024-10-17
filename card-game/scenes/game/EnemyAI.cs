@@ -48,7 +48,7 @@ public class EnemyAI
                 lane = move.Lane.Value;
                 if (lane < 0 || lane >= backLaneHasCard.Length)
                 {
-                    GD.PushError($"Scripted Move has an invalid lane value {lane}.");
+                    Log.Error($"Scripted Move has an invalid lane value {lane}.");
                     move.Resolved = true;
                     continue;
                 }
@@ -70,7 +70,7 @@ public class EnemyAI
 
                 if (lane >= backLaneHasCard.Length)
                 {
-                    GD.PushError($"Unexpected lane for resolved turn! openLanes={openLanes}; lanes=[{string.Join(",", backLaneHasCard)}]");
+                    Log.Error($"Unexpected lane for resolved turn! openLanes={openLanes}; lanes=[{string.Join(",", backLaneHasCard)}]");
                     move.Resolved = true;
                     continue;
                 }
@@ -91,7 +91,7 @@ public class EnemyAI
 
             if (cardInfo == null)
             {
-                GD.PushError("Could not find a card for move!");
+                Log.Error("Could not find a card for move!");
                 move.Resolved = true;
                 continue;
             }
@@ -108,7 +108,7 @@ public class EnemyAI
         var cardsWithId = _cardPool.Cards.Where(card => card.Id == id);
         if (!cardsWithId.Any())
         {
-            GD.PushError($"Enemy AI is trying to use undefined card id {id}");
+            Log.Error($"Enemy AI is trying to use undefined card id {id}");
             return null;
         }
 
@@ -125,7 +125,7 @@ public class EnemyAI
 
         if (!possibleCards.Any())
         {
-            GD.PushError($"Enemy AI is trying to use a cost and rarity that doesn't exist. Cost = {cost}; Rarity = {rarity};");
+            Log.Error($"Enemy AI is trying to use a cost and rarity that doesn't exist. Cost = {cost}; Rarity = {rarity};");
             return null;
         }
 

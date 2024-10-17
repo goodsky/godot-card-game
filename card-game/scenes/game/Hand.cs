@@ -38,7 +38,7 @@ public partial class Hand : CardDrop
 		if (base.TryAddCard(card, globalPosition))
 		{
 			int cardIndex = GetCardIndex(card, CardCount);
-			// GD.Print($"Placing card in hand: GlobalPosition: {card.GlobalPosition}; LocalPosition: {ToLocal(card.GlobalPosition)}; CardCount: {CardCount}; HandIndex: {cardIndex};");
+			// Log.Debug($"Placing card in hand: GlobalPosition: {card.GlobalPosition}; LocalPosition: {ToLocal(card.GlobalPosition)}; CardCount: {CardCount}; HandIndex: {cardIndex};");
 			CardsNode.MoveChild(card, cardIndex);
 
 			_cardCallbacks.Add(card, new HandCardCallbacks(card, this));
@@ -135,7 +135,7 @@ public partial class Hand : CardDrop
 			}
 
 			var relativePosition = new Vector2(spacePerCard * handIndex - (spacePerCard * (handSize - 1) / 2), 0);
-			// GD.Print($"UpdateCardPosition[{i}]: SpacePerCard: {spacePerCard}; HandSize: {handSize}; HandIndex: {handIndex}; NewPos: {relativePosition}");
+			// Log.Debug($"UpdateCardPosition[{i}]: SpacePerCard: {spacePerCard}; HandSize: {handSize}; HandIndex: {handIndex}; NewPos: {relativePosition}");
 			card.TargetPosition = GlobalPosition + relativePosition;
 		}
 	}
@@ -274,7 +274,7 @@ public partial class Hand : CardDrop
 				int draggingCardIndex = Array.IndexOf(childCards, ActiveCardState.Instance.DraggingCard);
 				int myCardIndex = Array.IndexOf(childCards, _card);
 
-				// GD.Print($"Already dragging card {CardManager.Instance.DraggingCard.Name}({draggingCardIndex}) while starting drag on {_card.Name}({myCardIndex})");
+				// Log.Debug($"Already dragging card {CardManager.Instance.DraggingCard.Name}({draggingCardIndex}) while starting drag on {_card.Name}({myCardIndex})");
 				if (draggingCardIndex > myCardIndex)
 				{
 					return;

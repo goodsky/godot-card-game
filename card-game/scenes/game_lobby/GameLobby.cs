@@ -273,7 +273,7 @@ public partial class GameLobby : Control
 	{
 		GameProgress progress = GameManager.Instance.Progress;
 		RandomGenerator rnd = GameManager.Instance.Random;
-		GD.Print("Starting game with seed", rnd.Seed);
+		Log.Info("Starting game with seed ", rnd.Seed);
 
 		var gameLevel = GenerateGameLevel(progress.CardPool, progress.Level, rnd.Seed);
 
@@ -529,7 +529,7 @@ public partial class GameLobby : Control
 		int oneCostCount = Mathf.CeilToInt(rnd.Nextf(0.2f, 0.4f) * startingDeckSize);
 		int otherCount = startingDeckSize - sacrificeCount - oneCostCount;
 
-		GD.Print($"Starting deck: {sacrificeCount} sacrifices; {oneCostCount} one cost; {otherCount} other;");
+		Log.Info($"Starting deck: {sacrificeCount} sacrifices; {oneCostCount} one cost; {otherCount} other;");
 
 		var sacrificeCards = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice).ToList();
 		for (int i = 0; i < sacrificeCount; i++)
@@ -588,7 +588,7 @@ public partial class GameLobby : Control
 				if (level1.Difficulty == level2.Difficulty &&
 					level1.Reward == level2.Reward)
 				{
-					GD.Print("Removing Duplicate Level #", i);
+					Log.Info("Removing Duplicate Level #", i);
 					gameLevels.RemoveAt(i);
 					break;
 				}
@@ -710,7 +710,7 @@ public partial class GameLobby : Control
 			{
 				if (marker.Check(state))
 				{
-					GD.Print($"Generated Level has hit marker: {marker.Name}");
+					Log.Info($"Generated Level has hit marker: {marker.Name}");
 					markerCount[marker.Marker] += 1;
 				}
 			}
@@ -782,7 +782,7 @@ public partial class GameLobby : Control
 		var twoCostProbabilities = new[] { 0.00f, 0.05f, 0.25f, 0.45f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f };
 		var threeCostProbabilities = new[] { 0.00f, 0.00f, 0.00f, 0.05f, 0.05f, 0.10f, 0.20f, 0.30f, 0.40f, 0.50f };
 
-		GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
+		Log.Info($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
 
 		int turnId = 0;
 		var moves = new List<ScriptedMove>();
@@ -800,7 +800,7 @@ public partial class GameLobby : Control
 			float threeCostProbability = threeCostProbabilities[costProbabilityIdx];
 			float zeroCostProbability = 1f - oneCostProbability - twoCostProbability - threeCostProbability;
 
-			GD.Print($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
+			Log.Info($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
 
 			for (int i = 0; i < concurrentCount; i++)
 			{
@@ -816,7 +816,7 @@ public partial class GameLobby : Control
 					rnd
 				);
 
-				GD.Print($"      {cost}:{rarity}");
+				Log.Info($"      {cost}:{rarity}");
 				moves.Add(new ScriptedMove(turnId, cost, rarity));
 			}
 
@@ -871,7 +871,7 @@ public partial class GameLobby : Control
 				return values[i];
 			}
 		}
-		GD.PushError($"Failed to PickOption - probabilities didn't cover 100%! {value:0.000}; {string.Join(",", probabilities)}");
+		Log.Error($"Failed to PickOption - probabilities didn't cover 100%! {value:0.000}; {string.Join(",", probabilities)}");
 		return values[0];
 	}
 }

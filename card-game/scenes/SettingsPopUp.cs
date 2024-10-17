@@ -30,13 +30,13 @@ public partial class SettingsPopUp : Control
 
 	public override void _EnterTree()
 	{
-		GD.Print("Settings pop up added");
+		Log.Info("Settings pop up added");
 		GetTree().Paused = true;
 	}
 
 	public override void _ExitTree()
 	{
-		GD.Print("Settings pop up removed");
+		Log.Info("Settings pop up removed");
 		GameLoader.SaveSettings((float)EffectsVolumeSlider.Value, (float)MusicVolumeSlider.Value);
 		GetTree().Paused = false;
 	}
@@ -51,7 +51,7 @@ public partial class SettingsPopUp : Control
 
 	public static void PopUp(Node root, bool fadeBackground = false, bool showMainMenuButton = false)
 	{
-		GD.Print("Pop up Settings Dialog");
+		Log.Info("Pop up Settings Dialog");
 		var settingsPopUp = Constants.SettingsPopUp.Instantiate<SettingsPopUp>();
 		settingsPopUp.BackgroundFade.Visible = fadeBackground;
 		settingsPopUp.MainMenuButton.Visible = showMainMenuButton;

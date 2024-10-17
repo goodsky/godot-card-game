@@ -29,7 +29,7 @@ public static class NodeExtensions
         {
             if (t.IsFaulted)
             {
-                GD.PushError($"Unhandled exception in coroutine! Ex={t.Exception}");
+                Log.Error($"Unhandled exception in coroutine! Ex={t.Exception}");
             }
         });
     }

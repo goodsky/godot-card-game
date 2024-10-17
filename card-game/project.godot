@@ -21,6 +21,11 @@ config/icon="res://assets/card_icon.svg"
 AudioManager="*res://scenes/AudioManager.cs"
 GameManager="*res://scenes/GameManager.cs"
 
+[debug]
+
+file_logging/enable_file_logging=true
+file_logging/max_log_files=30
+
 [display]
 
 window/size/viewport_width=800

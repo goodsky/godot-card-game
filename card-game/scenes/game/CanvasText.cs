@@ -15,7 +15,8 @@ public partial class CanvasText : Node2D
 	private Color _color = Colors.Black;
 
 	[Export]
-	public string Text {
+	public string Text
+	{
 		get
 		{
 			return _text;
@@ -44,7 +45,8 @@ public partial class CanvasText : Node2D
 	}
 
 	[Export]
-	public Vector2 TextBoxSize {
+	public Vector2 TextBoxSize
+	{
 		get
 		{
 			return _textBoxSize;
@@ -117,12 +119,12 @@ public partial class CanvasText : Node2D
 		}
 	}
 
-    public override void _Ready()
-    {
-        UpdateFontSize();
-    }
+	public override void _Ready()
+	{
+		UpdateFontSize();
+	}
 
-    public override void _Draw()
+	public override void _Draw()
 	{
 		if (!string.IsNullOrEmpty(_text) && _font != null)
 		{
@@ -185,7 +187,7 @@ public partial class CanvasText : Node2D
 				if (_dynamicFontSize <= 1)
 				{
 					_dynamicFontSize = 1;
-					GD.Print("Failed to find font size for ", Name, ". Text '", _text, "' does not fit in ", _textBoxSize);
+					Log.Warning("Failed to find font size for ", Name, ". Text '", _text, "' does not fit in ", _textBoxSize);
 					break;
 				}
 			}

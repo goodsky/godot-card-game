@@ -71,13 +71,13 @@ public partial class MainGame : Node2D
 
 	public void DrawCardFromDeck()
 	{
-		GD.Print("Draw card from deck...");
+		Log.Info("Draw card from deck...");
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
 				if (Creatures.Count == 0)
 				{
-					GD.Print("Deck empty!");
+					Log.Warning("Deck empty!");
 					return;
 				}
 
@@ -93,14 +93,14 @@ public partial class MainGame : Node2D
 
 	public void DrawCardFromSacrificeDeck()
 	{
-		GD.Print("Draw sacrifice card from deck...");
+		Log.Info("Draw sacrifice card from deck...");
 
 		switch (CurrentState)
 		{
 			case GameState.DrawCard:
 				if (Sacrifices.Count == 0)
 				{
-					GD.Print("Deck empty!");
+					Log.Warning("Deck empty!");
 					return;
 				}
 
@@ -118,7 +118,7 @@ public partial class MainGame : Node2D
 	{
 		if (Creatures.Count != 0 || Sacrifices.Count != 0)
 		{
-			GD.PushError("Skipped draw card state but cards are still available!");
+			Log.Error("Skipped draw card state but cards are still available!");
 		}
 		TransitionToState(GameState.PlayCard);
 	}
@@ -293,17 +293,17 @@ public partial class MainGame : Node2D
 	{
 		if (CurrentState == GameState.IsaacMode)
 		{
-			GD.Print($"Embrace the Isaac mode! Cannot transition to {nextState}.");
+			Log.Info($"Embrace the Isaac mode! Cannot transition to {nextState}.");
 			return;
 		}
 
 		if (CurrentState == GameState.GameOver)
 		{
-			GD.Print($"Game is over. Skipping transition to {nextState}.");
+			Log.Info($"Game is over. Skipping transition to {nextState}.");
 			return;
 		}
 
-		GD.Print($"State Transition: {CurrentState} -> {nextState}");
+		Log.Info($"State Transition: {CurrentState} -> {nextState}");
 
 		GameState lastState = CurrentState;
 		CurrentState = nextState;
@@ -344,7 +344,7 @@ public partial class MainGame : Node2D
 
 			if (GameLevel == null)
 			{
-				GD.PushError("No Level Set! Initializing to the Test Level.");
+				Log.Error("No Level Set! Initializing to the Test Level.");
 
 				// TODO: Load a deck instead of the whole card pool
 				var cardPool = GameLoader.LoadCardPool(Constants.StarterDeckResourcePath);
@@ -410,7 +410,7 @@ public partial class MainGame : Node2D
 		var card = InstantiateCardInHand(blueMonsterCard, Hand.GlobalPosition + new Vector2(250, 65));
 		card.AddToGroup("DebugCard");
 
-		GD.Print($"Drawing card {blueMonsterCard.Name}");
+		Log.Info($"Drawing card {blueMonsterCard.Name}");
 	}
 
 	public void Isaac_ClearCards()

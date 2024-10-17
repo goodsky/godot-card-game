@@ -48,13 +48,13 @@ public static class GameLoader
 	}
 
 	public class SavedSettings
-    {
-        [JsonPropertyName("effectsVolume")]
-        public float EffectsVolume { get; set; }
+	{
+		[JsonPropertyName("effectsVolume")]
+		public float EffectsVolume { get; set; }
 
-        [JsonPropertyName("musicVolume")]
-        public float MusicVolume { get; set; }
-    }
+		[JsonPropertyName("musicVolume")]
+		public float MusicVolume { get; set; }
+	}
 
 	public static bool SavedGameExists()
 	{
@@ -71,7 +71,7 @@ public static class GameLoader
 		var fileContent = Godot.FileAccess.GetFileAsString(UserSavePath);
 		if (string.IsNullOrEmpty(fileContent))
 		{
-			GD.PrintErr($"Failed to load saved game from {UserSavePath}. Error=\"{Godot.FileAccess.GetOpenError()}\"");
+			Log.Error($"Failed to load saved game from {UserSavePath}. Error=\"{Godot.FileAccess.GetOpenError()}\"");
 			return (null, null);
 		}
 
@@ -81,7 +81,7 @@ public static class GameLoader
 		CardPool cardPool = cardPools.Select(x => x.cards).FirstOrDefault(x => x.Name == saveGame.CardPoolName);
 		if (cardPool == null)
 		{
-			GD.PushError($"Could not find card pool for save game!");
+			Log.Error($"Could not find card pool for save game!");
 			return (null, null);
 		}
 
@@ -91,7 +91,7 @@ public static class GameLoader
 			var card = cardPool.Cards.FirstOrDefault(x => x.Id == id);
 			if (card.Id != id)
 			{
-				GD.PushError($"Failed to load card in deck with id {id} from cardpool {cardPool.Name}");
+				Log.Error($"Failed to load card in deck with id {id} from cardpool {cardPool.Name}");
 			}
 			else
 			{
@@ -99,7 +99,7 @@ public static class GameLoader
 			}
 		}
 
-		GD.Print($"Loaded Game Seed: {saveGame.Seed}[{saveGame.SeedN}]");
+		Log.Info($"Loaded Game Seed: {saveGame.Seed}[{saveGame.SeedN}]");
 
 		return (
 			new GameProgress
@@ -131,14 +131,14 @@ public static class GameLoader
 			SeedN = game.SeedN,
 		};
 
-		GD.Print($"Saving Game. Seed = {saveGame.Seed}[{saveGame.SeedN}]");
+		Log.Info($"Saving Game. Seed = {saveGame.Seed}[{saveGame.SeedN}]");
 
 		var saveGameJson = JsonSerializer.Serialize(saveGame);
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
 		var file = Godot.FileAccess.Open(UserSavePath, Godot.FileAccess.ModeFlags.Write);
 		if (file == null)
 		{
-			GD.PushError($"Failed to save game at {UserSavePath}: {Godot.FileAccess.GetOpenError()}");
+			Log.Error($"Failed to save game at {UserSavePath}: {Godot.FileAccess.GetOpenError()}");
 		}
 		else
 		{
@@ -179,12 +179,12 @@ public static class GameLoader
 
 	public static CardPool LoadCardPool(string cardPoolPath)
 	{
-		// GD.Print("Loading card pool at ", cardPoolPath);
+		// Log.Info("Loading card pool at ", cardPoolPath);
 
 		var fileContent = Godot.FileAccess.GetFileAsString(cardPoolPath);
 		if (string.IsNullOrEmpty(fileContent))
 		{
-			GD.PrintErr($"Failed to load card pool from {cardPoolPath}. Error=\"{Godot.FileAccess.GetOpenError()}\"");
+			Log.Error($"Failed to load card pool from {cardPoolPath}. Error=\"{Godot.FileAccess.GetOpenError()}\"");
 			return null;
 		}
 
@@ -209,7 +209,7 @@ public static class GameLoader
 
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDeckDirectory);
 		var filePath = Path.Combine(Constants.UserDeckDirectory, filename);
-		GD.Print("Saving card pool at ", filePath);
+		Log.Info("Saving card pool at ", filePath);
 
 		var file = Godot.FileAccess.Open(filePath, Godot.FileAccess.ModeFlags.Write);
 		if (file == null)
@@ -222,46 +222,46 @@ public static class GameLoader
 	}
 
 	public static SavedSettings LoadSettings()
-    {
-        try
-        {
-            var fileContent = Godot.FileAccess.GetFileAsString(UserSettingsPath);
-            return JsonSerializer.Deserialize<SavedSettings>(fileContent);
-        }
-        catch (Exception ex)
-        {
-            GD.Print($"Could not load settings file. Using the default. ", ex.Message);
-            return new SavedSettings
-            {
-                EffectsVolume = 1.0f,
-                MusicVolume = 1.0f,
-            };
-        }
-    }
+	{
+		try
+		{
+			var fileContent = Godot.FileAccess.GetFileAsString(UserSettingsPath);
+			return JsonSerializer.Deserialize<SavedSettings>(fileContent);
+		}
+		catch (Exception ex)
+		{
+			Log.Info($"Could not load settings file. Using the default. ", ex.Message);
+			return new SavedSettings
+			{
+				EffectsVolume = 1.0f,
+				MusicVolume = 1.0f,
+			};
+		}
+	}
 
-    public static void SaveSettings(
-        float effectsVolume,
-        float musicVolume)
-    {
-        var settings = new SavedSettings
-        {
-            EffectsVolume = Mathf.Clamp(effectsVolume, 0f, 1f),
-            MusicVolume = Mathf.Clamp(musicVolume, 0f, 1f),
-        };
+	public static void SaveSettings(
+		float effectsVolume,
+		float musicVolume)
+	{
+		var settings = new SavedSettings
+		{
+			EffectsVolume = Mathf.Clamp(effectsVolume, 0f, 1f),
+			MusicVolume = Mathf.Clamp(musicVolume, 0f, 1f),
+		};
 
-        var settingsJson = JsonSerializer.Serialize(settings);
-        DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
-        var file = Godot.FileAccess.Open(UserSettingsPath, Godot.FileAccess.ModeFlags.Write);
-        if (file == null)
-        {
-            GD.PushError($"Failed to save settings at {UserSettingsPath}: {Godot.FileAccess.GetOpenError()}");
-        }
-        else
-        {
-            file.StoreString(settingsJson);
-            file.Close();
-        }
-    }
+		var settingsJson = JsonSerializer.Serialize(settings);
+		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+		var file = Godot.FileAccess.Open(UserSettingsPath, Godot.FileAccess.ModeFlags.Write);
+		if (file == null)
+		{
+			Log.Error($"Failed to save settings at {UserSettingsPath}: {Godot.FileAccess.GetOpenError()}");
+		}
+		else
+		{
+			file.StoreString(settingsJson);
+			file.Close();
+		}
+	}
 
 	// Test code to validate the end to end serialization and deserialization of game data
 	public static void Debug_TestEndToEnd()
@@ -270,7 +270,7 @@ public static class GameLoader
 		SaveCardPool(testCardPool, "test");
 
 		var cardPools = GetAvailableCardPools();
-		GD.Print("Card Pool Names: ", string.Join(", ", cardPools.Select(t => t.cards.Name)));
+		Log.Info("Card Pool Names: ", string.Join(", ", cardPools.Select(t => t.cards.Name)));
 
 		var testDeckPath = cardPools.Where(t => t.cards.Name == "Test Cards").Select(t => t.path).FirstOrDefault();
 		if (testDeckPath == null)

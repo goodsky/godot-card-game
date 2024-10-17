@@ -32,7 +32,7 @@ public partial class ActiveCardState : Node2D
 	{
 		// if (ActiveCardDrop != null)
 		// {
-		// 	GD.Print($"Can't activate card drop {cardDrop.Name}. {ActiveCardDrop.Name} is already active.");
+		// 	Log.Info($"Can't activate card drop {cardDrop.Name}. {ActiveCardDrop.Name} is already active.");
 		// 	return;
 		// }
 
@@ -43,7 +43,7 @@ public partial class ActiveCardState : Node2D
 	{
 		if (ActiveCardDrop != cardDrop)
 		{
-			// GD.Print($"Skipping deactivate card drop {cardDrop.Name}. Active card drop = {ActiveCardDrop?.Name}");
+			// Log.Info($"Skipping deactivate card drop {cardDrop.Name}. Active card drop = {ActiveCardDrop?.Name}");
 			return;
 		}
 
@@ -54,7 +54,7 @@ public partial class ActiveCardState : Node2D
 	{
 		if (cardDrop != null && !cardDrop.CanDropCard(card))
 		{
-			GD.Print($"Can't drop card {card.Name} onto {cardDrop.Name}.");
+			Log.Info($"Can't drop card {card.Name} onto {cardDrop.Name}.");
 			return;
 		}
 
@@ -63,7 +63,7 @@ public partial class ActiveCardState : Node2D
 
 		if (cardDrop?.TryAddCard(card, cardStartingGlobalPosition) == false)
 		{
-			GD.PushError($"Failed to set card drop. {card.Name} could not be added to {cardDrop?.Name}");
+			Log.Error($"Failed to set card drop. {card.Name} could not be added to {cardDrop?.Name}");
 		}
 
 		if (cardDrop == null)
@@ -100,7 +100,7 @@ public partial class ActiveCardState : Node2D
 	{
 		if (StagedCard != null)
 		{
-			GD.Print($"Cancelled Staged Card. Reset {StagedCard.Name} to {StagedCardOldHome?.Name}");
+			Log.Info($"Cancelled Staged Card. Reset {StagedCard.Name} to {StagedCardOldHome?.Name}");
 			SetCardDrop(StagedCard, StagedCardOldHome);
 			StagedCard = null;
 			StagedCardOldHome = null;
@@ -145,7 +145,7 @@ public partial class ActiveCardState : Node2D
 	{
 		if (DraggingCard != null)
 		{
-			GD.Print($"Can't start dragging card. {DraggingCard.Name} is already dragging.");
+			Log.Warning($"Can't start dragging card. {DraggingCard.Name} is already dragging.");
 			return;
 		}
 
@@ -156,7 +156,7 @@ public partial class ActiveCardState : Node2D
 	{
 		if (DraggingCard != card)
 		{
-			GD.Print($"Can't stop dragging card {card.Name}. Dragging card = {DraggingCard?.Name}");
+			Log.Warning($"Can't stop dragging card {card.Name}. Dragging card = {DraggingCard?.Name}");
 			return;
 		}
 
@@ -176,7 +176,7 @@ public partial class ActiveCardState : Node2D
 
 		if (ProposedSacrifices.Count != (int)StagedCard.Info.BloodCost)
 		{
-			GD.PushError($"Sacrifices do not equal Blood Cost while resolving. {string.Join(";", ProposedSacrifices.Select(c => c.Name))} for {StagedCard.Info.BloodCost}");
+			Log.Error($"Sacrifices do not equal Blood Cost while resolving. {string.Join(";", ProposedSacrifices.Select(c => c.Name))} for {StagedCard.Info.BloodCost}");
 		}
 
 		foreach (Card card in ProposedSacrifices)

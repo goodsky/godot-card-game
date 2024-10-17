@@ -72,7 +72,7 @@ public partial class PlayArea : CardDrop
 
 				default:
 					card.TargetPosition = GlobalPosition;
-					GD.PushError($"[Unexpected State Action] Card added to PlayArea during {MainGame.Instance.CurrentState}.");
+					Log.Error($"[Unexpected State Action] Card added to PlayArea during {MainGame.Instance.CurrentState}.");
 					break;
 			}
 

@@ -1,37 +1,53 @@
-public static class TestUtils
+using Xunit.Sdk;
+
+[assembly: TestFramework("CardGame.Tests.DisableGodotLogging", "card-game-tests")]
+
+
+namespace CardGame.Tests
 {
-    private static CardBloodCost[] CardCosts = new[] {
-        CardBloodCost.Zero,
-        CardBloodCost.One,
-        CardBloodCost.Two,
-        CardBloodCost.Three,
-    };
-
-    private static CardRarity[] CardRarities = new[] {
-        CardRarity.Sacrifice,
-        CardRarity.Common,
-        CardRarity.Uncommon,
-        CardRarity.Rare,
-    };
-
-    public static IEnumerable<CardInfo> GenerateCardInfo(int n = 1)
+    public sealed class DisableGodotLogging : XunitTestFramework
     {
-        int id = 0;
-        foreach (CardBloodCost cost in CardCosts)
+        public DisableGodotLogging(IMessageSink messageSink) : base(messageSink)
         {
-            foreach (CardRarity rarity in CardRarities)
+            Log.SkipAllLogging = true;
+        }
+    }
+
+    public static class TestUtils
+    {
+        private static CardBloodCost[] CardCosts = new[] {
+                CardBloodCost.Zero,
+                CardBloodCost.One,
+                CardBloodCost.Two,
+                CardBloodCost.Three,
+            };
+
+        private static CardRarity[] CardRarities = new[] {
+                CardRarity.Sacrifice,
+                CardRarity.Common,
+                CardRarity.Uncommon,
+                CardRarity.Rare,
+            };
+
+        public static IEnumerable<CardInfo> GenerateCardInfo(int n = 1)
+        {
+            int id = 0;
+            foreach (CardBloodCost cost in CardCosts)
             {
-                for (int i = 0; i < n; i++)
+                foreach (CardRarity rarity in CardRarities)
                 {
-                    yield return new CardInfo
+                    for (int i = 0; i < n; i++)
                     {
-                        Name = $"{rarity}_{cost}_{id}",
-                        Attack = 0,
-                        Health = 1,
-                        BloodCost = cost,
-                        Rarity = rarity,
-                        Id = id++,
-                    };
+                        yield return new CardInfo
+                        {
+                            Name = $"{rarity}_{cost}_{id}",
+                            Attack = 0,
+                            Health = 1,
+                            BloodCost = cost,
+                            Rarity = rarity,
+                            Id = id++,
+                        };
+                    }
                 }
             }
         }
