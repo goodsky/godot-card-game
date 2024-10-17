@@ -145,7 +145,7 @@ public partial class GameLobby : Control
 	public void SelectLevel(GameLevel level)
 	{
 		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);
-		
+
 		switch (CurrentState)
 		{
 			case LobbyState.SelectLevel:
@@ -590,6 +590,7 @@ public partial class GameLobby : Control
 				{
 					GD.Print("Removing Duplicate Level #", i);
 					gameLevels.RemoveAt(i);
+					break;
 				}
 			}
 		}
