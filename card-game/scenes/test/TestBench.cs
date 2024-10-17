@@ -23,7 +23,7 @@ public partial class TestBench : Node2D
 		}
 
 		float volume = (float)VolumeSlider.Value;
-		Log.Info("Volume = ", volume);
+		GD.Print("Volume = ", volume);
 
 		AudioManager.Instance.Play(Constants.Audio.CardsShuffle, pitch: pitchScale, volume: volume);
 	}
@@ -49,27 +49,27 @@ public partial class TestBench : Node2D
 
 	private IEnumerable Debug_TestCoroutine()
 	{
-		Log.Info("Testing the coroutine!");
+		GD.Print("Testing the coroutine!");
 		yield return new CoroutineDelay(2.0);
-		Log.Info("I waited 2 seconds!");
+		GD.Print("I waited 2 seconds!");
 		yield return null;
-		Log.Info("And that time I didn't wait at all!");
+		GD.Print("And that time I didn't wait at all!");
 		for (int i = 10; i > 0; i--)
 		{
-			Log.Info($"{i}...");
+			GD.Print($"{i}...");
 			yield return new CoroutineDelay(0.2);
 		}
 
-		Log.Info("Blastoff!");
+		GD.Print("Blastoff!");
 		yield return new CoroutineDelay(5);
-		Log.Info("Get ready for a big one...");
+		GD.Print("Get ready for a big one...");
 		yield return new CoroutineDelay(1);
 		for (int i = 100; i > 0; i--)
 		{
-			Log.Info($"{i}...!");
+			GD.Print($"{i}...!");
 			yield return null;
 		}
 
-		Log.Info("Okay I'm done! Bye!");
+		GD.Print("Okay I'm done! Bye!");
 	}
 }

@@ -195,7 +195,7 @@ public static class CardGenerator
 		var abilityPointsLimit = data.Stats.AbilityPointLimits.Where(limit => limit.Cost == cost && limit.Rarity == rarity).FirstOrDefault();
 		if (abilityPointsLimit == null)
 		{
-			Log.Error($"No stats limit defined for cost: {cost} and rarity: {rarity}!");
+			GD.PushError($"No stats limit defined for cost: {cost} and rarity: {rarity}!");
 			return cardInfo;
 		}
 
@@ -256,7 +256,7 @@ public static class CardGenerator
 	{
 		var dataStr = Godot.FileAccess.GetFileAsString(DeckGeneratorDataPath);
 		var data = JsonSerializer.Deserialize<GeneratorData>(dataStr, new JsonSerializerOptions() { IncludeFields = true });
-		Log.Info($"Loaded Generator Data with {data.Nouns?.Count} nouns and {data.Adjectives?.Count} adjectives.");
+		GD.Print($"Loaded Generator Data with {data.Nouns?.Count} nouns and {data.Adjectives?.Count} adjectives.");
 		return data;
 	}
 }

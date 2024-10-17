@@ -50,7 +50,7 @@ public partial class InfoArea : Node2D
 	public override void _Ready()
 	{
 		Instance = this;
-
+		
 		if (LevelLabel != null)
 		{
 			LevelLabel.Text = $"Level {GameManager.Instance.Progress.Level}";
@@ -88,7 +88,7 @@ public partial class InfoArea : Node2D
 				if (MainGame.Instance.Creatures.Count == 0 &&
 					MainGame.Instance.Sacrifices.Count == 0)
 				{
-					Log.Info("No cards to draw! Continue on to combat.");
+					GD.Print("No cards to draw! Continue on to combat.");
 					MainGame.Instance.SkipDrawingCard();
 				}
 

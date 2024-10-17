@@ -76,7 +76,7 @@ public partial class HealthBar : Sprite2D
 
 		if (endPipIndex <= -HealthPerPlayer || endPipIndex >= HealthPerPlayer)
 		{
-			Log.Info($"The pip has hit the limit. This game is over! {startPipIndex} -> {endPipIndex}.");
+			GD.Print($"The pip has hit the limit. This game is over! {startPipIndex} -> {endPipIndex}.");
 			MainGame.Instance.GameOver();
 		}
 	}

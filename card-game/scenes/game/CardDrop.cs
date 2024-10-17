@@ -6,7 +6,7 @@ using Godot;
  */
 public abstract partial class CardDrop : Node2D
 {
-	[Export(PropertyHint.None)]
+	[Export(PropertyHint.None)] 
 	public Card[] DebugCards = null;
 
 	protected Node CardsNode;
@@ -38,7 +38,7 @@ public abstract partial class CardDrop : Node2D
 	public virtual bool TryAddCard(Card card, Vector2? globalPosition)
 	{
 		int cardCount = CardCount;
-		// Log.Info($"Dropping Card: {card.Name} into {this.Name} - {cardCount}/{MaxCards} - IsAncestor: {CardsNode.IsAncestorOf(card)}");
+		// GD.Print($"Dropping Card: {card.Name} into {this.Name} - {cardCount}/{MaxCards} - IsAncestor: {CardsNode.IsAncestorOf(card)}");
 		if (cardCount < MaxCards && !CardsNode.IsAncestorOf(card))
 		{
 			CardsNode.AddChild(card);
@@ -55,7 +55,7 @@ public abstract partial class CardDrop : Node2D
 
 	public virtual bool TryRemoveCard(Card card)
 	{
-		// Log.Info($"Picking Up Card: {card.Name} from {this.Name} - IsAncestor: {CardsNode.IsAncestorOf(card)}");
+		// GD.Print($"Picking Up Card: {card.Name} from {this.Name} - IsAncestor: {CardsNode.IsAncestorOf(card)}");
 		if (CardsNode.IsAncestorOf(card))
 		{
 			CardsNode.RemoveChild(card);

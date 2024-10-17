@@ -50,7 +50,7 @@ public partial class ClickableArea : Node2D
 			.Where(node => node is Area2D)
 			.Select(node => node as Area2D)
 			.FirstOrDefault();
-
+		
 		if (_area == null)
 		{
 			throw new InvalidOperationException("ClickableArea does not have a child Area2D!");
@@ -65,7 +65,7 @@ public partial class ClickableArea : Node2D
 	{
 		if (inputEvent.IsActionReleased(Constants.ClickEventName))
 		{
-			// Log.Debug($"Unclick: mouseDown = {_isMouseDown}; dragging = {_isDragging};");
+			// GD.Print($"Unclick: mouseDown = {_isMouseDown}; dragging = {_isDragging};");
 			if (_isDragging)
 			{
 				EmitSignal(SignalName.AreaStopDragging);
@@ -89,7 +89,7 @@ public partial class ClickableArea : Node2D
 			Vector2 clickDelta = inputMouseMotionEvent.GlobalPosition - _clickGlobalPosition.Value;
 			if (clickDelta.Length() > DragDistanceThreshold)
 			{
-				// Log.Debug($"Dragging on {this.GetParent().Name}. delta = {clickDelta}; length = {clickDelta.Length()}");
+				// GD.Print($"Dragging on {this.GetParent().Name}. delta = {clickDelta}; length = {clickDelta.Length()}");
 				_isDragging = true;
 				EmitSignal(SignalName.AreaStartDragging);
 			}
@@ -97,7 +97,7 @@ public partial class ClickableArea : Node2D
 
 		if (inputEvent.IsActionPressed(Constants.ClickEventName))
 		{
-			// Log.Debug($"Click on {this.GetParent().Name}");
+			// GD.Print($"Click on {this.GetParent().Name}");
 			SetProcessInput(true);
 			_isMouseDown = true;
 			_clickGlobalPosition = GetGlobalMousePosition();

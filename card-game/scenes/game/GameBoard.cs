@@ -88,7 +88,7 @@ public partial class GameBoard : Node2D
 				Card stagedCard = ActiveCardState.Instance.StagedCard;
 				if (stagedCard == null)
 				{
-					Log.Error($"[UnexpectedState] Transitioned to PayPrice without a StagedCard.");
+					GD.PushError($"[UnexpectedState] Transitioned to PayPrice without a StagedCard.");
 					break;
 				}
 				PopUpPayThePricePanel(stagedCard.Info.BloodCost);
@@ -244,7 +244,7 @@ public partial class GameBoard : Node2D
 		PlayArea lane = AllLanes[laneIndex][ENEMY_STAGE_INDEX];
 		if (lane.CardCount > 0)
 		{
-			Log.Error($"Cannot play enemy card in lane {laneIndex}.");
+			GD.PushError($"Cannot play enemy card in lane {laneIndex}.");
 			return null;
 		}
 
@@ -263,7 +263,7 @@ public partial class GameBoard : Node2D
 	{
 		foreach (PlayedCard move in moves)
 		{
-			Log.Info($"Playing card {move.Card.Name} in lane {move.Lane}");
+			GD.Print($"Playing card {move.Card.Name} in lane {move.Lane}");
 			yield return new CoroutineDelay(0.5f);
 			InstantiateCardInLane(move.Card, move.Lane);
 		}
@@ -308,7 +308,7 @@ public partial class GameBoard : Node2D
 				if (playerCard != null)
 				{
 					yield return enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.08f);
-					Log.Info($"Dealt {damage} damage to {playerCard.Info.Name}!");
+					GD.Print($"Dealt {damage} damage to {playerCard.Info.Name}!");
 
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamageCard_Low :
@@ -320,7 +320,7 @@ public partial class GameBoard : Node2D
 				else
 				{
 					yield return enemyCard.LerpGlobalPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.08f);
-					Log.Info($"Dealt {damage} damage to the player!");
+					GD.Print($"Dealt {damage} damage to the player!");
 
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamagePlayer_Low :
@@ -359,7 +359,7 @@ public partial class GameBoard : Node2D
 				if (enemyCard != null)
 				{
 					yield return playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.08f);
-					Log.Info($"Dealt {damage} damage to {enemyCard.Info.Name}!");
+					GD.Print($"Dealt {damage} damage to {enemyCard.Info.Name}!");
 
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamageCard_Low :
@@ -371,7 +371,7 @@ public partial class GameBoard : Node2D
 				else
 				{
 					yield return playerCard.LerpGlobalPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.08f);
-					Log.Info($"Dealt {damage} damage to the enemy!");
+					GD.Print($"Dealt {damage} damage to the enemy!");
 
 					AudioStream damageAudio = damage <= 2 ?
 						Constants.Audio.DamagePlayer_Low :

@@ -37,7 +37,7 @@ public partial class AudioManager : Node
 
     public void UpdateEffectsVolume(float volume)
     {
-        Log.Info("Updating effects volume ", volume);
+        GD.Print("Updating effects volume ", volume);
         float curVolume = _effectsVolume;
         foreach (AudioStreamPlayer activeChannel in _activeChannels.Keys)
         {
@@ -66,7 +66,7 @@ public partial class AudioManager : Node
     {
         if (_channels.Count == 0)
         {
-            Log.Error($"Dropping Audio! No available channels for {audio.ResourcePath}");
+            GD.PushError($"Dropping Audio! No available channels for {audio.ResourcePath}");
             return Task.CompletedTask;
         }
 
@@ -79,7 +79,7 @@ public partial class AudioManager : Node
 
         if (!_activeChannels.TryAdd(channel, audioMetadata))
         {
-            Log.Error($"Could not start audio! Failed to add to active channels.");
+            GD.PushError($"Could not start audio! Failed to add to active channels.");
             _channels.Enqueue(channel);
             return Task.CompletedTask;
         }
@@ -123,7 +123,7 @@ public partial class AudioManager : Node
         }
         else
         {
-            Log.Error("Audio finished without a completion source!");
+            GD.PushError("Audio finished without a completion source!");
         }
 
         _channels.Enqueue(channel);
