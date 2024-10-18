@@ -297,7 +297,7 @@ public partial class GameLobby : Control
 		DateTime start = DateTime.Now;
 		string cardPoolName = $"cards-{start:yyyyMMdd-HHmmss}";
 
-		var cardPool = CardGenerator.GenerateRandomCardPool(CardGenerator.DefaultArgs, cardPoolName);
+		var cardPool = CardGenerator.GenerateRandomCardPool(cardPoolName);
 		GameLoader.SaveCardPool(cardPool, cardPoolName);
 		GameManager.Instance.StartNewGame(cardPool);
 

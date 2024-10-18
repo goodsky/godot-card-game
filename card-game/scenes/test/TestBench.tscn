@@ -1,50 +1,164 @@
-[gd_scene load_steps=2 format=3 uid="uid://c3nxo8hbqatw1"]
+[gd_scene load_steps=4 format=3 uid="uid://c3nxo8hbqatw1"]
 
 [ext_resource type="Script" path="res://scenes/test/TestBench.cs" id="1_3gwek"]
 
-[node name="TestBench" type="Node2D" node_paths=PackedStringArray("PitchScale", "VolumeSlider")]
-script = ExtResource("1_3gwek")
-PitchScale = NodePath("Control/Buttons/PitchScaleLineEdit")
-VolumeSlider = NodePath("Control/Buttons/VolumeSlider")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_puqy2"]
+content_margin_left = 12.0
+content_margin_top = 12.0
+content_margin_right = 12.0
+content_margin_bottom = 12.0
+bg_color = Color(0.792157, 0.47451, 0.717647, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
-[node name="Control" type="Control" parent="."]
+[sub_resource type="Theme" id="Theme_ufqf1"]
+PanelContainer/styles/panel = SubResource("StyleBoxFlat_puqy2")
+
+[node name="TestBench" type="Node2D"]
+script = ExtResource("1_3gwek")
+
+[node name="RootControl" type="Control" parent="."]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 800.0
 offset_bottom = 600.0
 
-[node name="Buttons" type="VBoxContainer" parent="Control"]
-layout_mode = 0
-offset_left = 23.0
-offset_top = 28.0
-offset_right = 297.0
-offset_bottom = 582.0
+[node name="VBoxContainer" type="VBoxContainer" parent="RootControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_ufqf1")
+alignment = 1
 
-[node name="PitchScaleLineEdit" type="LineEdit" parent="Control/Buttons"]
+[node name="Panels" type="VFlowContainer" parent="RootControl/VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+theme_override_constants/h_separation = 32
+theme_override_constants/v_separation = 16
+alignment = 1
+
+[node name="CardsPanel" type="PanelContainer" parent="RootControl/VBoxContainer/Panels"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RootControl/VBoxContainer/Panels/CardsPanel"]
+layout_mode = 2
+
+[node name="CardsTitle" type="Label" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+layout_mode = 2
+text = "Card Generator
+"
+
+[node name="GenerateCardsButton" type="Button" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Generate Card Pool"
+
+[node name="HSeparator" type="HSeparator" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Pools to Analyze"
+
+[node name="AnalyzeCardsCount" type="TextEdit" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(50, 35)
+layout_mode = 2
+text = "100"
+placeholder_text = "Count"
+
+[node name="AnalyzeCardsButton" type="Button" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Analyze Card Pools"
+
+[node name="AnalyzeCardsLabel" type="Label" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
+
+[node name="SerializationButton" type="Button" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Serialization End-to-End"
+
+[node name="DataPanel" type="PanelContainer" parent="RootControl/VBoxContainer/Panels"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RootControl/VBoxContainer/Panels/DataPanel"]
+layout_mode = 2
+
+[node name="DataTitle" type="Label" parent="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer"]
+layout_mode = 2
+text = "Data Controls
+"
+
+[node name="SampleCoroutineButton" type="Button" parent="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Sample Coroutine"
+
+[node name="ResetSettingsButton" type="Button" parent="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+text = "Reset data.json Settings"
+
+[node name="VolumePanel" type="PanelContainer" parent="RootControl/VBoxContainer/Panels"]
+visible = false
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RootControl/VBoxContainer/Panels/VolumePanel"]
+layout_mode = 2
+
+[node name="VolumeTitle" type="Label" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
+layout_mode = 2
+text = "Volume Tests"
+
+[node name="PitchScaleLineEdit" type="LineEdit" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
 layout_mode = 2
 placeholder_text = "Pitch Scale"
 
-[node name="VolumeSlider" type="HSlider" parent="Control/Buttons"]
+[node name="VolumeSlider" type="HSlider" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.5
 
-[node name="PlaySoundButton" type="Button" parent="Control/Buttons"]
+[node name="PlaySoundButton" type="Button" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Play Sound"
 
-[node name="PlayMultipleButton" type="Button" parent="Control/Buttons"]
+[node name="PlayMultipleButton" type="Button" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
+visible = false
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Play Sound x3"
 
-[node name="DeckGeneratorButton" type="Button" parent="Control/Buttons"]
-custom_minimum_size = Vector2(0, 42)
+[node name="GoBackButton" type="Button" parent="RootControl/VBoxContainer"]
+custom_minimum_size = Vector2(160, 42)
 layout_mode = 2
-text = "Generate Test Deck"
+size_flags_horizontal = 4
+text = "Back to Menu"
 
-[connection signal="pressed" from="Control/Buttons/PlaySoundButton" to="." method="Click_PlaySound"]
-[connection signal="pressed" from="Control/Buttons/PlayMultipleButton" to="." method="Click_PlayManySounds"]
-[connection signal="pressed" from="Control/Buttons/DeckGeneratorButton" to="." method="Click_GenerateDeck"]
+[node name="Buffer" type="Control" parent="RootControl/VBoxContainer"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/GenerateCardsButton" to="." method="Click_GenerateCardPool"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/AnalyzeCardsButton" to="." method="Click_AnalyzeCardPool"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/SerializationButton" to="." method="Click_SerializationTest"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer/SampleCoroutineButton" to="." method="Click_SampleCoroutine"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer/ResetSettingsButton" to="." method="Click_ResetSettings"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer/PlaySoundButton" to="." method="Click_PlaySound"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer/PlayMultipleButton" to="." method="Click_PlayManySounds"]
+[connection signal="pressed" from="RootControl/VBoxContainer/GoBackButton" to="." method="Click_BackToMainMenu"]

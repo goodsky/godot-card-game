@@ -43,7 +43,7 @@ public partial class SettingsPopUp : Control
 
 	public override void _Input(InputEvent inputEvent)
 	{
-		if (inputEvent.IsActionPressed("ui_cancel"))
+		if (inputEvent.IsActionPressed(Constants.EscEventName))
 		{
 			Click_Cancel();
 		}

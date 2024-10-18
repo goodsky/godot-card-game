@@ -266,7 +266,7 @@ public static class GameLoader
 	// Test code to validate the end to end serialization and deserialization of game data
 	public static void Debug_TestEndToEnd()
 	{
-		var testCardPool = CardGenerator.GenerateRandomCardPool(CardGenerator.DefaultArgs, "Test Cards");
+		var testCardPool = CardGenerator.GenerateRandomCardPool("Test Cards");
 		SaveCardPool(testCardPool, "test");
 
 		var cardPools = GetAvailableCardPools();

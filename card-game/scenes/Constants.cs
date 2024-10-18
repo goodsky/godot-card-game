@@ -4,6 +4,8 @@ public static class Constants
 {
 	public static readonly string ClickEventName = "click";
 	public static readonly string RightClickEventName = "cancel_click";
+	public static readonly string TestBenchEventName = "testbench_hotkey";
+	public static readonly string IsaacModeEventName = "isaac_mode_hotkey";
 	public static readonly string EscEventName = "ui_cancel";
 
 	public static readonly string GameDeckDirectory = "res://cards";
@@ -21,6 +23,8 @@ public static class Constants
 	public static readonly PackedScene MainMenuScene = GD.Load<PackedScene>("res://scenes/menu/MainMenu.tscn");
 	public static readonly PackedScene GameLobbyScene = GD.Load<PackedScene>("res://scenes/game_lobby/GameLobby.tscn");
 	public static readonly PackedScene SelectLevelScene = GD.Load<PackedScene>("res://scenes/game_lobby/SelectLevelPanel.tscn");
+	public static readonly PackedScene TestBenchScene = GD.Load<PackedScene>("res://scenes/test/TestBench.tscn");
+	public static readonly PackedScene IsaaacModeScene = GD.Load<PackedScene>("res://scenes/game/isaacs.tscn");
 
 	public static readonly string ErrorAvatarPath = "res://assets/sprites/avatars/avatar_blue_monster_00.jpeg";
 

@@ -5,17 +5,22 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Godot;
 
-public struct NewCardPoolArgs
+public class CardPoolArgs
 {
+	[JsonPropertyName("sacrifice")]
 	public int SacrificeCardCount { get; set; }
+	[JsonPropertyName("common")]
 	public Dictionary<CardBloodCost, int> CommonCardsCounts { get; set; }
+	[JsonPropertyName("uncommon")]
 	public Dictionary<CardBloodCost, int> UncommonCardsCounts { get; set; }
+	[JsonPropertyName("rare")]
 	public Dictionary<CardBloodCost, int> RareCardsCounts { get; set; }
 }
 
 public static class CardGenerator
 {
-	private static readonly string DeckGeneratorDataPath = "res://cards/generator/data.json";
+	private static readonly string TemplateDeckGeneratorDataPath = "res://settings/data.json";
+	private static readonly string UserDeckGeneratorDataPath = "user://data/data.json";
 
 	public class GeneratorData
 	{
@@ -31,20 +36,25 @@ public static class CardGenerator
 
 	public class StatsData
 	{
+		[JsonPropertyName("pool_size")]
+		public CardPoolArgs DefaultCardPoolArgs { get; set; }
+
 		[JsonPropertyName("ability_costs")]
 		public Dictionary<string, int> AbilityCosts { get; set; }
 
-		[JsonPropertyName("point_limits")]
-		public List<AbilityPointLimit> AbilityPointLimits { get; set; }
+		[JsonPropertyName("ability_point_limits")]
+		public AbilityPointLimit AbilityPointLimits { get; set; }
 
 		public class AbilityPointLimit
 		{
-			[JsonPropertyName("cost")]
-			public CardBloodCost Cost { get; set; }
-			[JsonPropertyName("rarity")]
-			public CardRarity Rarity { get; set; }
-			[JsonPropertyName("limit")]
-			public int Limit { get; set; }
+			[JsonPropertyName("sacrifice")]
+			public int SacrificeCardPointLimit { get; set; }
+			[JsonPropertyName("common")]
+			public Dictionary<CardBloodCost, int> CommonCardsPointLimit { get; set; }
+			[JsonPropertyName("uncommon")]
+			public Dictionary<CardBloodCost, int> UncommonCardsPointLimit { get; set; }
+			[JsonPropertyName("rare")]
+			public Dictionary<CardBloodCost, int> RareCardsPointLimit { get; set; }
 		}
 	}
 
@@ -62,37 +72,16 @@ public static class CardGenerator
 		public int Level { get; set; }
 	}
 
-	public static readonly NewCardPoolArgs DefaultArgs = new NewCardPoolArgs()
-	{
-		SacrificeCardCount = 10,
-		CommonCardsCounts = new Dictionary<CardBloodCost, int>
-		{
-			{ CardBloodCost.Zero, 3 },
-			{ CardBloodCost.One, 10 },
-			{ CardBloodCost.Two, 10 },
-			{ CardBloodCost.Three, 10 },
-		},
-		UncommonCardsCounts = new Dictionary<CardBloodCost, int>
-		{
-			{ CardBloodCost.Zero, 3 },
-			{ CardBloodCost.One, 5 },
-			{ CardBloodCost.Two, 5 },
-			{ CardBloodCost.Three, 5 },
-		},
-		RareCardsCounts = new Dictionary<CardBloodCost, int>
-		{
-			{ CardBloodCost.Zero, 1 },
-			{ CardBloodCost.One, 3 },
-			{ CardBloodCost.Two, 3 },
-			{ CardBloodCost.Three, 3 },
-		},
-	};
-
 	private static int NextGeneratedCardId = 0;
-	public static CardPool GenerateRandomCardPool(NewCardPoolArgs args, string name)
+	public static CardPool GenerateRandomCardPool(string name, CardPoolArgs args = null)
 	{
 		NextGeneratedCardId = 0;
 		GeneratorData data = LoadGeneratorData();
+
+		if (args == null)
+		{
+			args = data.Stats.DefaultCardPoolArgs;
+		}
 
 		var cards = new List<CardInfo>();
 		for (int i = 0; i < args.SacrificeCardCount; i++)
@@ -192,17 +181,28 @@ public static class CardGenerator
 			Rarity = rarity,
 		};
 
-		var abilityPointsLimit = data.Stats.AbilityPointLimits.Where(limit => limit.Cost == cost && limit.Rarity == rarity).FirstOrDefault();
-		if (abilityPointsLimit == null)
+		int remainingPoints = 0;
+		var abilityLimits = data.Stats.AbilityPointLimits;
+		if (rarity == CardRarity.Sacrifice)
 		{
-			GD.PushError($"No stats limit defined for cost: {cost} and rarity: {rarity}!");
-			return cardInfo;
+			remainingPoints = abilityLimits.SacrificeCardPointLimit;
+		}
+		else if (rarity == CardRarity.Common)
+		{
+			remainingPoints = abilityLimits.CommonCardsPointLimit[cost];
+		}
+		else if (rarity == CardRarity.Uncommon)
+		{
+			remainingPoints = abilityLimits.UncommonCardsPointLimit[cost];
+		}
+		else if (rarity == CardRarity.Rare)
+		{
+			remainingPoints = abilityLimits.RareCardsPointLimit[cost];
 		}
 
 		// TODO: Many different options for improvements
 		//		- Filter identical stat lines or "strictly better than" options
 		//		- Enumerate all possible stats to find interesting options - instead of the random market approach
-		int remainingPoints = abilityPointsLimit.Limit;
 		for (int i = 0; i < 1000; i++)
 		{
 			List<StatAction> possibleActions = StatActions
@@ -219,6 +219,12 @@ public static class CardGenerator
 			remainingPoints -= statAction.Cost(data);
 		}
 		return cardInfo;
+	}
+
+	public static void ResetCardGeneratorSettings()
+	{
+		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+		DirAccess.CopyAbsolute(TemplateDeckGeneratorDataPath, UserDeckGeneratorDataPath);
 	}
 
 	private static T SelectRandom<T>(ICollection<T> collection)
@@ -254,7 +260,12 @@ public static class CardGenerator
 
 	private static GeneratorData LoadGeneratorData()
 	{
-		var dataStr = Godot.FileAccess.GetFileAsString(DeckGeneratorDataPath);
+		if (!FileAccess.FileExists(UserDeckGeneratorDataPath))
+		{
+			ResetCardGeneratorSettings();
+		}
+
+		var dataStr = FileAccess.GetFileAsString(UserDeckGeneratorDataPath);
 		var data = JsonSerializer.Deserialize<GeneratorData>(dataStr, new JsonSerializerOptions() { IncludeFields = true });
 		GD.Print($"Loaded Generator Data with {data.Nouns?.Count} nouns and {data.Adjectives?.Count} adjectives.");
 		return data;

@@ -15,6 +15,18 @@ public partial class MainMenu : Control
 		}
 	}
 
+	public override void _Input(InputEvent inputEvent)
+	{
+		if (inputEvent.IsActionPressed(Constants.TestBenchEventName))
+		{
+			SceneLoader.Instance.LoadTestBench();
+		}
+		else if (inputEvent.IsActionPressed(Constants.IsaacModeEventName))
+		{
+			SceneLoader.Instance.LoadIsaacMode();
+		}
+	}
+
 	public void Click_ContinueGame()
 	{
 		AudioManager.Instance.Play(Constants.Audio.ClickSnap, pitch: 1.0f, volume: 0.5f);

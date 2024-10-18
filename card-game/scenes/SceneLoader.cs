@@ -38,6 +38,20 @@ public partial class SceneLoader : Node2D
 		AddChild(mainGame);
 	}
 
+	public void LoadTestBench()
+	{
+		RemoveAllChildren();
+		TestBench testBench = Constants.TestBenchScene.Instantiate<TestBench>();
+		AddChild(testBench);
+	}
+
+	public void LoadIsaacMode()
+	{
+		RemoveAllChildren();
+		MainGame mainGame = Constants.IsaaacModeScene.Instantiate<MainGame>();
+		AddChild(mainGame);
+	}
+
 	private void RemoveAllChildren()
 	{
 		foreach (var child in GetChildren())

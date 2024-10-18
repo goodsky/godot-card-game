@@ -23,7 +23,7 @@ public partial class ConfirmPopUp : Control
 
     public override void _Input(InputEvent inputEvent)
 	{
-		if (inputEvent.IsActionPressed("ui_cancel"))
+		if (inputEvent.IsActionPressed(Constants.EscEventName))
 		{
 			QueueFree();
 		}
