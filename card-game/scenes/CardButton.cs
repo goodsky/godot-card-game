@@ -32,7 +32,7 @@ public partial class CardButton : BaseButton
         if (cardInfo.HasValue)
         {
             Visual.Visible = true;
-            Visual.Update(cardInfo.Value, firstUpdate: true);
+            Visual.Update(cardInfo.Value);
             Visual.ShowCardBack(ShowCardBack);
         }
         else

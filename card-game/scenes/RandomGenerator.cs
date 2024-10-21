@@ -53,15 +53,30 @@ public class RandomGenerator
         return list[_rnd.Next(list.Count)];
     }
 
-    public T SelectRandom<T>(List<T> list)
+    public T SelectRandom<T>(IList<T> list)
     {
-        ++N;
-        return list[_rnd.Next(list.Count)];
+        return list[Next(list.Count)];
     }
 
     public T SelectRandom<T>(T[] arr)
     {
-        ++N;
-        return arr[_rnd.Next(arr.Length)];
+        return arr[Next(arr.Length)];
+    }
+
+    public T SelectRandomOdds<T>(T[] values, int[] odds)
+    {
+        int oddsSum = odds.Sum();
+        int randValue = Next(oddsSum);
+        int sum = 0;
+        for (int i = 0; i < odds.Length; i++)
+        {
+            sum += odds[i];
+            if (sum > randValue)
+            {
+                return values[i];
+            }
+        }
+
+        throw new InvalidOperationException($"Invalid odds array! Did not select a value. value: {randValue}; odds: [{string.Join(",", odds)}];");
     }
 }

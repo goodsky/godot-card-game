@@ -3,6 +3,8 @@ using System;
 
 public partial class CardVisual : Node2D
 {
+	private string _loadedAvatarResource = null;
+
 	[Export]
 	public Sprite2D CardFront { get; set; }
 
@@ -27,7 +29,10 @@ public partial class CardVisual : Node2D
 	[Export]
 	public CanvasText HealthLabel { get; set; }
 
-    public void SetHighlight(bool showHighlight)
+	[Export]
+	public CanvasText[] AbilityLabels { get; set; }
+
+	public void SetHighlight(bool showHighlight)
 	{
 		CardHighlight.Visible = showHighlight;
 	}
@@ -38,12 +43,26 @@ public partial class CardVisual : Node2D
 		CardFront.Visible = !showBack;
 	}
 
-	public void Update(CardInfo cardInfo, CardCombatInfo combatInfo = null, bool firstUpdate = false)
+	public void Update(CardInfo cardInfo, CardCombatInfo combatInfo = null)
 	{
-		if (firstUpdate)
-		{
-			Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
+		NameLabel.Text = cardInfo.Name;
+		AttackLabel.Text = cardInfo.Attack.ToString();
 
+		int health = Math.Max(0, cardInfo.Health - (combatInfo?.DamageReceived ?? 0));
+		HealthLabel.Text = health.ToString();
+
+		if (_loadedAvatarResource != cardInfo.AvatarResource)
+		{
+			_loadedAvatarResource = cardInfo.AvatarResource;
+			Avatar.Texture = ResourceLoader.Load<CompressedTexture2D>(cardInfo.AvatarResource);
+		}
+
+		if (cardInfo.CardFoilHexcode != default)
+		{
+			CardFront.SelfModulate = new Color(cardInfo.CardFoilHexcode);
+		}
+		else
+		{
 			switch (cardInfo.Rarity)
 			{
 				case CardRarity.Sacrifice:
@@ -59,20 +78,28 @@ public partial class CardVisual : Node2D
 					break;
 
 				case CardRarity.Rare:
-					CardFront.SelfModulate = new Color(Random.Shared.NextSingle() * .75f, Random.Shared.NextSingle(), Random.Shared.NextSingle() * .75f);
+					CardFront.SelfModulate = new Color("cfcf00");
 					break;
 			}
 		}
 
-		NameLabel.Text = cardInfo.Name;
-		AttackLabel.Text = cardInfo.Attack.ToString();
-
-		int health = Math.Max(0, cardInfo.Health - (combatInfo?.DamageReceived ?? 0));
-		HealthLabel.Text = health.ToString();
-
 		for (int i = 0; i < BloodCostIcons.Length; i++)
 		{
 			BloodCostIcons[i].Visible = i < ((int)cardInfo.BloodCost);
+		}
+
+		for (int i = 0; i < AbilityLabels.Length; i++)
+		{
+			if (cardInfo.Abilities == null ||
+				i >= cardInfo.Abilities.Length ||
+				cardInfo.Abilities[i] == CardAbilities.None)
+			{
+				AbilityLabels[i].Text = string.Empty;
+			}
+			else
+			{
+				AbilityLabels[i].Text = cardInfo.Abilities[i].ToString();
+			}
 		}
 	}
 }

@@ -3,7 +3,7 @@
       "pool_size": {
          "sacrifice": 8,
          "common": {
-            "0": 3,
+            "0": 0,
             "1": 10,
             "2": 10,
             "3": 10
@@ -22,28 +22,144 @@
          }
       },
       "ability_costs": {
-         "attack": 3,
+         "agile": 4,
+         "attack": 2,
+         "guard": 2,
          "health": 1
       },
-      "ability_point_limits": {
-         "sacrifice": 0,
+      "card_templates": {
+         "sacrifice": {
+            "attack": 0,
+            "health": 1
+         },
          "common": {
-            "0": 0,
-            "1": 4,
-            "2": 6,
-            "3": 12
+            "0":
+            [
+               {
+                  "attack": 0,
+                  "health": 1,
+                  "ability_points": 0
+               }
+            ],
+            "1":
+            [
+               {
+                  "attack": 1,
+                  "health": 2,
+                  "ability_points": 0,
+                  "prob": 60
+               },
+               {
+                  "attack": 0,
+                  "health": 1,
+                  "ability_points": 2,
+                  "prob": 40
+               }
+            ],
+            "2":
+            [
+               {
+                  "attack": 2,
+                  "health": 3,
+                  "ability_points": 2,
+                  "prob": 50
+               },
+               {
+                  "attack": 1,
+                  "health": 1,
+                  "ability_points": 4,
+                  "prob": 50
+               }
+            ],
+            "3":
+            [
+               {
+                  "attack": 3,
+                  "health": 4,
+                  "ability_points": 2,
+                  "prob": 50
+               },
+               {
+                  "attack": 2,
+                  "health": 2,
+                  "ability_points": 6,
+                  "prob": 50
+               }
+            ]
          },
          "uncommon": {
-            "0": 2,
-            "1": 6,
-            "2": 9,
-            "3": 15
+            "0":
+            [
+               {
+                  "attack": 1,
+                  "health": 1,
+                  "ability_points": 0
+               }
+            ],
+            "1":
+            [
+               {
+                  "attack": 0,
+                  "health": 1,
+                  "ability_points": 4,
+                  "prob": 1
+               }
+            ],
+            "2":
+            [
+               {
+                  "attack": 1,
+                  "health": 2,
+                  "ability_points": 6,
+                  "prob": 1
+               }
+            ],
+            "3":
+            [
+               {
+                  "attack": 2,
+                  "health": 2,
+                  "ability_points": 8,
+                  "prob": 1
+               }
+            ]
          },
          "rare": {
-            "0": 3,
-            "1": 8,
-            "2": 12,
-            "3": 18
+            "0":
+            [
+               {
+                  "attack": 0,
+                  "health": 1,
+                  "ability_points": 4
+               }
+            ],
+            "1":
+            [
+               {
+                  "attack": 1,
+                  "health": 1,
+                  "ability_points": 6,
+                  "prob": 1
+               }
+            ],
+            "2":
+            [
+               {
+                  "attack": 1,
+                  "health": 2,
+                  "ability_points": 8,
+                  "prob": 1
+               }
+            ],
+            "3":
+            [
+               {
+                  "attack": 2,
+                  "health": 2,
+                  "ability_points": 10,
+                  "prob": 1
+               }
+            ]
          }
       }
    },

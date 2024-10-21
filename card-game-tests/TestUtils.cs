@@ -16,7 +16,6 @@ public static class TestUtils
 
     public static IEnumerable<CardInfo> GenerateCardInfo(int n = 1)
     {
-        int id = 0;
         foreach (CardBloodCost cost in CardCosts)
         {
             foreach (CardRarity rarity in CardRarities)
@@ -25,12 +24,12 @@ public static class TestUtils
                 {
                     yield return new CardInfo
                     {
-                        Name = $"{rarity}_{cost}_{id}",
+                        NameAdjective = rarity.ToString(),
+                        NameNoun = cost.ToString(),
                         Attack = 0,
                         Health = 1,
                         BloodCost = cost,
                         Rarity = rarity,
-                        Id = id++,
                     };
                 }
             }

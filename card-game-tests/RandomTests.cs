@@ -29,6 +29,84 @@ public class RandomTests
     }
 
     [Fact]
+    public void SelectRandomFromList()
+    {
+        var rnd = new RandomGenerator();
+        var list = Enumerable.Range(1, 10).ToList();
+
+        var counter = list.ToDictionary(k => k, v => 0);
+        for (int i = 0; i < 1000; i++)
+        {
+            int randomItem = rnd.SelectRandom(list);
+            counter[randomItem]++;
+        }
+
+        foreach (var kvp in counter)
+        {
+            _output.WriteLine("{0}: {1}", kvp.Key, kvp.Value);
+        }
+    }
+
+    [Fact]
+    public void SelectRandomFromArray()
+    {
+        var rnd = new RandomGenerator();
+        var list = Enumerable.Range(1, 10).ToArray();
+
+        var counter = list.ToDictionary(k => k, v => 0);
+        for (int i = 0; i < 1000; i++)
+        {
+            int randomItem = rnd.SelectRandom(list);
+            counter[randomItem]++;
+        }
+
+        foreach (var kvp in counter)
+        {
+            _output.WriteLine("{0}: {1}", kvp.Key, kvp.Value);
+        }
+    }
+
+    [Fact]
+    public void SelectWeightedOdds_HeavyOdds()
+    {
+        var rnd = new RandomGenerator();
+        var vals = new[] { "Common", "Uncommon", "Rare" };
+        var odds = new[] { 80, 18, 2 };
+
+        var counter = vals.ToDictionary(k => k, v => 0);
+        for (int i = 0; i < 1000; i++)
+        {
+            string randomItem = rnd.SelectRandomOdds(vals, odds);
+            counter[randomItem]++;
+        }
+
+        foreach (var kvp in counter)
+        {
+            _output.WriteLine("{0}: {1}", kvp.Key, kvp.Value);
+        }
+    }
+
+    [Fact]
+    public void SelectWeightedOdds_EvenOdds()
+    {
+        var rnd = new RandomGenerator();
+        var vals = new[] { "FirstOption", "SecondOption", "ThirdOption" };
+        var odds = new[] { 1, 2, 3 };
+
+        var counter = vals.ToDictionary(k => k, v => 0);
+        for (int i = 0; i < 1000; i++)
+        {
+            string randomItem = rnd.SelectRandomOdds(vals, odds);
+            counter[randomItem]++;
+        }
+
+        foreach (var kvp in counter)
+        {
+            _output.WriteLine("{0}: {1}", kvp.Key, kvp.Value);
+        }
+    }
+
+    [Fact]
     public void SeededRandomRangef()
     {
         int seed = 947681303;
@@ -85,7 +163,7 @@ public class RandomTests
 
         _output.WriteLine($"Rnd2: [{string.Join(",", values2)}]");
         Assert.Equal(targetN, rnd2.N);
-        
+
         var rnd3 = new RandomGenerator(seed, targetN);
         var value3 = rnd3.Nextf(0f, 1f);
 

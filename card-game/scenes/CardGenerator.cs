@@ -42,19 +42,34 @@ public static class CardGenerator
 		[JsonPropertyName("ability_costs")]
 		public Dictionary<string, int> AbilityCosts { get; set; }
 
-		[JsonPropertyName("ability_point_limits")]
-		public AbilityPointLimit AbilityPointLimits { get; set; }
+		[JsonPropertyName("card_templates")]
+		public CardTemplates Templates { get; set; }
 
-		public class AbilityPointLimit
+		public class CardTemplates
 		{
 			[JsonPropertyName("sacrifice")]
-			public int SacrificeCardPointLimit { get; set; }
+			public CardTemplate SacrificeTemplate { get; set; }
 			[JsonPropertyName("common")]
-			public Dictionary<CardBloodCost, int> CommonCardsPointLimit { get; set; }
+			public Dictionary<CardBloodCost, CardTemplate[]> CommonTemplates { get; set; }
 			[JsonPropertyName("uncommon")]
-			public Dictionary<CardBloodCost, int> UncommonCardsPointLimit { get; set; }
+			public Dictionary<CardBloodCost, CardTemplate[]> UncommonTemplates { get; set; }
 			[JsonPropertyName("rare")]
-			public Dictionary<CardBloodCost, int> RareCardsPointLimit { get; set; }
+			public Dictionary<CardBloodCost, CardTemplate[]> RareTemplates { get; set; }
+		}
+
+		public class CardTemplate
+		{
+			[JsonPropertyName("prob")]
+			public int Probability { get; set; } = 1;
+
+			[JsonPropertyName("attack")]
+			public int Attack { get; set; }
+
+			[JsonPropertyName("health")]
+			public int Health { get; set; }
+
+			[JsonPropertyName("ability_points")]
+			public int AbilityPoints { get; set; } = 0;
 		}
 	}
 
@@ -72,10 +87,8 @@ public static class CardGenerator
 		public int Level { get; set; }
 	}
 
-	private static int NextGeneratedCardId = 0;
 	public static CardPool GenerateRandomCardPool(string name, CardPoolArgs args = null)
 	{
-		NextGeneratedCardId = 0;
 		GeneratorData data = LoadGeneratorData();
 
 		if (args == null)
@@ -143,9 +156,21 @@ public static class CardGenerator
 	{
 		new StatAction()
 		{
+			StatName = "agile",
+			CanApply = (cardInfo) => cardInfo.Abilities.Length < 2 && !cardInfo.Abilities.Contains(CardAbilities.Agile),
+			ApplyStat = (cardInfo) => { cardInfo.Abilities = cardInfo.Abilities.Append(CardAbilities.Agile).ToArray(); return cardInfo; }
+		},
+		new StatAction()
+		{
 			StatName = "attack",
 			CanApply = (_) => true,
 			ApplyStat = (cardInfo) => { cardInfo.Attack += 1; return cardInfo; }
+		},
+		new StatAction()
+		{
+			StatName = "guard",
+			CanApply = (cardInfo) => cardInfo.Abilities.Length < 2 && !cardInfo.Abilities.Contains(CardAbilities.Guard),
+			ApplyStat = (cardInfo) => { cardInfo.Abilities = cardInfo.Abilities.Append(CardAbilities.Guard).ToArray(); return cardInfo; }
 		},
 		new StatAction()
 		{
@@ -162,43 +187,52 @@ public static class CardGenerator
 			data = LoadGeneratorData();
 		}
 
-		var nouns = GetNounsForCardLevel(data, cost);
-		var noun = SelectRandom(nouns);
+		var rnd = new RandomGenerator();
 
-		var avatar = SelectRandom(noun.Value.AvatarResources);
+		var nouns = GetNounsForCardLevel(data, cost);
+		var noun = rnd.SelectRandom(nouns);
 
 		var adjectives = GetAdjectivesForCardLevel(data, rarity);
-		var adjective = SelectRandom(adjectives);
+		var adjective = rnd.SelectRandom(adjectives);
 
-		var cardInfo = new CardInfo
-		{
-			Id = NextGeneratedCardId++,
-			Name = $"{adjective.Key} {noun.Key}",
-			AvatarResource = avatar,
-			Attack = 0,
-			Health = 1,
-			BloodCost = cost,
-			Rarity = rarity,
-		};
+		var avatar = rnd.SelectRandom(noun.Value.AvatarResources);
 
-		int remainingPoints = 0;
-		var abilityLimits = data.Stats.AbilityPointLimits;
-		if (rarity == CardRarity.Sacrifice)
+		StatsData.CardTemplate[] templates;
+		string cardFoilHexcode = null;
+
+		if (rarity == CardRarity.Rare)
 		{
-			remainingPoints = abilityLimits.SacrificeCardPointLimit;
-		}
-		else if (rarity == CardRarity.Common)
-		{
-			remainingPoints = abilityLimits.CommonCardsPointLimit[cost];
+			templates = data.Stats.Templates.RareTemplates[cost];
+			cardFoilHexcode = new Color(rnd.Nextf(0.25f, 0.75f), rnd.Nextf(0.25f, 0.80f), rnd.Nextf(0.25f, 0.75f)).ToHtml();
 		}
 		else if (rarity == CardRarity.Uncommon)
 		{
-			remainingPoints = abilityLimits.UncommonCardsPointLimit[cost];
+			templates = data.Stats.Templates.UncommonTemplates[cost];
 		}
-		else if (rarity == CardRarity.Rare)
+		else if (rarity == CardRarity.Common)
 		{
-			remainingPoints = abilityLimits.RareCardsPointLimit[cost];
+			templates = data.Stats.Templates.CommonTemplates[cost];
 		}
+		else
+		{
+			templates = new[] { data.Stats.Templates.SacrificeTemplate };
+		}
+
+		var template = rnd.SelectRandomOdds(templates, templates.Select(t => t.Probability).ToArray());
+
+		int remainingPoints = template.AbilityPoints;
+		var cardInfo = new CardInfo
+		{
+			NameAdjective = adjective.Key,
+			NameNoun = noun.Key,
+			AvatarResource = avatar,
+			Attack = template.Attack,
+			Health = template.Health,
+			Abilities = new CardAbilities[0],
+			BloodCost = cost,
+			Rarity = rarity,
+			CardFoilHexcode = cardFoilHexcode,
+		};
 
 		// TODO: Many different options for improvements
 		//		- Filter identical stat lines or "strictly better than" options
@@ -214,7 +248,7 @@ public static class CardGenerator
 				return cardInfo;
 			}
 
-			var statAction = SelectRandom(possibleActions);
+			var statAction = rnd.SelectRandom(possibleActions);
 			cardInfo = statAction.ApplyStat(cardInfo);
 			remainingPoints -= statAction.Cost(data);
 		}
@@ -225,12 +259,6 @@ public static class CardGenerator
 	{
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
 		DirAccess.CopyAbsolute(TemplateDeckGeneratorDataPath, UserDeckGeneratorDataPath);
-	}
-
-	private static T SelectRandom<T>(ICollection<T> collection)
-	{
-		int index = Random.Shared.Next(collection.Count);
-		return collection.Skip(index).First();
 	}
 
 	private static Dictionary<string, NounData> GetNounsForCardLevel(GeneratorData data, CardBloodCost cost)
@@ -260,8 +288,9 @@ public static class CardGenerator
 
 	private static GeneratorData LoadGeneratorData()
 	{
-		if (!FileAccess.FileExists(UserDeckGeneratorDataPath))
+		if (OS.IsDebugBuild() || !FileAccess.FileExists(UserDeckGeneratorDataPath))
 		{
+			GD.Print("Copying over data.json...");
 			ResetCardGeneratorSettings();
 		}
 

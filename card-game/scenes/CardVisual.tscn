@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://c4garv105erm4" path="res://assets/sprites/card-back.png" id="11_mxocv"]
 [ext_resource type="Texture2D" uid="uid://cg0xksq5yfmro" path="res://assets/sprites/card-highlight.png" id="12_a3swt"]
 
-[node name="CardVisual" type="Node2D" node_paths=PackedStringArray("CardFront", "CardBack", "CardHighlight", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel")]
+[node name="CardVisual" type="Node2D" node_paths=PackedStringArray("CardFront", "CardBack", "CardHighlight", "Avatar", "BloodCostIcons", "NameLabel", "AttackLabel", "HealthLabel", "AbilityLabels")]
 script = ExtResource("2_s21yx")
 CardFront = NodePath("CardFront")
 CardBack = NodePath("CardBack")
@@ -23,6 +23,7 @@ BloodCostIcons = [NodePath("CardFront/Card-cost-1"), NodePath("CardFront/Card-co
 NameLabel = NodePath("CardFront/CardTitle")
 AttackLabel = NodePath("CardFront/AttackStat")
 HealthLabel = NodePath("CardFront/HealthStat")
+AbilityLabels = [NodePath("CardFront/Ability1"), NodePath("CardFront/Ability2")]
 
 [node name="CardFront" type="Sprite2D" parent="."]
 texture = ExtResource("1_qunm4")
@@ -77,6 +78,24 @@ texture = ExtResource("9_ub7tx")
 [node name="Card-cost-3" type="Sprite2D" parent="CardFront"]
 position = Vector2(12, 28)
 texture = ExtResource("9_ub7tx")
+
+[node name="Ability1" parent="CardFront" instance=ExtResource("2_1lmow")]
+position = Vector2(-25, 32)
+Text = "Guard"
+MaxFontSize = 12
+TextBoxSize = Vector2(50, 17)
+Font = ExtResource("3_w7sdl")
+Alignment = 1
+VerticalAlignment = 1
+
+[node name="Ability2" parent="CardFront" instance=ExtResource("2_1lmow")]
+position = Vector2(-25, 45)
+Text = "Counter"
+MaxFontSize = 12
+TextBoxSize = Vector2(50, 17)
+Font = ExtResource("3_w7sdl")
+Alignment = 1
+VerticalAlignment = 1
 
 [node name="CardBack" type="Sprite2D" parent="."]
 visible = false

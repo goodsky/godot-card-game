@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class Deck
@@ -28,7 +29,7 @@ public class Deck
     {
         if (Count == 0)
         {
-            return new CardInfo { Id = -1, Name = "ERROR", Attack = 0, Health = 0, AvatarResource = Constants.ErrorAvatarPath, BloodCost = CardBloodCost.Zero, Rarity = CardRarity.Rare };
+            throw new InvalidOperationException($"Attempted to draw card from empty deck!");
         }
 
         int drawIndex = Cards.Count - 1;

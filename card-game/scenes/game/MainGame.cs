@@ -390,6 +390,8 @@ public partial class MainGame : Node2D
 	/** Isaac Mode! (and other miscellaneous manual test routines) */
 	public void Isaac_DrawCard()
 	{
+		var rnd = new RandomGenerator();
+
 		var blueMonsterAvatars = new[] {
 			"res://assets/sprites/avatars/avatar_blue_monster_00.jpeg",
 			"res://assets/sprites/avatars/avatar_blue_monster_01.jpeg",
@@ -398,13 +400,14 @@ public partial class MainGame : Node2D
 
 		var blueMonsterCard = new CardInfo()
 		{
-			Id = DrawnCardCount,
-			Name = $"Blue Monster",
-			AvatarResource = blueMonsterAvatars[Random.Shared.Next(blueMonsterAvatars.Length)],
-			Attack = Random.Shared.Next(1, 6),
-			Health = Random.Shared.Next(1, 11),
-			BloodCost = (CardBloodCost)Random.Shared.Next(1, 4),
+			NameAdjective = "Blue",
+			NameNoun = "Monster",
+			AvatarResource = rnd.SelectRandom(blueMonsterAvatars),
+			Attack = rnd.Next(1, 6),
+			Health = rnd.Next(1, 11),
+			BloodCost = (CardBloodCost)rnd.Next(1, 4),
 			Rarity = CardRarity.Rare,
+			CardFoilHexcode = new Color(rnd.Nextf(0.25f, 0.75f), rnd.Nextf(0.25f, 0.80f), rnd.Nextf(0.25f, 0.75f)).ToHtml(),
 		};
 
 		var card = InstantiateCardInHand(blueMonsterCard, Hand.GlobalPosition + new Vector2(250, 65));

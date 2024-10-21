@@ -9,22 +9,6 @@ public class EnemyAITests
         _output = output;
     }
 
-    [Fact]
-    public void ResolvesCorrectCardId()
-    {
-        int cardId = 7;
-        var cards = new CardPool(TestUtils.GenerateCardInfo(), "EnemyAITestsDeck");
-        var moves = new List<ScriptedMove> {
-            new ScriptedMove(0, cardId),
-        };
-
-        var ai = new EnemyAI(cards, moves, new RandomGenerator());
-        List<PlayedCard> resolvedMoves = ai.GetMovesForTurn(0, new bool[4]);
-
-        Assert.Single(resolvedMoves);
-        Assert.Equal(cardId, resolvedMoves[0].Card.Id);
-    }
-
     [Theory]
     [InlineData(CardBloodCost.Zero)]
     [InlineData(CardBloodCost.One)]

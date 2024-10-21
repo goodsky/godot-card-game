@@ -1,50 +1,8 @@
 using System;
 using System.Collections;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Godot;
-
-public enum CardBloodCost
-{
-	Zero = 0,
-	One = 1,
-	Two = 2,
-	Three = 3,
-}
-
-public enum CardRarity
-{
-	Sacrifice = 0,
-	Common = 1,
-	Uncommon = 2,
-	Rare = 3,
-}
-
-public struct CardInfo
-{
-	[JsonPropertyName("id")]
-	public int Id { get; set; }
-
-	[JsonPropertyName("name")]
-	public string Name { get; set; }
-
-	[JsonPropertyName("avatar")]
-	public string AvatarResource { get; set; }
-
-	[JsonPropertyName("attack")]
-	public int Attack { get; set; }
-
-	[JsonPropertyName("health")]
-	public int Health { get; set; }
-
-	[JsonPropertyName("cost")]
-	public CardBloodCost BloodCost { get; set; }
-
-	[JsonPropertyName("rarity")]
-	public CardRarity Rarity { get; set; }
-}
 
 public class CardCombatInfo
 {
@@ -85,7 +43,7 @@ public partial class Card : Node2D
 	public override void _Ready()
 	{
 		// Note: CardInfo must be set before adding Card to scene tree!
-		Visual.Update(Info, firstUpdate: true);
+		Visual.Update(Info);
 		_combatInfo = new CardCombatInfo
 		{
 			DamageReceived = 0,
@@ -165,7 +123,7 @@ public partial class Card : Node2D
 		_isAnimating = isAnimating;
 	}
 
-	
+
 
 	public void DealDamage(int damage)
 	{

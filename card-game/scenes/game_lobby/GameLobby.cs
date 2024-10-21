@@ -560,7 +560,7 @@ public partial class GameLobby : Control
 
 	public static List<GameLevel> GenerateGameLevelPool(CardPool cardPool, int level, RandomGenerator rnd)
 	{
-		int levelCount = level < 4 ? 2 : PickOption(new[] { 0.5f, 0.5f }, new[] { 2, 3 }, rnd);
+		int levelCount = level < 4 ? 2 : rnd.SelectRandomOdds(new[] { 2, 3 }, new[] { 50, 50 });
 
 		var gameLevels = new List<GameLevel>();
 		while (gameLevels.Count < levelCount)
@@ -738,26 +738,23 @@ public partial class GameLobby : Control
 	{
 		if (difficulty == LevelDifficulty.Hard)
 		{
-			return PickOption(
-				new[] { 0.20f, 0.40f, 0.20f, 0.10f, 0.10f },
+			return rnd.SelectRandomOdds(
 				new[] { LevelReward.AddCreature, LevelReward.AddUncommonCreature, LevelReward.AddRareCreature, LevelReward.RemoveCard, LevelReward.IncreaseHandSize },
-				rnd
+				new[] { 20, 40, 20, 10, 10 }
 			);
 		}
 		else if (difficulty == LevelDifficulty.Medium)
 		{
-			return PickOption(
-				new[] { 0.50f, 0.15f, 0.05f, 0.25f, 0.05f },
+			return rnd.SelectRandomOdds(
 				new[] { LevelReward.AddCreature, LevelReward.AddUncommonCreature, LevelReward.AddRareCreature, LevelReward.RemoveCard, LevelReward.IncreaseHandSize },
-				rnd
+				new[] { 50, 15, 05, 25, 05 }
 			);
 		}
 		else
 		{
-			return PickOption(
-				new[] { 0.20f, 0.80f },
+			return rnd.SelectRandomOdds(
 				new[] { LevelReward.AddResource, LevelReward.AddCreature },
-				rnd
+				new[] { 20, 80 }
 			);
 		}
 	}
@@ -767,20 +764,20 @@ public partial class GameLobby : Control
 		const int TOTAL_CARDS_RATE = 1;
 		int totalCards = LinearScale(level, TOTAL_CARDS_RATE, min: 4, max: 12, y_intercept: 4, random_amount: 1, rnd: rnd);
 
-		float oneCardsProbability = LinearScalef(level, 0f, min: 0.50f, max: 0.50f, y_intercept: 0.50f, x_intercept: 1);
-		float twoCardsProbability = LinearScalef(level, 0.05f, min: 0.00f, max: 0.20f, x_intercept: 2);
-		float threeCardsProbability = LinearScalef(level, 0.025f, min: 0.00f, max: 0.15f, x_intercept: 6);
-		float fourCardsProbability = LinearScalef(level, 0.025f, min: 0.00f, max: 0.10f, x_intercept: 8);
-		float zeroCardsProbability = 1f - oneCardsProbability - twoCardsProbability - threeCardsProbability - fourCardsProbability;
+		int oneCardsProbability = LinearScale(level, 0f, min: 50, max: 50, y_intercept: 50, x_intercept: 1);
+		int twoCardsProbability = LinearScale(level, 5f, min: 0, max: 20, x_intercept: 2);
+		int threeCardsProbability = LinearScale(level, 2.5f, min: 0, max: 15, x_intercept: 6);
+		int fourCardsProbability = LinearScale(level, 2.5f, min: 0, max: 10, x_intercept: 8);
+		int zeroCardsProbability = 100 - oneCardsProbability - twoCardsProbability - threeCardsProbability - fourCardsProbability;
 
-		float uncommonProbability = LinearScalef(level, 0.025f, min: 0, max: .25f);
-		float rareProbability = LinearScalef(level, 0.025f, min: 0, max: .25f, x_intercept: 2);
-		float commonProbability = 1f - uncommonProbability - rareProbability;
+		int uncommonProbability = LinearScale(level, 2.5f, min: 0, max: 25);
+		int rareProbability = LinearScale(level, 2.5f, min: 0, max: 25, x_intercept: 2);
+		int commonProbability = 100 - uncommonProbability - rareProbability;
 
 		// probability of card cost per turn Idx
-		var oneCostProbabilities = new[] { 0.05f, 0.50f, 0.50f, 0.50f, 0.45f, 0.40f, 0.30f, 0.20f, 0.10f, 0.00f };
-		var twoCostProbabilities = new[] { 0.00f, 0.05f, 0.25f, 0.45f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f, 0.50f };
-		var threeCostProbabilities = new[] { 0.00f, 0.00f, 0.00f, 0.05f, 0.05f, 0.10f, 0.20f, 0.30f, 0.40f, 0.50f };
+		var oneCostProbabilities = new[] { 05, 50, 50, 50, 45, 40, 30, 20, 10, 00 };
+		var twoCostProbabilities = new[] { 00, 05, 25, 45, 50, 50, 50, 50, 50, 50 };
+		var threeCostProbabilities = new[] { 00, 00, 00, 05, 05, 10, 20, 30, 40, 50 };
 
 		GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
 
@@ -788,32 +785,29 @@ public partial class GameLobby : Control
 		var moves = new List<ScriptedMove>();
 		while (moves.Count < totalCards)
 		{
-			int concurrentCount = PickOption(
-				new[] { zeroCardsProbability, oneCardsProbability, twoCardsProbability, threeCardsProbability, fourCardsProbability },
+			int concurrentCount = rnd.SelectRandomOdds(
 				new[] { 0, 1, 2, 3, 4 },
-				rnd
+				new[] { zeroCardsProbability, oneCardsProbability, twoCardsProbability, threeCardsProbability, fourCardsProbability }
 			);
 
 			int costProbabilityIdx = Math.Clamp(turnId, 0, 9);
-			float oneCostProbability = oneCostProbabilities[costProbabilityIdx];
-			float twoCostProbability = twoCostProbabilities[costProbabilityIdx];
-			float threeCostProbability = threeCostProbabilities[costProbabilityIdx];
-			float zeroCostProbability = 1f - oneCostProbability - twoCostProbability - threeCostProbability;
+			int oneCostProbability = oneCostProbabilities[costProbabilityIdx];
+			int twoCostProbability = twoCostProbabilities[costProbabilityIdx];
+			int threeCostProbability = threeCostProbabilities[costProbabilityIdx];
+			int zeroCostProbability = 100 - oneCostProbability - twoCostProbability - threeCostProbability;
 
 			GD.Print($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
 
 			for (int i = 0; i < concurrentCount; i++)
 			{
-				CardBloodCost cost = PickOption(
-					new[] { zeroCostProbability, oneCostProbability, twoCostProbability, threeCostProbability },
+				CardBloodCost cost = rnd.SelectRandomOdds(
 					new[] { CardBloodCost.Zero, CardBloodCost.One, CardBloodCost.Two, CardBloodCost.Three },
-					rnd
+					new[] { zeroCostProbability, oneCostProbability, twoCostProbability, threeCostProbability }
 				);
 
-				CardRarity rarity = PickOption(
-					new[] { commonProbability, uncommonProbability, rareProbability },
+				CardRarity rarity = rnd.SelectRandomOdds(
 					new[] { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare },
-					rnd
+					new[] { commonProbability, uncommonProbability, rareProbability }
 				);
 
 				GD.Print($"      {cost}:{rarity}");
@@ -859,7 +853,7 @@ public partial class GameLobby : Control
 		return Math.Clamp(Mathf.RoundToInt(y + 1e-6f), min, max);
 	}
 
-	public static T PickOption<T>(float[] probabilities, T[] values, RandomGenerator rnd)
+	public static T PickOptionZzz<T>(float[] probabilities, T[] values, RandomGenerator rnd)
 	{
 		float value = rnd.Nextf(0f, 1f);
 		float sum = 0f;

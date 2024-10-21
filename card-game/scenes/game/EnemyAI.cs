@@ -79,12 +79,11 @@ public class EnemyAI
             }
 
             CardInfo? cardInfo = null;
-            if (move.CardIdToPlay != null)
+            if (move.CardToPlay != null)
             {
-                cardInfo = GetCardById(move.CardIdToPlay.Value);
+                cardInfo = move.CardToPlay;
             }
-
-            if (cardInfo == null && move.CardCostToPlay != null)
+            else if (move.CardCostToPlay != null)
             {
                 cardInfo = GetCardByCostAndRarity(move.CardCostToPlay.Value, move.CardRarityToPlay);
             }
@@ -101,18 +100,6 @@ public class EnemyAI
         }
 
         return playedCards;
-    }
-
-    private CardInfo? GetCardById(int id)
-    {
-        var cardsWithId = _cardPool.Cards.Where(card => card.Id == id);
-        if (!cardsWithId.Any())
-        {
-            GD.PushError($"Enemy AI is trying to use undefined card id {id}");
-            return null;
-        }
-
-        return cardsWithId.First();
     }
 
     private CardInfo? GetCardByCostAndRarity(CardBloodCost cost, CardRarity? rarity)
@@ -138,14 +125,14 @@ public class ScriptedMove
     public bool Resolved { get; set; } = false;
     public int Turn { get; set; }
     public int? Lane { get; set; }
-    public int? CardIdToPlay { get; set; }
+    public CardInfo? CardToPlay { get; set; }
     public CardBloodCost? CardCostToPlay { get; set; }
     public CardRarity? CardRarityToPlay { get; set; }
 
-    public ScriptedMove(int turn, int cardId, int? lane = null)
+    public ScriptedMove(int turn, CardInfo cardInfo, int? lane = null)
     {
         Turn = turn;
-        CardIdToPlay = cardId;
+        CardToPlay = cardInfo;
         CardCostToPlay = null;
         CardRarityToPlay = null;
         Lane = lane;
@@ -154,7 +141,7 @@ public class ScriptedMove
     public ScriptedMove(int turn, CardBloodCost cost, CardRarity? rarity = null, int? lane = null)
     {
         Turn = turn;
-        CardIdToPlay = null;
+        CardToPlay = null;
         CardCostToPlay = cost;
         CardRarityToPlay = rarity;
         Lane = lane;
