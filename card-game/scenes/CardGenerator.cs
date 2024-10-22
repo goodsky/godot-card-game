@@ -189,8 +189,9 @@ public static class CardGenerator
 		new StatAction()
 		{
 			StatName = "poisoned",
-			CanApply = (cardInfo) => cardInfo.Abilities.Count < MaxCardAbilities,
-			ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Guard); return cardInfo; }
+			CanApply = (cardInfo) => cardInfo.Abilities.Count < MaxCardAbilities &&
+				!cardInfo.Abilities.Contains(CardAbilities.Poisoned),
+			ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Poisoned); return cardInfo; }
 		},
 	};
 
