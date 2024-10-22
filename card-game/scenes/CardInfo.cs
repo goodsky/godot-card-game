@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 public enum CardBloodCost
@@ -48,7 +49,7 @@ public struct CardInfo
     public int Health { get; set; }
 
     [JsonPropertyName("abilities")]
-    public CardAbilities[] Abilities { get; set; }
+    public List<CardAbilities> Abilities { get; set; }
 
     [JsonPropertyName("cost")]
     public CardBloodCost BloodCost { get; set; }

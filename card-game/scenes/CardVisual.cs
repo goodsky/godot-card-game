@@ -91,7 +91,7 @@ public partial class CardVisual : Node2D
 		for (int i = 0; i < AbilityLabels.Length; i++)
 		{
 			if (cardInfo.Abilities == null ||
-				i >= cardInfo.Abilities.Length ||
+				i >= cardInfo.Abilities.Count ||
 				cardInfo.Abilities[i] == CardAbilities.None)
 			{
 				AbilityLabels[i].Text = string.Empty;

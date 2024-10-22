@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text;
 
 public partial class TestBench : Node2D
@@ -21,6 +22,7 @@ public partial class TestBench : Node2D
 	{
 		public CardRarity Rarity { get; private set; }
 		public CardBloodCost BloodCost { get; private set; }
+		public List<CardAbilities> Abilities { get; private set; }
 		public int Attack { get; private set; }
 		public int Health { get; private set; }
 
@@ -30,27 +32,46 @@ public partial class TestBench : Node2D
 			BloodCost = info.BloodCost;
 			Attack = info.Attack;
 			Health = info.Health;
+			Abilities = info.Abilities.ToList();
+			Abilities.Sort();
 		}
 
-        public override bool Equals(object obj)
-        {
-            CardAnalysisKey o = obj as CardAnalysisKey;
+		public override bool Equals(object obj)
+		{
+			CardAnalysisKey o = obj as CardAnalysisKey;
 			if (o == null)
 			{
 				return false;
 			}
 
-			return o.Rarity == Rarity && o.BloodCost == BloodCost && o.Attack == Attack && o.Health == Health;
-        }
+			bool abilitiesMatch = o.Abilities.Count == Abilities.Count;
+			if (abilitiesMatch)
+			{
+				for (int i = 0; i < Abilities.Count; i++)
+				{
+					if (o.Abilities[i] != Abilities[i])
+					{
+						abilitiesMatch = false;
+					}
+				}
+			}
+
+			return o.Rarity == Rarity &&
+				o.BloodCost == BloodCost &&
+				o.Attack == Attack &&
+				o.Health == Health &&
+				abilitiesMatch;
+		}
 
 		public override int GetHashCode()
 		{
-			return Rarity.GetHashCode() ^ BloodCost.GetHashCode() ^ Attack.GetHashCode() ^ Health.GetHashCode();
+			string abilitiesStr = string.Join("", Abilities);
+			return Rarity.GetHashCode() ^ BloodCost.GetHashCode() ^ Attack.GetHashCode() ^ Health.GetHashCode() & abilitiesStr.GetHashCode();
 		}
 
-        public int CompareTo(CardAnalysisKey other)
-        {
-            if (other == null) return 1;
+		public int CompareTo(CardAnalysisKey other)
+		{
+			if (other == null) return 1;
 
 			int cmp;
 
@@ -66,10 +87,19 @@ public partial class TestBench : Node2D
 			cmp = Health.CompareTo(other.Health);
 			if (cmp != 0) return cmp;
 
-			return 0;
-        }
+			cmp = Abilities.Count.CompareTo(other.Abilities.Count);
+			if (cmp != 0) return cmp;
 
-    }
+			for (int i = 0; i < Abilities.Count; i++)
+			{
+				cmp = Abilities[i].CompareTo(other.Abilities[i]);
+				if (cmp != 0) return cmp;
+			}
+
+			return 0;
+		}
+
+	}
 
 	public class Counter<T> where T : IComparable<T>
 	{
@@ -113,7 +143,7 @@ public partial class TestBench : Node2D
 			}
 
 			file.StoreString(csvBuilder.ToString());
-            file.Close();
+			file.Close();
 		}
 	}
 
@@ -156,7 +186,7 @@ public partial class TestBench : Node2D
 				nounCount.Add(noun);
 				nameCount.Add(card.Name);
 			}
-			
+
 			// Count up how many card infos or name parts have collisions - and how severe the collision is.
 			// Where a collision is defined as a generated card with more than 1 usage in the card pool.
 			cardCollisionHist.AddHistogram(cardInfoCount.Result);
@@ -167,8 +197,8 @@ public partial class TestBench : Node2D
 
 		totalCount.WriteCsv(
 			"CardPoolAnalysis_TotalCardInfo.csv",
-			new List<string> { "Rarity", "BloodCost", "Attack", "Health" },
-			(key) => new List<object> { key.Rarity.ToString(), key.BloodCost.ToString(), key.Attack, key.Health });
+			new List<string> { "Rarity", "BloodCost", "Attack", "Health", "AbilitiesCount", "Abilities" },
+			(key) => new List<object> { key.Rarity.ToString(), key.BloodCost.ToString(), key.Attack, key.Health, key.Abilities.Count, key.Abilities.Count > 0 ? string.Join("-", key.Abilities) : CardAbilities.None.ToString() });
 
 		cardCollisionHist.WriteCsv(
 			"CardPoolAnalysis_CardInfoHist.csv",
@@ -189,7 +219,7 @@ public partial class TestBench : Node2D
 			"CardPoolAnalysis_NameHist.csv",
 			new List<string> { "Card Name Collision Count" },
 			(key) => new List<object> { key });
-		
+
 		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
 		label.Text = $"Analyzed {poolsCount} in {analysisTime}ms";
 	}

@@ -19,6 +19,8 @@ public class CardPoolArgs
 
 public static class CardGenerator
 {
+	private static readonly int MaxCardAbilities = 2;
+
 	private static readonly string TemplateDeckGeneratorDataPath = "res://settings/data.json";
 	private static readonly string UserDeckGeneratorDataPath = "user://data/data.json";
 
@@ -157,8 +159,11 @@ public static class CardGenerator
 		new StatAction()
 		{
 			StatName = "agile",
-			CanApply = (cardInfo) => cardInfo.Abilities.Length < 2 && !cardInfo.Abilities.Contains(CardAbilities.Agile),
-			ApplyStat = (cardInfo) => { cardInfo.Abilities = cardInfo.Abilities.Append(CardAbilities.Agile).ToArray(); return cardInfo; }
+			CanApply = (cardInfo) =>
+				cardInfo.Abilities.Count < MaxCardAbilities &&
+				!cardInfo.Abilities.Contains(CardAbilities.Agile) &&
+				!cardInfo.Abilities.Contains(CardAbilities.Guard), // semi-redundant
+			ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Agile); return cardInfo; }
 		},
 		new StatAction()
 		{
@@ -169,8 +174,11 @@ public static class CardGenerator
 		new StatAction()
 		{
 			StatName = "guard",
-			CanApply = (cardInfo) => cardInfo.Abilities.Length < 2 && !cardInfo.Abilities.Contains(CardAbilities.Guard),
-			ApplyStat = (cardInfo) => { cardInfo.Abilities = cardInfo.Abilities.Append(CardAbilities.Guard).ToArray(); return cardInfo; }
+			CanApply = (cardInfo) =>
+				cardInfo.Abilities.Count < MaxCardAbilities &&
+				!cardInfo.Abilities.Contains(CardAbilities.Guard) &&
+				!cardInfo.Abilities.Contains(CardAbilities.Agile), // redundant
+			ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Guard); return cardInfo; }
 		},
 		new StatAction()
 		{
@@ -228,7 +236,7 @@ public static class CardGenerator
 			AvatarResource = avatar,
 			Attack = template.Attack,
 			Health = template.Health,
-			Abilities = new CardAbilities[0],
+			Abilities = new List<CardAbilities>(),
 			BloodCost = cost,
 			Rarity = rarity,
 			CardFoilHexcode = cardFoilHexcode,
@@ -252,6 +260,8 @@ public static class CardGenerator
 			cardInfo = statAction.ApplyStat(cardInfo);
 			remainingPoints -= statAction.Cost(data);
 		}
+
+		cardInfo.Abilities.Sort();
 		return cardInfo;
 	}
 
