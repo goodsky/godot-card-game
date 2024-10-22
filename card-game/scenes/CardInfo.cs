@@ -22,6 +22,7 @@ public enum CardAbilities
     None = 0,
     Agile = 1,
     Guard = 2,
+    Poisoned = 3,
 }
 
 public struct CardInfo

@@ -303,9 +303,14 @@ public partial class GameBoard : Node2D
 				int damage = enemyCard.Info.Attack;
 				if (damage == 0) continue;
 
+				bool isBlocked = playerCard != null &&
+					!(enemyCard.Info.Abilities.Contains(CardAbilities.Agile) &&
+						!playerCard.Info.Abilities.Contains(CardAbilities.Agile) &&
+						!playerCard.Info.Abilities.Contains(CardAbilities.Guard));
+
 				enemyCard.ZIndex = 10;
 				Vector2 startPosition = enemyCard.GlobalPosition;
-				if (playerCard != null)
+				if (isBlocked)
 				{
 					yield return enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.08f);
 					GD.Print($"Dealt {damage} damage to {playerCard.Info.Name}!");
@@ -315,7 +320,14 @@ public partial class GameBoard : Node2D
 						Constants.Audio.DamageCard_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
 
-					playerCard.DealDamage(damage);
+					if (enemyCard.Info.Abilities.Contains(CardAbilities.Poisoned))
+					{
+						playerCard.DealDamage(playerCard.Info.Health);
+					}
+					else
+					{
+						playerCard.DealDamage(damage);
+					}
 				}
 				else
 				{
@@ -354,9 +366,14 @@ public partial class GameBoard : Node2D
 				int damage = playerCard.Info.Attack;
 				if (damage == 0) continue;
 
+				bool isBlocked = enemyCard != null &&
+					!(playerCard.Info.Abilities.Contains(CardAbilities.Agile) &&
+						!enemyCard.Info.Abilities.Contains(CardAbilities.Agile) &&
+						!enemyCard.Info.Abilities.Contains(CardAbilities.Guard));
+
 				playerCard.ZIndex = 10;
 				Vector2 startPosition = playerCard.GlobalPosition;
-				if (enemyCard != null)
+				if (isBlocked)
 				{
 					yield return playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.08f);
 					GD.Print($"Dealt {damage} damage to {enemyCard.Info.Name}!");
@@ -366,7 +383,14 @@ public partial class GameBoard : Node2D
 						Constants.Audio.DamageCard_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
 
-					enemyCard.DealDamage(damage);
+					if (playerCard.Info.Abilities.Contains(CardAbilities.Poisoned))
+					{
+						enemyCard.DealDamage(enemyCard.Info.Health);
+					}
+					else
+					{
+						enemyCard.DealDamage(damage);
+					}
 				}
 				else
 				{

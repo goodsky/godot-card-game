@@ -25,7 +25,8 @@
          "agile": 4,
          "attack": 2,
          "guard": 2,
-         "health": 1
+         "health": 1,
+         "poisoned": 3
       },
       "card_templates": {
          "sacrifice": {

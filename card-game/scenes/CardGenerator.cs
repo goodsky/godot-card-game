@@ -186,6 +186,12 @@ public static class CardGenerator
 			CanApply = (_) => true,
 			ApplyStat = (cardInfo) => { cardInfo.Health += 1; return cardInfo; }
 		},
+		new StatAction()
+		{
+			StatName = "poisoned",
+			CanApply = (cardInfo) => cardInfo.Abilities.Count < MaxCardAbilities,
+			ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Guard); return cardInfo; }
+		},
 	};
 
 	public static CardInfo GenerateRandomCard(CardRarity rarity, CardBloodCost cost, GeneratorData data = null)

@@ -90,7 +90,7 @@ public class EnemyAI
 
             if (cardInfo == null)
             {
-                GD.PushError("Could not find a card for move!");
+                GD.PushError($"Could not find a card for move! Cost = {move.CardToPlay}; Rarity = {move.CardRarityToPlay};");
                 move.Resolved = true;
                 continue;
             }
@@ -112,7 +112,6 @@ public class EnemyAI
 
         if (!possibleCards.Any())
         {
-            GD.PushError($"Enemy AI is trying to use a cost and rarity that doesn't exist. Cost = {cost}; Rarity = {rarity};");
             return null;
         }
 

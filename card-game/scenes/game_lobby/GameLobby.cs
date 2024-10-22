@@ -810,6 +810,12 @@ public partial class GameLobby : Control
 					new[] { commonProbability, uncommonProbability, rareProbability }
 				);
 
+				if (cost == CardBloodCost.Zero && rarity == CardRarity.Common)
+				{
+					// Just use sacrifice for this
+					rarity = CardRarity.Sacrifice;
+				}
+
 				GD.Print($"      {cost}:{rarity}");
 				moves.Add(new ScriptedMove(turnId, cost, rarity));
 			}
