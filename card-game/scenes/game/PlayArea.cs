@@ -1,3 +1,4 @@
+using System.Linq;
 using Godot;
 
 public partial class PlayArea : CardDrop
@@ -15,6 +16,7 @@ public partial class PlayArea : CardDrop
 	public ClickableArea Area { get; set; }
 
 	protected override int MaxCards => MainGame.Instance.CurrentState == GameState.IsaacMode ? 1 : 2;
+	public Card Card => GetChildCards().FirstOrDefault();
 
 	public override void _Ready()
 	{

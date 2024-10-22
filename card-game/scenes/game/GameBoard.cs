@@ -95,7 +95,7 @@ public partial class GameBoard : Node2D
 				break;
 
 			case GameState.PlayerCombat:
-				coroutine = this.StartCoroutine(PlayerCombatCoroutine());
+				coroutine = this.StartCoroutine(CombatCoroutine(GameState.PlayerCombat));
 				break;
 
 			case GameState.EnemyPlayCard:
@@ -103,7 +103,7 @@ public partial class GameBoard : Node2D
 				break;
 
 			case GameState.EnemyCombat:
-				coroutine = this.StartCoroutine(OpponentCombatCoroutine());
+				coroutine = this.StartCoroutine(CombatCoroutine(GameState.EnemyCombat));
 				break;
 
 			case GameState.EnemyStageCard:
@@ -289,62 +289,121 @@ public partial class GameBoard : Node2D
 		MainGame.Instance.OpponentDonePlayingCards();
 	}
 
+	private IEnumerable CombatCoroutine(GameState state)
+	{
+		int attackingIndex = -1;
+		int defendingIndex = -1;
+		Vector2 defendingCardOffset = Vector2.Zero;
+		Vector2 defendingPlayerOffset = Vector2.Zero;
+		if (state == GameState.PlayerCombat)
+		{
+			attackingIndex = PLAYER_INDEX;
+			defendingIndex = ENEMY_INDEX;
+			defendingCardOffset = new Vector2(0, 50);
+			defendingPlayerOffset = new Vector2(0, -100);
+		}
+		else if (state == GameState.EnemyCombat)
+		{
+			attackingIndex = ENEMY_INDEX;
+			defendingIndex = PLAYER_INDEX;
+			defendingCardOffset = new Vector2(0, -50);
+			defendingPlayerOffset = new Vector2(0, 100);
+		}
+		else { throw new StateMachineException(nameof(CombatCoroutine), state); }
+
+		yield return new CoroutineDelay(1.0);
+
+		foreach (var lane in AllLanes)
+		{
+			Card attackingCard = lane[attackingIndex].Card;
+			Card defendingCard = lane[defendingIndex].Card;
+
+			if (CombatHelper.IsAttacking(attackingCard?.Info, defendingCard?.Info))
+			{
+				int damage = CombatHelper.CardDamage(attackingCard?.Info, defendingCard?.Info);
+
+				attackingCard.ZIndex = 10;
+				Vector2 startPosition = attackingCard.GlobalPosition;
+				if (CombatHelper.IsBlocked(attackingCard?.Info, defendingCard?.Info))
+				{
+					yield return attackingCard.LerpGlobalPositionCoroutine(lane[defendingIndex].GlobalPosition + defendingCardOffset, 0.08f);
+					GD.Print($"Dealt {damage} damage to {defendingCard.Info.Name}!");
+
+					var damageAudio = damage <= 2 ? Constants.Audio.DamageCard_Low : Constants.Audio.DamageCard_High;
+					AudioManager.Instance.Play(damageAudio, tweak: true);
+					defendingCard.DealDamage(damage);
+				}
+				else
+				{
+					yield return attackingCard.LerpGlobalPositionCoroutine(lane[defendingIndex].GlobalPosition + defendingPlayerOffset, 0.08f);
+					GD.Print($"Dealt {damage} damage to health total!");
+
+					var damageAudio = damage <= 2 ? Constants.Audio.DamagePlayer_Low : Constants.Audio.DamagePlayer_High;
+					AudioManager.Instance.Play(damageAudio, tweak: true);
+					yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
+				}
+
+				yield return attackingCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
+				yield return new CoroutineDelay(0.234);
+				attackingCard.ZIndex = 0;
+			}
+		}
+
+		if (state == GameState.PlayerCombat)
+		{
+			MainGame.Instance.EndPlayerCombat();
+		}
+		else
+		{
+			MainGame.Instance.EndOpponentCombat();
+		}
+	}
+
 	private IEnumerable OpponentCombatCoroutine()
 	{
 		yield return new CoroutineDelay(1.0);
 
 		foreach (var lane in AllLanes)
 		{
-			Card playerCard = lane[PLAYER_INDEX].GetChildCards().FirstOrDefault();
-			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
+			Card attackingCard = lane[ENEMY_INDEX].Card;
+			Card defendingCard = lane[PLAYER_INDEX].Card;
 
-			if (enemyCard != null)
+			if (CombatHelper.IsAttacking(attackingCard?.Info, defendingCard?.Info))
 			{
-				int damage = enemyCard.Info.Attack;
-				if (damage == 0) continue;
+				int damage = CombatHelper.CardDamage(attackingCard?.Info, defendingCard?.Info);
+				var damageAudio = damage <= 2 ? Constants.Audio.DamageCard_Low : Constants.Audio.DamageCard_High;
 
-				bool isBlocked = playerCard != null &&
-					!(enemyCard.Info.Abilities.Contains(CardAbilities.Agile) &&
-						!playerCard.Info.Abilities.Contains(CardAbilities.Agile) &&
-						!playerCard.Info.Abilities.Contains(CardAbilities.Guard));
-
-				enemyCard.ZIndex = 10;
-				Vector2 startPosition = enemyCard.GlobalPosition;
-				if (isBlocked)
+				attackingCard.ZIndex = 10;
+				Vector2 startPosition = attackingCard.GlobalPosition;
+				if (CombatHelper.IsBlocked(attackingCard?.Info, defendingCard?.Info))
 				{
-					yield return enemyCard.LerpGlobalPositionCoroutine(playerCard.GlobalPosition + new Vector2(0, -50), 0.08f);
-					GD.Print($"Dealt {damage} damage to {playerCard.Info.Name}!");
+					yield return attackingCard.LerpGlobalPositionCoroutine(defendingCard.GlobalPosition + new Vector2(0, -50), 0.08f);
+					GD.Print($"Dealt {damage} damage to {defendingCard.Info.Name}!");
 
-					AudioStream damageAudio = damage <= 2 ?
-						Constants.Audio.DamageCard_Low :
-						Constants.Audio.DamageCard_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
 
-					if (enemyCard.Info.Abilities.Contains(CardAbilities.Poisoned))
+					if (attackingCard.Info.Abilities.Contains(CardAbilities.Poisoned))
 					{
-						playerCard.DealDamage(playerCard.Info.Health);
+						defendingCard.DealDamage(defendingCard.Info.Health);
 					}
 					else
 					{
-						playerCard.DealDamage(damage);
+						defendingCard.DealDamage(damage);
 					}
 				}
 				else
 				{
-					yield return enemyCard.LerpGlobalPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.08f);
+					yield return attackingCard.LerpGlobalPositionCoroutine(lane[PLAYER_INDEX].GlobalPosition, 0.08f);
 					GD.Print($"Dealt {damage} damage to the player!");
 
-					AudioStream damageAudio = damage <= 2 ?
-						Constants.Audio.DamagePlayer_Low :
-						Constants.Audio.DamagePlayer_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
 
 					yield return MainGame.Instance.HealthBar.PlayerTakeDamage(damage);
 				}
 
-				yield return enemyCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
+				yield return attackingCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
 				yield return new CoroutineDelay(0.234);
-				enemyCard.ZIndex = 0;
+				attackingCard.ZIndex = 0;
 			}
 		}
 
@@ -357,57 +416,36 @@ public partial class GameBoard : Node2D
 
 		foreach (var lane in AllLanes)
 		{
-			Card playerCard = lane[PLAYER_INDEX].GetChildCards().FirstOrDefault();
-			Card enemyCard = lane[ENEMY_INDEX].GetChildCards().FirstOrDefault();
-			Card enemyBackCard = lane[ENEMY_STAGE_INDEX].GetChildCards().FirstOrDefault();
+			Card attackingCard = lane[PLAYER_INDEX].Card;
+			Card defendingCard = lane[ENEMY_INDEX].Card;
 
-			if (playerCard != null)
+			if (CombatHelper.IsAttacking(attackingCard?.Info, defendingCard?.Info))
 			{
-				int damage = playerCard.Info.Attack;
-				if (damage == 0) continue;
+				int damage = CombatHelper.CardDamage(attackingCard?.Info, defendingCard?.Info);
+				var damageAudio = damage <= 2 ? Constants.Audio.DamageCard_Low : Constants.Audio.DamageCard_High;
 
-				bool isBlocked = enemyCard != null &&
-					!(playerCard.Info.Abilities.Contains(CardAbilities.Agile) &&
-						!enemyCard.Info.Abilities.Contains(CardAbilities.Agile) &&
-						!enemyCard.Info.Abilities.Contains(CardAbilities.Guard));
-
-				playerCard.ZIndex = 10;
-				Vector2 startPosition = playerCard.GlobalPosition;
-				if (isBlocked)
+				attackingCard.ZIndex = 10;
+				Vector2 startPosition = attackingCard.GlobalPosition;
+				if (CombatHelper.IsBlocked(attackingCard?.Info, defendingCard?.Info))
 				{
-					yield return playerCard.LerpGlobalPositionCoroutine(enemyCard.GlobalPosition + new Vector2(0, 50), 0.08f);
-					GD.Print($"Dealt {damage} damage to {enemyCard.Info.Name}!");
+					yield return attackingCard.LerpGlobalPositionCoroutine(defendingCard.GlobalPosition + new Vector2(0, 50), 0.08f);
+					GD.Print($"Dealt {damage} damage to {defendingCard.Info.Name}!");
 
-					AudioStream damageAudio = damage <= 2 ?
-						Constants.Audio.DamageCard_Low :
-						Constants.Audio.DamageCard_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
-
-					if (playerCard.Info.Abilities.Contains(CardAbilities.Poisoned))
-					{
-						enemyCard.DealDamage(enemyCard.Info.Health);
-					}
-					else
-					{
-						enemyCard.DealDamage(damage);
-					}
+					defendingCard.DealDamage(damage);
 				}
 				else
 				{
-					yield return playerCard.LerpGlobalPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.08f);
+					yield return attackingCard.LerpGlobalPositionCoroutine(lane[ENEMY_STAGE_INDEX].GlobalPosition + new Vector2(0, 50), 0.08f);
 					GD.Print($"Dealt {damage} damage to the enemy!");
 
-					AudioStream damageAudio = damage <= 2 ?
-						Constants.Audio.DamagePlayer_Low :
-						Constants.Audio.DamagePlayer_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
-
 					yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
 				}
 
-				yield return playerCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
+				yield return attackingCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
 				yield return new CoroutineDelay(0.234);
-				playerCard.ZIndex = 0;
+				attackingCard.ZIndex = 0;
 			}
 		}
 
