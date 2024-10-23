@@ -340,7 +340,15 @@ public partial class GameBoard : Node2D
 
 					var damageAudio = damage <= 2 ? Constants.Audio.DamagePlayer_Low : Constants.Audio.DamagePlayer_High;
 					AudioManager.Instance.Play(damageAudio, tweak: true);
-					yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
+					
+					if (state == GameState.PlayerCombat)
+					{
+						yield return MainGame.Instance.HealthBar.OpponentTakeDamage(damage);
+					}
+					else
+					{
+						yield return MainGame.Instance.HealthBar.PlayerTakeDamage(damage);
+					}
 				}
 
 				yield return attackingCard.LerpGlobalPositionCoroutine(startPosition, 0.1f);
