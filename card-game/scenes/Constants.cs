@@ -9,6 +9,7 @@ public static class Constants
 	public static readonly string EscEventName = "ui_cancel";
 
 	public static readonly string GameDeckDirectory = "res://cards";
+	public static readonly string GameSettingsDirectory = "res://settings";
 	public static readonly string UserDeckDirectory = "user://cards";
 	public static readonly string UserDataDirectory = "user://data";
 

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -21,8 +22,8 @@ public static class CardGenerator
 {
 	private static readonly int MaxCardAbilities = 2;
 
-	private static readonly string TemplateDeckGeneratorDataPath = "res://settings/data.json";
-	private static readonly string UserDeckGeneratorDataPath = "user://data/data.json";
+	private static readonly string ResourceDeckGeneratorDataPath = Path.Combine(Constants.GameSettingsDirectory, "data.json");
+	private static readonly string UserDeckGeneratorDataPath = Path.Combine(Constants.UserDataDirectory, "data.json");
 
 	public class GeneratorData
 	{
@@ -275,7 +276,10 @@ public static class CardGenerator
 	public static void ResetCardGeneratorSettings()
 	{
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
-		DirAccess.CopyAbsolute(TemplateDeckGeneratorDataPath, UserDeckGeneratorDataPath);
+		// Bug Fix: The string "res://" is resolved as a relative path in a packaged game. So it fails during the CopyAbsolute method.
+		// DirAccess.CopyAbsolute(TemplateDeckGeneratorDataPath, UserDeckGeneratorDataPath);
+		var dir = DirAccess.Open("res://");
+		dir.Copy(ResourceDeckGeneratorDataPath, UserDeckGeneratorDataPath);
 	}
 
 	private static Dictionary<string, NounData> GetNounsForCardLevel(GeneratorData data, CardBloodCost cost)
@@ -305,13 +309,13 @@ public static class CardGenerator
 
 	private static GeneratorData LoadGeneratorData()
 	{
-		if (OS.IsDebugBuild() || !FileAccess.FileExists(UserDeckGeneratorDataPath))
+		if (OS.IsDebugBuild() || !Godot.FileAccess.FileExists(UserDeckGeneratorDataPath))
 		{
 			GD.Print("Copying over data.json...");
 			ResetCardGeneratorSettings();
 		}
 
-		var dataStr = FileAccess.GetFileAsString(UserDeckGeneratorDataPath);
+		var dataStr = Godot.FileAccess.GetFileAsString(UserDeckGeneratorDataPath);
 		var data = JsonSerializer.Deserialize<GeneratorData>(dataStr, new JsonSerializerOptions() { IncludeFields = true });
 		GD.Print($"Loaded Generator Data with {data.Nouns?.Count} nouns and {data.Adjectives?.Count} adjectives.");
 		return data;
