@@ -390,7 +390,7 @@ public partial class GameBoard : Node2D
 
 					AudioManager.Instance.Play(damageAudio, tweak: true);
 
-					if (attackingCard.Info.Abilities.Contains(CardAbilities.Poisoned))
+					if (attackingCard.Info.Abilities.Contains(CardAbilities.Lethal))
 					{
 						defendingCard.DealDamage(defendingCard.Info.Health);
 					}

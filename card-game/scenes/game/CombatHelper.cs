@@ -29,7 +29,7 @@ public static class CombatHelper
         if (attacker == null) return 0;
 
         CardInfo attackerInfo = attacker.Value;
-        if (attackerInfo.Abilities.Contains(CardAbilities.Poisoned) &&
+        if (attackerInfo.Abilities.Contains(CardAbilities.Lethal) &&
             defender != null)
         {
             return defender.Value.Health; // poison removes all health
