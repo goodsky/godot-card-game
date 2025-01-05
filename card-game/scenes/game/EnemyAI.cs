@@ -12,6 +12,8 @@ public class EnemyAI
 
     public int MaxTurn { get; private set; }
 
+    public RandomGenerator SnapshotRandomGenerator => new RandomGenerator(_rnd.Seed, _rnd.N); 
+
     public EnemyAI(CardPool cards, List<ScriptedMove> moves, RandomGenerator rnd)
     {
         _cardPool = cards;

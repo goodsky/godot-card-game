@@ -264,12 +264,13 @@ public partial class GameLobby : Control
 
 			case LobbyState.PlayGame:
 				GameManager.Instance.UpdateProgress(LobbyState.PlayGame, updateSeed: true);
-				StartGame();
+				var (sacrificeDeck, creatureDeck, gameLevel) = InitializeGame();
+				SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, gameLevel);
 				break;
 		}
 	}
 
-	private void StartGame()
+	public static (Deck, Deck, GameLevel) InitializeGame()
 	{
 		GameProgress progress = GameManager.Instance.Progress;
 		RandomGenerator rnd = GameManager.Instance.Random;
@@ -282,7 +283,7 @@ public partial class GameLobby : Control
 		var sacrificeDeck = new Deck(sacrificeCards, rnd);
 		var creatureDeck = new Deck(creatureCards, rnd);
 
-		SceneLoader.Instance.LoadMainGame(sacrificeDeck, creatureDeck, gameLevel);
+		return (sacrificeDeck, creatureDeck, gameLevel);
 	}
 
 	private IEnumerable GenerateCardPoolCoroutine(TimeSpan delay)
@@ -857,22 +858,6 @@ public partial class GameLobby : Control
 	{
 		float y = LinearScalef(x, rate, min, max, x_intercept, y_intercept, random_amount, rnd);
 		return Math.Clamp(Mathf.RoundToInt(y + 1e-6f), min, max);
-	}
-
-	public static T PickOptionZzz<T>(float[] probabilities, T[] values, RandomGenerator rnd)
-	{
-		float value = rnd.Nextf(0f, 1f);
-		float sum = 0f;
-		for (int i = 0; i < probabilities.Length; i++)
-		{
-			sum += probabilities[i];
-			if (value < sum)
-			{
-				return values[i];
-			}
-		}
-		GD.PushError($"Failed to PickOption - probabilities didn't cover 100%! {value:0.000}; {string.Join(",", probabilities)}");
-		return values[0];
 	}
 }
 
