@@ -53,9 +53,13 @@ layout_mode = 2
 layout_mode = 2
 text = "Game Simulator"
 
-[node name="Button" type="Button" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
+[node name="SimulateSaveButton" type="Button" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
 layout_mode = 2
 text = "Simulate Save File"
+
+[node name="UnitTestsButton" type="Button" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
+layout_mode = 2
+text = "Run Tests"
 
 [node name="SimulatorResultsLabel" type="Label" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
 layout_mode = 2
@@ -171,7 +175,8 @@ text = "Back to Menu"
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
-[connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/Button" to="." method="Click_SimulateSaveFile"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/SimulateSaveButton" to="." method="Click_SimulateSaveFile"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/UnitTestsButton" to="." method="Click_GameSimulatorTests"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/GenerateCardsButton" to="." method="Click_GenerateCardPool"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/AnalyzeCardsButton" to="." method="Click_AnalyzeCardPool"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/SerializationButton" to="." method="Click_SerializationTest"]

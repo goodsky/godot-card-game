@@ -48,6 +48,14 @@ public partial class TestBench : Node2D
 		resultsLabel.Text = $"Simulation completed in {analysisTime}ms";
 	}
 
+	public void Click_GameSimulatorTests()
+	{
+		var resultsLabel = FindChild("SimulatorResultsLabel") as Label;
+
+		bool allPass = GameSimulatorTests.Go();
+		resultsLabel.Text = $"{(allPass ? "All tests passed!" : "TEST FAILURES")}";
+	}
+
 	public void Click_GenerateCardPool()
 	{
 		var cardPool = CardGenerator.GenerateRandomCardPool("TestBench Card Pool");

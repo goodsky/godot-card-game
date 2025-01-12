@@ -469,7 +469,7 @@ public static class SingleRoundCombatSimulator
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
     }
 
-    protected struct LaneCombatAnalysis
+    internal struct LaneCombatAnalysis
     {
         public int PlayerDamageReceived { get; set; }
         public int PlayerCardDamageReceived { get; set; }
@@ -477,7 +477,7 @@ public static class SingleRoundCombatSimulator
         public int EnemyCardDamageReceived { get; set; }
     }
 
-    private static LaneCombatAnalysis AnalyzeLaneCombat(
+    internal static LaneCombatAnalysis AnalyzeLaneCombat(
         SimulatorCard playerCard,
         SimulatorCard enemyCard,
         SimulatorCard stagedCard,
