@@ -77,13 +77,8 @@ public static class SingleRoundCombatSimulator
                 state.IsPlayerMove = !state.IsPlayerMove;
                 state.Logger.Log("");
             }
-        }
-        finally
-        {
-            state.Logger.Dispose();
-        }
 
-        var roundResult = new SimulatorRoundResult
+            var roundResult = new SimulatorRoundResult
         {
             Turns = state.Turn,
             IsStalemate = state.Turn > 100,
@@ -98,6 +93,11 @@ public static class SingleRoundCombatSimulator
         {
             Rounds = new List<SimulatorRoundResult> { roundResult },
         };
+        }
+        finally
+        {
+            state.Logger.Dispose();
+        }
     }
 
     private static SimulatorState InitializeSimulationState(SimulatorArgs args)
@@ -645,8 +645,13 @@ internal class SimulatorLanes
     {
         for (int col = 0; col < COL_COUNT; col++)
         {
-            _lanes[col, ENEMY_LANE_ROW] = _lanes[col, ENEMY_STAGE_LANE_ROW];
-            _lanes[col, ENEMY_STAGE_LANE_ROW] = null;
+            var stagedCard = _lanes[col, ENEMY_STAGE_LANE_ROW];
+            var activeCard = _lanes[col, ENEMY_LANE_ROW];
+            if (activeCard == null && stagedCard != null)
+            {
+                _lanes[col, ENEMY_LANE_ROW] = stagedCard;
+                _lanes[col, ENEMY_STAGE_LANE_ROW] = null;
+            }
         }
     }
 }
