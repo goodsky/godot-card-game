@@ -6,6 +6,7 @@ using Godot;
 
 public class SimulatorArgs
 {
+    public bool EnableLogging { get; set; }
     public int StartingHandSize { get; set; }
     public List<CardInfo> CreaturesDeck { get; set; }
     public List<CardInfo> SacrificesDeck { get; set; }
@@ -26,9 +27,9 @@ public class SimulatorResult
     public List<SimulatorRoundResult> Rounds { get; set; }
 }
 
-public static class SingleRoundCombatSimulator
+public abstract class GameSimulatorBase
 {
-    private class SimulatorState
+    protected class SimulatorState
     {
         public int Turn { get; set; }
         public bool IsPlayerMove { get; set; }
@@ -41,65 +42,26 @@ public static class SingleRoundCombatSimulator
         public EnemyAI AI { get; set; }
         public SimulationLogger Logger { get; set; }
         public List<SimulatorRoundResult> Results { get; set; }
-    }
 
-    private class TurnState
-    {
-        public PlayerTurnAction BestAction { get; set; }
-    }
-
-    public static SimulatorResult Simulate(SimulatorArgs args)
-    {
-        var state = InitializeSimulationState(args);
-
-        try {
-            while (!IsGameOver(state))
+        public SimulatorState Clone()
+        {
+            return new SimulatorState
             {
-                if (state.IsPlayerMove)
-                {
-                    state.Logger.LogHeader($"TURN {state.Turn}");
-                    state.Logger.LogHeader(">> PLAYER TURN <<");
-                    state.Logger.LogHand(state.Hand);
-                    state.Logger.LogDeck(state.Creatures, "Creatures");
-                    state.Logger.LogDeck(state.Sacrifices, "Sacrifices");
-                    state.Logger.LogLanes(state.Lanes);
-
-                    SimulatePlayerTurn(state);
-                }
-                else
-                {
-                    state.Logger.LogHeader(">> AI TURN <<");
-                    SimulateEnemyTurn(state);
-
-                    state.Turn++;
-                }
-
-                state.IsPlayerMove = !state.IsPlayerMove;
-                state.Logger.Log("");
-            }
-
-            var roundResult = new SimulatorRoundResult
-        {
-            Turns = state.Turn,
-            IsStalemate = state.Turn > 100,
-            PlayerWon = state.PlayerDamageReceived < state.EnemyDamageReceived,
-            PlayerDamage = state.PlayerDamageReceived,
-            EnemyDamage = state.EnemyDamageReceived,
-        };
-
-        state.Logger.LogRoundResult(roundResult);
-
-        return new SimulatorResult
-        {
-            Rounds = new List<SimulatorRoundResult> { roundResult },
-        };
-        }
-        finally
-        {
-            state.Logger.Dispose();
+                Turn = Turn,
+                IsPlayerMove = IsPlayerMove,
+                PlayerDamageReceived = PlayerDamageReceived,
+                EnemyDamageReceived = EnemyDamageReceived,
+                Hand = new List<SimulatorCard>(Hand),
+                Lanes = Lanes.Clone(),
+                Creatures = Creatures.Clone(),
+                Sacrifices = Sacrifices.Clone(),
+                AI = AI.Clone(),
+                Logger = Logger,
+                Results = Results,
+            };
         }
     }
-
+    
     private static SimulatorState InitializeSimulationState(SimulatorArgs args)
     {
         var state = new SimulatorState
@@ -113,7 +75,7 @@ public static class SingleRoundCombatSimulator
             Creatures = new SimulatorDeck(args.CreaturesDeck),
             Sacrifices = new SimulatorDeck(args.SacrificesDeck),
             AI = args.AI,
-            Logger = new SimulationLogger(),
+            Logger = new SimulationLogger(args.EnableLogging),
             Results = new List<SimulatorRoundResult>(),
         };
 
@@ -136,28 +98,6 @@ public static class SingleRoundCombatSimulator
         int netDamage = state.EnemyDamageReceived - state.PlayerDamageReceived;
         state.Logger.Log($"[CHECK IF GAME OVER] Net Damage={netDamage} [EnemyReceived: {state.EnemyDamageReceived} / PlayerReceived: {state.PlayerDamageReceived}]\n");
         return Math.Abs(netDamage) >= 5 || state.Turn > 100;
-    }
-
-    private static void SimulatePlayerTurn(SimulatorState state)
-    {
-        PlayerTurnAction action = GetBestPlayerAction(state);
-        ResolveAction(state, action);
-        ResolveCombat(state, isPlayerTurn: true);
-    }
-
-    private static void SimulateEnemyTurn(SimulatorState state)
-    {
-        state.Lanes.PromoteStagedCards();
-
-        bool[] stageLaneOccupied = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_STAGE_LANE_ROW).Select(c => c != null).ToArray();
-        List<PlayedCard> enemyMoves = state.AI.GetMovesForTurn(state.Turn, stageLaneOccupied);
-        foreach (var playedCard in enemyMoves)
-        {
-            state.Logger.Log($"Enemy plays {playedCard.Card.Name} in lane {playedCard.Lane}");
-            state.Lanes.PlayCard(new SimulatorCard(playedCard.Card), playedCard.Lane, isEnemy: true);
-        }
-
-        ResolveCombat(state, isPlayerTurn: false);
     }
 
     private static void ResolveCombat(SimulatorState state, bool isPlayerTurn)
@@ -232,214 +172,6 @@ public static class SingleRoundCombatSimulator
         }
     }
 
-    private static PlayerTurnAction GetBestPlayerAction(SimulatorState state)
-    {
-        var turnState = new TurnState();
-        CalculateBestPlayerActionsDrawCreature(turnState, state);
-        CalculateBestPlayerActionsDrawSacrifice(turnState, state);
-
-        if (turnState.BestAction == null || turnState.BestAction.HeuristicScore <= 0)
-        {
-            state.Logger.Log($"No best action found! No available moves or all actions have negative heuristic. Let's just draw a card.");
-            DrawAction drawAction = DrawAction.NoDraw;
-            if (state.Creatures.RemainingCardCount > 0)
-            {
-                drawAction = DrawAction.DrawFromCreatures;
-            }
-            else if (state.Sacrifices.RemainingCardCount > 0)
-            {
-                drawAction = DrawAction.DrawFromSacrifices;
-            }
-
-            turnState.BestAction = new PlayerTurnAction() { DrawAction = drawAction, CardActions = new PlayCardAction[0] };
-        }
-
-        state.Logger.LogHeader("BEST ACTION");
-        state.Logger.LogAction(turnState.BestAction);
-        return turnState.BestAction;
-    }
-
-    private static void CalculateBestPlayerActionsDrawCreature(TurnState turnState, SimulatorState state)
-    {
-        if (state.Creatures.RemainingCardCount == 0)
-        {
-            state.Logger.Log("Creatures deck is empty! - Skipping player actions for drawing creatures");
-            return;
-        }
-
-        var newCreature = state.Creatures.PeekTop();
-        var newHand = state.Hand.Append(newCreature).ToList();
-
-        state.Logger.LogHeader("[Calculate Action] DRAW CREATURE");
-        CalculateBestPlayerActions(turnState, DrawAction.DrawFromCreatures, newHand, state.Lanes, state.Logger);
-    }
-
-    private static void CalculateBestPlayerActionsDrawSacrifice(TurnState turnState, SimulatorState state)
-    {
-        if (state.Sacrifices.RemainingCardCount == 0)
-        {
-            state.Logger.Log("Sacrifices deck is empty! - Skipping player actions for drawing sacrifices");
-            return;
-        }
-
-        var newSacrifice = state.Sacrifices.PeekTop();
-        var newHand = state.Hand.Append(newSacrifice).ToList();
-
-        state.Logger.LogHeader("[Calculate Action] DRAW SACRIFICE");
-        CalculateBestPlayerActions(turnState, DrawAction.DrawFromSacrifices, newHand, state.Lanes, state.Logger);
-    }
-
-    private static void CalculateBestPlayerActions(
-        TurnState turnState,
-        DrawAction action,
-        List<SimulatorCard> hand,
-        SimulatorLanes lanes,
-        SimulationLogger logger)
-    {
-        List<SimulatorCard> sacrificesOnBoard = GetAvailableSacrifices(lanes, sort: true);
-        List<SimulatorCard> sacrificesInHand = hand.Where(card => card.Card.Rarity == CardRarity.Sacrifice).ToList();
-        List<SimulatorCard> creaturesInHand = hand.Where(card => card.Card.Rarity != CardRarity.Sacrifice).ToList();
-        int openLanes = SimulatorLanes.COL_COUNT - sacrificesOnBoard.Count;
-
-        foreach (SimulatorCard creatureInHand in creaturesInHand)
-        {
-            logger.Log($"+++ Checking if we can play {creatureInHand.Card.Name} [{creatureInHand.Card.Attack}/{creatureInHand.Card.Health}]");
-            int neededSacrificeCards = (int)creatureInHand.Card.BloodCost;
-
-            List<SimulatorCard> sacrifices = new List<SimulatorCard>();
-
-            int possibleSacrificesFromHand = Math.Min(sacrificesInHand.Count, openLanes);
-            int neededSacrificesFromHand = Math.Min(neededSacrificeCards, possibleSacrificesFromHand);
-            sacrifices.AddRange(sacrificesInHand.Take(neededSacrificesFromHand));
-
-            int neededSacrificesFromBoard = neededSacrificeCards - sacrifices.Count;
-            sacrifices.AddRange(sacrificesOnBoard.Take(neededSacrificesFromBoard));
-
-            if (sacrifices.Count != neededSacrificeCards)
-            {
-                logger.Log($"   Could not play {creatureInHand.Card.Name} - found {sacrifices.Count} sacrifices, needed {neededSacrificeCards}");
-                continue;
-            }
-
-            int opportunityCostOfSacrifices = sacrifices.Sum(sacrifice => OpportunityCostOfSacrifice(sacrifice, lanes));
-            for (int laneColumn = 0; laneColumn < SimulatorLanes.COL_COUNT; laneColumn++)
-            {
-                SimulatorCard existingCard = lanes.GetCardAt(SimulatorLanes.PLAYER_LANE_ROW, laneColumn);
-                if (existingCard != null && !sacrifices.Contains(existingCard))
-                {
-                    logger.Log($"   Not playing {creatureInHand.Card.Name} in lane {laneColumn} - occupied by {existingCard.Card.Name}");
-                    continue;
-                }
-
-                int opportunityScore = OpportunityScoreOfPlayingCard(creatureInHand, laneColumn, lanes);
-                int actionHeuristicScore = opportunityScore - opportunityCostOfSacrifices;
-
-                logger.Log($"   >>> {creatureInHand.Card.Name} in lane {laneColumn} : Heuristic = {actionHeuristicScore} (opportunity score {opportunityScore} - opportunity cost {opportunityCostOfSacrifices}) [{string.Join(", ", sacrifices.Select(card => card.Card.Name))}]");
-                if (turnState.BestAction == null || actionHeuristicScore > turnState.BestAction.HeuristicScore)
-                {
-                    turnState.BestAction = new PlayerTurnAction
-                    {
-                        DrawAction = action,
-                        CardActions = new PlayCardAction[]
-                        {
-                            new PlayCardAction
-                            {
-                                PlayedCard = creatureInHand,
-                                LaneColumnIndex = laneColumn,
-                                SacrificeCards = sacrifices,
-                            }
-                        },
-                        HeuristicScore = actionHeuristicScore,
-                    };
-                }
-            }
-        }
-    }
-
-    private static List<SimulatorCard> GetAvailableSacrifices(SimulatorLanes lanes, bool sort)
-    {
-        var availableSacrifices = lanes.GetRowCards(SimulatorLanes.PLAYER_LANE_ROW).Where(c => c != null).ToList();
-
-        if (sort)
-        {
-            availableSacrifices.Sort(SacrificeCardComparerFactory(lanes));
-        }
-        
-        return availableSacrifices;
-    }
-
-    /** Sort cards by how willing we are to sacrifice them */
-    private static IComparer<SimulatorCard> SacrificeCardComparerFactory(SimulatorLanes lanes)
-    {
-        Dictionary<SimulatorCard, int> opportunityCosts = new Dictionary<SimulatorCard, int>();
-        return Comparer<SimulatorCard>.Create((cardA, cardB) =>
-        {
-            if (!opportunityCosts.TryGetValue(cardA, out int opportunityCostA))
-            {
-                opportunityCosts[cardA] = OpportunityCostOfSacrifice(cardA, lanes);
-            }
-
-            if (!opportunityCosts.TryGetValue(cardB, out int opportunityCostB))
-            {
-                opportunityCosts[cardB] = OpportunityCostOfSacrifice(cardB,  lanes);
-            }
-
-            return opportunityCostA - opportunityCostB;
-        });
-    }
-
-    /** Arbitrary score to represent the opportunity cost of sacrificing a card
-        0 basically means the card is useless (0 attack on a lane taking no damage)
-        Numbers are higher if the card is dealing damage or preventing damage */
-    private static int OpportunityCostOfSacrifice(SimulatorCard card, SimulatorLanes lanes)
-    {
-        var lane = lanes.GetLaneCards(card);
-        if (lane == null)
-        {
-            // A card that isn't on the board yet has no opportunity cost (it may be in hand)
-            return 0;
-        }
-
-        LaneCombatAnalysis statusQuoAnalysis = AnalyzeLaneCombat(
-            playerCard: lane[SimulatorLanes.PLAYER_LANE_ROW],
-            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
-            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW]
-        );
-
-        LaneCombatAnalysis sacrificeCardAnalysis = AnalyzeLaneCombat(
-            playerCard: null,
-            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
-            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW]
-        );
-
-        int damagePreventing = sacrificeCardAnalysis.PlayerDamageReceived - statusQuoAnalysis.PlayerDamageReceived;
-        int damageDealing = statusQuoAnalysis.EnemyDamageReceived - sacrificeCardAnalysis.EnemyDamageReceived;
-
-        return damagePreventing + damageDealing;
-    }
-
-    private static int OpportunityScoreOfPlayingCard(SimulatorCard card, int laneIdx, SimulatorLanes lanes)
-    {
-        var lane = lanes.GetLaneCards(laneIdx);
-        // NB: this assumes that we have sacrificed any card that is already in the lane.
-        LaneCombatAnalysis withoutCardAnalysis = AnalyzeLaneCombat(
-            playerCard: null,
-            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
-            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW]
-        );
-
-        LaneCombatAnalysis playingCardAnalysis = AnalyzeLaneCombat(
-            playerCard: card,
-            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
-            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW]
-        );
-
-        int damagePreventing = withoutCardAnalysis.PlayerDamageReceived - playingCardAnalysis.PlayerDamageReceived;
-        int damageDealing = playingCardAnalysis.EnemyDamageReceived - withoutCardAnalysis.EnemyDamageReceived;
-
-        return damagePreventing + damageDealing;
-    }
-
     private static void PlayCardFromHand(SimulatorState state, SimulatorCard card, int laneCol, IEnumerable<SimulatorCard> sacrifices)
     {
         // Clear sacrifices
@@ -467,6 +199,285 @@ public static class SingleRoundCombatSimulator
 
         // Play the card in the lane
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
+    }
+
+    /** Game Simulator entry point */
+    public SimulatorResult Simulate(SimulatorArgs args)
+    {
+        SimulatorState initialState = InitializeSimulationState(args);
+        SimulationLogger logger = initialState.Logger;
+
+        try {
+            var stateQueue = new Queue<SimulatorState>();
+            var roundResults = new List<SimulatorRoundResult>();
+            var enqueueStateIfNotGameOver = (SimulatorState state) =>
+            {
+                if (IsGameOver(state))
+                {
+                    var roundResult = new SimulatorRoundResult
+                    {
+                        Turns = state.Turn,
+                        IsStalemate = state.Turn > 100,
+                        PlayerWon = state.PlayerDamageReceived < state.EnemyDamageReceived,
+                        PlayerDamage = state.PlayerDamageReceived,
+                        EnemyDamage = state.EnemyDamageReceived,
+                    };
+
+                    logger.LogRoundResult(roundResult);
+                    roundResults.Add(roundResult);
+                }
+                else
+                {
+                    stateQueue.Enqueue(state);
+                }
+            };
+
+            stateQueue.Enqueue(initialState);
+            while (stateQueue.Count > 0)
+            {
+                SimulatorState state = stateQueue.Dequeue();
+                if (state.IsPlayerMove)
+                {
+                    state.Logger.LogHeader($"TURN {state.Turn}");
+                    state.Logger.LogHeader(">> PLAYER TURN <<");
+                    state.Logger.LogHand(state.Hand);
+                    state.Logger.LogDeck(state.Creatures, "Creatures");
+                    state.Logger.LogDeck(state.Sacrifices, "Sacrifices");
+                    state.Logger.LogLanes(state.Lanes);
+
+                    IEnumerable<SimulatorState> playerNextStates = StepPlayerTurnState(state);
+                    foreach (var nextState in playerNextStates)
+                    {
+                        enqueueStateIfNotGameOver(nextState);
+                    }
+                }
+                else
+                {
+                    state.Logger.LogHeader(">> AI TURN <<");
+                    SimulatorState enemyNextState = StepEnemyTurnState(state);
+                    enqueueStateIfNotGameOver(enemyNextState);
+                }
+            }
+            
+            logger.Log($"Completed simulation with {roundResults.Count} rounds.");
+            return new SimulatorResult
+            {
+                Rounds = roundResults,
+            };
+        }
+        finally
+        {
+            logger.Dispose();
+        }
+    }
+
+    protected abstract IEnumerable<PlayerTurnAction> GetPlayerActions(SimulatorState state);
+
+    private IEnumerable<SimulatorState> StepPlayerTurnState(SimulatorState state)
+    {
+        IEnumerable<PlayerTurnAction> actions = GetPlayerActions(state);
+        foreach (var action in actions)
+        {
+            SimulatorState nextState = state.Clone();
+            ResolveAction(nextState, action);
+            ResolveCombat(nextState, isPlayerTurn: true);
+            nextState.IsPlayerMove = false;
+            yield return nextState;
+        }
+    }
+
+    private SimulatorState StepEnemyTurnState(SimulatorState state)
+    {
+        state.Lanes.PromoteStagedCards();
+
+        bool[] stageLaneOccupied = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_STAGE_LANE_ROW).Select(c => c != null).ToArray();
+        List<PlayedCard> enemyMoves = state.AI.GetMovesForTurn(state.Turn, stageLaneOccupied);
+        foreach (var playedCard in enemyMoves)
+        {
+            state.Logger.Log($"Enemy plays {playedCard.Card.Name} in lane {playedCard.Lane}");
+            state.Lanes.PlayCard(new SimulatorCard(playedCard.Card), playedCard.Lane, isEnemy: true);
+        }
+
+        ResolveCombat(state, isPlayerTurn: false);
+        state.Turn++;
+        state.IsPlayerMove = true;
+        return state; // NB: not cloning here since we should not be forking the state
+    }
+
+    protected static IEnumerable<PlayerTurnAction> CalculateBestPlayerActions(
+        DrawAction action,
+        List<SimulatorCard> hand,
+        SimulatorLanes lanes,
+        SimulationLogger logger,
+        int maxActions = 1,
+        bool maxOneActionPerCard = true)
+    {
+        List<SimulatorCard> sacrificesOnBoard = GetAvailableSacrifices(lanes, sort: true);
+        List<SimulatorCard> sacrificesInHand = hand.Where(card => card.Card.BloodCost == CardBloodCost.Zero).ToList();
+        List<SimulatorCard> creaturesInHand = hand.Where(card => card.Card.BloodCost != CardBloodCost.Zero).ToList();
+        int openLanes = SimulatorLanes.COL_COUNT - sacrificesOnBoard.Count;
+
+        var bestActions = new List<PlayerTurnAction>();
+        foreach (SimulatorCard creatureInHand in creaturesInHand)
+        {
+            logger.Log($"+++ Checking if we can play {creatureInHand.Card.Name} [{creatureInHand.Card.Attack}/{creatureInHand.Card.Health}]");
+            int neededSacrificeCards = (int)creatureInHand.Card.BloodCost;
+
+            List<SimulatorCard> sacrifices = new List<SimulatorCard>();
+
+            int possibleSacrificesFromHand = Math.Min(sacrificesInHand.Count, openLanes);
+            int neededSacrificesFromHand = Math.Min(neededSacrificeCards, possibleSacrificesFromHand);
+            sacrifices.AddRange(sacrificesInHand.Take(neededSacrificesFromHand));
+
+            int neededSacrificesFromBoard = neededSacrificeCards - sacrifices.Count;
+            sacrifices.AddRange(sacrificesOnBoard.Take(neededSacrificesFromBoard));
+
+            if (sacrifices.Count != neededSacrificeCards)
+            {
+                logger.Log($"   Could not play {creatureInHand.Card.Name} - found {sacrifices.Count} sacrifices, needed {neededSacrificeCards}");
+                continue;
+            }
+
+            int opportunityCostOfSacrifices = sacrifices.Sum(sacrifice => OpportunityCostOfSacrifice(sacrifice, lanes));
+            PlayerTurnAction bestActionForCard = null;
+            for (int laneColumn = 0; laneColumn < SimulatorLanes.COL_COUNT; laneColumn++)
+            {
+                SimulatorCard existingCard = lanes.GetCardAt(SimulatorLanes.PLAYER_LANE_ROW, laneColumn);
+                if (existingCard != null && !sacrifices.Contains(existingCard))
+                {
+                    logger.Log($"   Not playing {creatureInHand.Card.Name} in lane {laneColumn} - occupied by {existingCard.Card.Name}");
+                    continue;
+                }
+
+                int opportunityScore = OpportunityScoreOfPlayingCard(creatureInHand, laneColumn, lanes);
+                int actionHeuristicScore = opportunityScore - opportunityCostOfSacrifices;
+
+                logger.Log($"   >>> {creatureInHand.Card.Name} in lane {laneColumn} : Heuristic = {actionHeuristicScore} (opportunity score {opportunityScore} - opportunity cost {opportunityCostOfSacrifices}) [{string.Join(", ", sacrifices.Select(card => card.Card.Name))}]");
+                var actionForCard = new PlayerTurnAction
+                {
+                    DrawAction = action,
+                    CardActions = new PlayCardAction[]
+                    {
+                        new PlayCardAction
+                        {
+                            PlayedCard = creatureInHand,
+                            LaneColumnIndex = laneColumn,
+                            SacrificeCards = sacrifices,
+                        }
+                    },
+                    HeuristicScore = actionHeuristicScore,
+                };
+
+                if (maxOneActionPerCard)
+                {
+                    if (bestActionForCard == null || actionForCard.HeuristicScore > bestActionForCard.HeuristicScore)
+                    {
+                        bestActionForCard = actionForCard;
+                    }
+                }
+                else
+                {
+                    PlayerTurnAction.AddIfInTopN(bestActions, maxActions, actionForCard);
+                }
+            }
+
+            if (maxOneActionPerCard && bestActionForCard != null)
+            {
+                PlayerTurnAction.AddIfInTopN(bestActions, maxActions, bestActionForCard);
+            }
+        }
+
+        return bestActions;
+    }
+
+    /** Get available sacrifices from the board, sorted by how willing we are to sacrifice them */
+    protected static List<SimulatorCard> GetAvailableSacrifices(SimulatorLanes lanes, bool sort = true)
+    {
+        var availableSacrifices = lanes.GetRowCards(SimulatorLanes.PLAYER_LANE_ROW).Where(c => c != null).ToList();
+
+        if (sort)
+        {
+            availableSacrifices.Sort(SacrificeCardComparerFactory(lanes));
+        }
+        
+        return availableSacrifices;
+    }
+
+    /** Sort cards by how willing we are to sacrifice them */
+    protected static IComparer<SimulatorCard> SacrificeCardComparerFactory(SimulatorLanes lanes)
+    {
+        Dictionary<SimulatorCard, int> opportunityCosts = new Dictionary<SimulatorCard, int>();
+        return Comparer<SimulatorCard>.Create((cardA, cardB) =>
+        {
+            if (!opportunityCosts.TryGetValue(cardA, out int opportunityCostA))
+            {
+                opportunityCosts[cardA] = OpportunityCostOfSacrifice(cardA, lanes);
+            }
+
+            if (!opportunityCosts.TryGetValue(cardB, out int opportunityCostB))
+            {
+                opportunityCosts[cardB] = OpportunityCostOfSacrifice(cardB,  lanes);
+            }
+
+            return opportunityCostA - opportunityCostB;
+        });
+    }
+
+    /** Heuristic score to represent the opportunity cost of sacrificing a card
+        Calculated as # damage preventing + damage dealing over the next N turns */
+    protected static int OpportunityCostOfSacrifice(SimulatorCard card, SimulatorLanes lanes, int turnCount = 3)
+    {
+        var lane = lanes.GetLaneCards(card);
+        if (lane == null)
+        {
+            // A card that isn't on the board yet has no opportunity cost (it may be in hand)
+            return 0;
+        }
+
+        LaneCombatAnalysis statusQuoAnalysis = AnalyzeLaneCombat(
+            playerCard: lane[SimulatorLanes.PLAYER_LANE_ROW],
+            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
+            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW],
+            turnCount: turnCount
+        );
+
+        LaneCombatAnalysis sacrificeCardAnalysis = AnalyzeLaneCombat(
+            playerCard: null,
+            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
+            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW],
+            turnCount: turnCount
+        );
+
+        int damagePreventing = sacrificeCardAnalysis.PlayerDamageReceived - statusQuoAnalysis.PlayerDamageReceived;
+        int damageDealing = statusQuoAnalysis.EnemyDamageReceived - sacrificeCardAnalysis.EnemyDamageReceived;
+
+        return damagePreventing + damageDealing;
+    }
+
+    /** Heuristic score to represent the opportunity of playing a card in a lane
+        Calculated as # damage preventing + damage dealing over the next N turns */
+    protected static int OpportunityScoreOfPlayingCard(SimulatorCard card, int laneIdx, SimulatorLanes lanes, int turnCount = 3)
+    {
+        var lane = lanes.GetLaneCards(laneIdx);
+        // NB: this assumes that we have sacrificed any card that is already in the lane.
+        LaneCombatAnalysis withoutCardAnalysis = AnalyzeLaneCombat(
+            playerCard: null,
+            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
+            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW],
+            turnCount: turnCount
+        );
+
+        LaneCombatAnalysis playingCardAnalysis = AnalyzeLaneCombat(
+            playerCard: card,
+            enemyCard: lane[SimulatorLanes.ENEMY_LANE_ROW],
+            stagedCard: lane[SimulatorLanes.ENEMY_STAGE_LANE_ROW],
+            turnCount: turnCount
+        );
+
+        int damagePreventing = withoutCardAnalysis.PlayerDamageReceived - playingCardAnalysis.PlayerDamageReceived;
+        int damageDealing = playingCardAnalysis.EnemyDamageReceived - withoutCardAnalysis.EnemyDamageReceived;
+
+        return damagePreventing + damageDealing;
     }
 
     internal struct LaneCombatAnalysis
@@ -558,7 +569,7 @@ public static class SingleRoundCombatSimulator
     }
 }
 
-internal class SimulatorLanes
+public class SimulatorLanes
 {
     public static readonly int COL_COUNT = 4;
     public static readonly int ROW_COUNT = 3;
@@ -571,6 +582,20 @@ internal class SimulatorLanes
     public SimulatorLanes()
     {
         _lanes = new SimulatorCard[COL_COUNT, ROW_COUNT];
+    }
+
+    public SimulatorLanes Clone()
+    {
+        var clone = new SimulatorLanes();
+        for (int col = 0; col < COL_COUNT; col++)
+        {
+            for (int row = 0; row < ROW_COUNT; row++)
+            {
+                clone._lanes[col, row] = _lanes[col, row] != null ? new SimulatorCard(_lanes[col, row]) : null;
+            }
+        }
+
+        return clone;
     }
 
     public SimulatorCard GetCardAt(int row, int col)
@@ -656,7 +681,7 @@ internal class SimulatorLanes
     }
 }
 
-internal class SimulatorDeck
+public class SimulatorDeck
 {
     private List<SimulatorCard> _deck;
     private int _drawnCardsCount;
@@ -669,6 +694,12 @@ internal class SimulatorDeck
         _drawnCardsCount = 0;
     }
 
+    public SimulatorDeck Clone()
+    {
+        var clone = new SimulatorDeck(_deck.Select(card => card.Card).ToList());
+        clone._drawnCardsCount = _drawnCardsCount;
+        return clone;
+    }
     public SimulatorCard DrawFromTop()
     {
         return _deck[_deck.Count - 1 - _drawnCardsCount++];
@@ -678,10 +709,13 @@ internal class SimulatorDeck
     {
         return _deck[_deck.Count - 1 - _drawnCardsCount];
     }
+
+    public List<CardInfo> Cards => _deck.Select(card => card.Card).ToList();
 }
 
-internal class SimulatorCard
+public class SimulatorCard
 {
+    // TODO: Consider using an ID for the card for better comparison and selection between action and state
     public CardInfo Card { get; set; }
     public int DamageReceived { get; set; }
 
@@ -698,42 +732,81 @@ internal class SimulatorCard
     }
 }
 
-internal class PlayerTurnAction
+public class PlayerTurnAction
 {
     public DrawAction DrawAction { get; set; }
     public PlayCardAction[] CardActions { get; set; }
     // Heuristic score of this action - higher is better
     public int? HeuristicScore { get; set; }
+
+    public static List<PlayerTurnAction> TakeTop(int count, int minValue, params IEnumerable<PlayerTurnAction>[] actionParams)
+    {
+        var top = new List<PlayerTurnAction>(count);
+        foreach (IEnumerable<PlayerTurnAction> actions in actionParams)
+        {
+            foreach (PlayerTurnAction action in actions)
+            {
+                if (action.HeuristicScore > minValue)
+                {
+                    AddIfInTopN(top, count, action);
+                }
+            }
+        }
+
+        return top;
+    }
+
+    public static void AddIfInTopN(List<PlayerTurnAction> top, int n, PlayerTurnAction action)
+    {
+        if (top.Count < n)
+        {
+            top.Add(action);
+        }
+        else if (action.HeuristicScore > top[n - 1].HeuristicScore)
+        {
+            top[n - 1] = action;
+            for (int i = top.Count - 1; i > 0; i--)
+            {
+                if (top[i - 1].HeuristicScore < top[i].HeuristicScore)
+                {
+                    (top[i - 1], top[i]) = (top[i], top[i - 1]);
+                }
+            }
+        }
+    }
 }
 
-internal enum DrawAction
+public enum DrawAction
 {
     NoDraw,
     DrawFromCreatures,
     DrawFromSacrifices,
 }
 
-internal class PlayCardAction
+public class PlayCardAction
 {
     public SimulatorCard PlayedCard { get; set; }
     public int LaneColumnIndex { get; set; }
     public List<SimulatorCard> SacrificeCards { get; set; }
 }
 
-internal class SimulationLogger : IDisposable
+public class SimulationLogger : IDisposable
 {
     private FileAccess _file;
     private const string FILENAME = "simulation.log";
 
-    public SimulationLogger()
+    public SimulationLogger(bool enableLogging = true)
     {
-        DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
-        _file = FileAccess.Open($"{Constants.UserDataDirectory}/{FILENAME}", FileAccess.ModeFlags.Write);
+        if (enableLogging)
+        {
+            DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+            _file = FileAccess.Open($"{Constants.UserDataDirectory}/{FILENAME}", FileAccess.ModeFlags.Write);
+        }
     }
 
     public void Log(string line)
     {
-        _file.StoreLine(line);
+        _file?.StoreLine(line);
     }
 
     public void LogHeader(string header)
@@ -826,6 +899,6 @@ internal class SimulationLogger : IDisposable
 
     public void Dispose()
     {
-        _file.Close();
+        _file?.Close();
     }
 }

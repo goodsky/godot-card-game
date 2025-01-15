@@ -23,6 +23,12 @@ public class EnemyAI
         Initialize();
     }
 
+    /** Used by simulation to clone a snapshot of the AI */
+    public EnemyAI Clone()
+    {
+        return new EnemyAI(_cardPool, _moves.Select(move => new ScriptedMove(move)).ToList(), SnapshotRandomGenerator);
+    }
+
     public void Initialize()
     {
         for (int i = 0; i < _moves.Count; i++)
@@ -146,6 +152,16 @@ public class ScriptedMove
         CardCostToPlay = cost;
         CardRarityToPlay = rarity;
         Lane = lane;
+    }
+
+    public ScriptedMove(ScriptedMove o)
+    {
+        Resolved = o.Resolved;
+        Turn = o.Turn;
+        Lane = o.Lane;
+        CardToPlay = o.CardToPlay;
+        CardCostToPlay = o.CardCostToPlay;
+        CardRarityToPlay = o.CardRarityToPlay;
     }
 }
 

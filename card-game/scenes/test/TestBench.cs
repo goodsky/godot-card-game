@@ -1,7 +1,6 @@
 using Godot;
 using System;
 using System.Collections;
-using System.Data.Common;
 
 public partial class TestBench : Node2D
 {
@@ -26,6 +25,7 @@ public partial class TestBench : Node2D
 
 		SimulatorArgs args = new SimulatorArgs
 		{
+			EnableLogging = true,
 			StartingHandSize = progress.HandSize,
 			SacrificesDeck = sacrificeDeck.Cards,
 			CreaturesDeck = creatureDeck.Cards,
@@ -35,7 +35,7 @@ public partial class TestBench : Node2D
 		var startTime = DateTime.Now;
 		try
 		{
-			SingleRoundCombatSimulator.Simulate(args);
+			new GreedyHeuristicGameSimulator().Simulate(args);
 		}
 		catch (Exception e)
 		{
