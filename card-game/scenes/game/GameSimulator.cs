@@ -16,10 +16,17 @@ public class SimulatorArgs
 public struct SimulatorRoundResult
 {
     public int Turns { get; set; }
-    public bool IsStalemate { get; set; }
-    public bool PlayerWon { get; set; }
-    public int PlayerDamage { get; set; }
-    public int EnemyDamage { get; set; }
+    public RoundResult Result { get; set; }
+    public int PlayerDamageReceived { get; set; }
+    public int EnemyDamageReceived { get; set; }
+}
+
+public enum RoundResult
+{
+    PlayerWin,
+    EnemyWin,
+    Stalemate,
+    MaxTurnsReached,
 }
 
 public class SimulatorResult
@@ -93,13 +100,6 @@ public class GameSimulator
         }
 
         return state;
-    }
-
-    private static bool IsGameOver(SimulatorState state)
-    {
-        int netDamage = state.EnemyDamageReceived - state.PlayerDamageReceived;
-        state.Logger.Log($"[CHECK IF GAME OVER] Net Damage={netDamage} [EnemyReceived: {state.EnemyDamageReceived} / PlayerReceived: {state.PlayerDamageReceived}]\n");
-        return Math.Abs(netDamage) >= 5 || state.Turn > 100;
     }
 
     private static void ResolveCombat(SimulatorState state, bool isPlayerTurn)
@@ -203,15 +203,18 @@ public class GameSimulator
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
     }
 
+    private int _maxTurns;
     private int _maxCardActionBranchesPerTurn;
     private bool _alwaysTryDrawingCreature;
     private bool _alwaysTryDrawingSacrifice;
 
     public GameSimulator(
+        int maxTurns = 50,
         int maxBranchPerTurn = 1,
         bool alwaysTryDrawingCreature = false,
         bool alwaysTryDrawingSacrifice = false)
     {
+        _maxTurns = maxTurns;
         _maxCardActionBranchesPerTurn = maxBranchPerTurn;
         _alwaysTryDrawingCreature = alwaysTryDrawingCreature;
         _alwaysTryDrawingSacrifice = alwaysTryDrawingSacrifice;
@@ -228,15 +231,28 @@ public class GameSimulator
             var roundResults = new List<SimulatorRoundResult>();
             var enqueueStateIfNotGameOver = (SimulatorState state) =>
             {
+                RoundResult? result = null;
                 if (IsGameOver(state))
+                {
+                    result = state.PlayerDamageReceived < state.EnemyDamageReceived ? RoundResult.PlayerWin : RoundResult.EnemyWin;
+                }
+                else if (IsStalemate(state))
+                {
+                    result = RoundResult.Stalemate;
+                }
+                else if (state.Turn > _maxTurns)
+                {
+                    result = RoundResult.MaxTurnsReached;
+                }
+
+                if (result != null)
                 {
                     var roundResult = new SimulatorRoundResult
                     {
                         Turns = state.Turn,
-                        IsStalemate = state.Turn > 100,
-                        PlayerWon = state.PlayerDamageReceived < state.EnemyDamageReceived,
-                        PlayerDamage = state.PlayerDamageReceived,
-                        EnemyDamage = state.EnemyDamageReceived,
+                        Result = result.Value,
+                        PlayerDamageReceived = state.PlayerDamageReceived,
+                        EnemyDamageReceived = state.EnemyDamageReceived,
                     };
 
                     logger.LogRoundResult(roundResult);
@@ -660,6 +676,29 @@ public class GameSimulator
 
         return analysis;
     }
+
+    private bool IsGameOver(SimulatorState state)
+    {
+        int netDamage = state.EnemyDamageReceived - state.PlayerDamageReceived;
+        state.Logger.Log($"[CHECK IF GAME OVER] Net Damage={netDamage} [EnemyReceived: {state.EnemyDamageReceived} / PlayerReceived: {state.PlayerDamageReceived}]\n");
+        return Math.Abs(netDamage) >= 5 || state.Turn > 100;
+    }
+
+    private bool IsStalemate(SimulatorState state)
+    {
+        bool playerHasNoCards = state.Hand.Cards.Count == 0 && state.Creatures.RemainingCardCount == 0;
+        bool enemyHasNoMoreCards = state.AI.MaxTurn < state.Turn;
+        if (playerHasNoCards && enemyHasNoMoreCards)
+        {
+            int netPlayerAttack = state.Lanes.GetRowCards(SimulatorLanes.PLAYER_LANE_ROW).Sum(card => card?.Card.Attack ?? 0);
+            int netEnemyAttack = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_LANE_ROW).Sum(card => card?.Card.Attack ?? 0)
+                + state.Lanes.GetRowCards(SimulatorLanes.ENEMY_STAGE_LANE_ROW).Sum(card => card?.Card.Attack ?? 0);
+
+            return netPlayerAttack == netEnemyAttack;
+        }
+
+        return false;
+    }
 }
 
 public class SimulatorCard
@@ -1022,10 +1061,9 @@ public class SimulatorLogger : IDisposable
     {
         LogHeader("ROUND RESULT");
         Log($"[Result] Turns: {result.Turns}");
-        Log($"[Result] Player Won: {result.PlayerWon}");
-        Log($"[Result] Player Damage: {result.PlayerDamage}");
-        Log($"[Result] Enemy Damage: {result.EnemyDamage}");
-        Log($"[Result] Stalemate: {result.IsStalemate}");
+        Log($"[Result] Result: {result.Result}");
+        Log($"[Result] Player Damage: {result.PlayerDamageReceived}");
+        Log($"[Result] Enemy Damage: {result.EnemyDamageReceived}");
     }
 
     public void Dispose()

@@ -603,10 +603,9 @@ public partial class GameLobby : Control
 	{
 		var rnd = new RandomGenerator(seed);
 		var ai = GenerateEnemyAI(cardPool, level, rnd);
-		var difficulty = CalculateLevelDifficulty(cardPool, ai, level);
+		var difficulty = CalculateLevelDifficulty(cardPool, ai.Clone(), level);
 		var reward = GenerateLevelReward(difficulty, rnd);
-
-		ai.Initialize();
+		
 		return new GameLevel
 		{
 			Level = level,

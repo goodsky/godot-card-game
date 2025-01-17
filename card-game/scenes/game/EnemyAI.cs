@@ -1,5 +1,4 @@
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -20,22 +19,13 @@ public class EnemyAI
         _moves = moves;
         _rnd = new RandomGenerator(rnd.Seed, rnd.N); // copy so other game state doesn't affect this
 
-        Initialize();
+        MaxTurn = moves.Count > 0 ? moves.Max(move => move.Turn) : 0;
     }
 
     /** Used by simulation to clone a snapshot of the AI */
     public EnemyAI Clone()
     {
         return new EnemyAI(_cardPool, _moves.Select(move => new ScriptedMove(move)).ToList(), SnapshotRandomGenerator);
-    }
-
-    public void Initialize()
-    {
-        for (int i = 0; i < _moves.Count; i++)
-        {
-            _moves[i].Resolved = false;
-            MaxTurn = Math.Max(MaxTurn, _moves[i].Turn);
-        }
     }
 
     public List<PlayedCard> GetMovesForTurn(int turn, bool[] backLaneHasCard)
@@ -129,7 +119,7 @@ public class EnemyAI
 
 public class ScriptedMove
 {
-    public bool Resolved { get; set; } = false;
+    public bool Resolved { get; set; }
     public int Turn { get; set; }
     public int? Lane { get; set; }
     public CardInfo? CardToPlay { get; set; }
@@ -138,6 +128,7 @@ public class ScriptedMove
 
     public ScriptedMove(int turn, CardInfo cardInfo, int? lane = null)
     {
+        Resolved = false;
         Turn = turn;
         CardToPlay = cardInfo;
         CardCostToPlay = null;
@@ -147,6 +138,7 @@ public class ScriptedMove
 
     public ScriptedMove(int turn, CardBloodCost cost, CardRarity? rarity = null, int? lane = null)
     {
+        Resolved = false;
         Turn = turn;
         CardToPlay = null;
         CardCostToPlay = cost;
@@ -158,10 +150,10 @@ public class ScriptedMove
     {
         Resolved = o.Resolved;
         Turn = o.Turn;
-        Lane = o.Lane;
         CardToPlay = o.CardToPlay;
         CardCostToPlay = o.CardCostToPlay;
         CardRarityToPlay = o.CardRarityToPlay;
+        Lane = o.Lane;
     }
 }
 
