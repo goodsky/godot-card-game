@@ -27,7 +27,7 @@ public class SimulatorResult
     public List<SimulatorRoundResult> Rounds { get; set; }
 }
 
-public abstract class GameSimulatorBase
+public class GameSimulator
 {
     protected class SimulatorState
     {
@@ -35,12 +35,12 @@ public abstract class GameSimulatorBase
         public bool IsPlayerMove { get; set; }
         public int PlayerDamageReceived { get; set; }
         public int EnemyDamageReceived { get; set; }
-        public List<SimulatorCard> Hand { get; set; }
+        public SimulatorHand Hand { get; set; }
         public SimulatorLanes Lanes { get; set; }
         public SimulatorDeck Creatures { get; set; }
         public SimulatorDeck Sacrifices { get; set; }
         public EnemyAI AI { get; set; }
-        public SimulationLogger Logger { get; set; }
+        public SimulatorLogger Logger { get; set; }
         public List<SimulatorRoundResult> Results { get; set; }
 
         public SimulatorState Clone()
@@ -51,10 +51,10 @@ public abstract class GameSimulatorBase
                 IsPlayerMove = IsPlayerMove,
                 PlayerDamageReceived = PlayerDamageReceived,
                 EnemyDamageReceived = EnemyDamageReceived,
-                Hand = new List<SimulatorCard>(Hand),
-                Lanes = Lanes.Clone(),
-                Creatures = Creatures.Clone(),
-                Sacrifices = Sacrifices.Clone(),
+                Hand = new SimulatorHand(Hand),
+                Lanes = new SimulatorLanes(Lanes),
+                Creatures = new SimulatorDeck(Creatures),
+                Sacrifices = new SimulatorDeck(Sacrifices),
                 AI = AI.Clone(),
                 Logger = Logger,
                 Results = Results,
@@ -64,18 +64,20 @@ public abstract class GameSimulatorBase
     
     private static SimulatorState InitializeSimulationState(SimulatorArgs args)
     {
+        SimulatorCard.NextId = 0; // This is not thread safe
+
         var state = new SimulatorState
         {
             Turn = 1, // turn 0 is only for staging the enemy cards
             IsPlayerMove = true,
             PlayerDamageReceived = 0,
             EnemyDamageReceived = 0,
-            Hand = new List<SimulatorCard>(),
+            Hand = new SimulatorHand(),
             Lanes = new SimulatorLanes(),
             Creatures = new SimulatorDeck(args.CreaturesDeck),
             Sacrifices = new SimulatorDeck(args.SacrificesDeck),
             AI = args.AI,
-            Logger = new SimulationLogger(args.EnableLogging),
+            Logger = new SimulatorLogger(args.EnableLogging),
             Results = new List<SimulatorRoundResult>(),
         };
 
@@ -119,7 +121,7 @@ public abstract class GameSimulatorBase
                         if (enemyCard.DamageReceived >= enemyCard.Card.Health)
                         {
                             state.Logger.Log($"Enemy card {enemyCard.Card.Name} killed!");
-                            state.Lanes.TryRemoveCard(enemyCard);
+                            state.Lanes.TryRemoveCardById(enemyCard.Id);
                         }
                     }
                     else
@@ -140,7 +142,7 @@ public abstract class GameSimulatorBase
                         if (playerCard.DamageReceived >= playerCard.Card.Health)
                         {
                             state.Logger.Log($"Player card {playerCard.Card.Name} killed!");
-                            state.Lanes.TryRemoveCard(playerCard);
+                            state.Lanes.TryRemoveCardById(playerCard.Id);
                         }
                     }
                     else
@@ -177,11 +179,11 @@ public abstract class GameSimulatorBase
         // Clear sacrifices
         foreach (var sacrifice in sacrifices)
         {
-            if (state.Hand.Remove(sacrifice))
+            if (state.Hand.RemoveCardById(sacrifice.Id))
             {
                 state.Logger.Log($"Sacrificed {sacrifice.Card.Name} from hand.");
             }
-            else if (state.Lanes.TryRemoveCard(sacrifice))
+            else if (state.Lanes.TryRemoveCardById(sacrifice.Id))
             {
                 state.Logger.Log($"Sacrificed {sacrifice.Card.Name} from board.");
             }
@@ -192,7 +194,7 @@ public abstract class GameSimulatorBase
         }
 
         // Remove the card from the hand
-        if (!state.Hand.Remove(card))
+        if (!state.Hand.RemoveCardById(card.Id))
         {
             throw new InvalidOperationException($"Attempted to play a card that was not in the hand! [{card.Card.Name}]");
         }
@@ -201,11 +203,25 @@ public abstract class GameSimulatorBase
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
     }
 
+    private int _maxCardActionBranchesPerTurn;
+    private bool _alwaysTryDrawingCreature;
+    private bool _alwaysTryDrawingSacrifice;
+
+    public GameSimulator(
+        int maxBranchPerTurn = 1,
+        bool alwaysTryDrawingCreature = false,
+        bool alwaysTryDrawingSacrifice = false)
+    {
+        _maxCardActionBranchesPerTurn = maxBranchPerTurn;
+        _alwaysTryDrawingCreature = alwaysTryDrawingCreature;
+        _alwaysTryDrawingSacrifice = alwaysTryDrawingSacrifice;
+    }
+
     /** Game Simulator entry point */
     public SimulatorResult Simulate(SimulatorArgs args)
     {
         SimulatorState initialState = InitializeSimulationState(args);
-        SimulationLogger logger = initialState.Logger;
+        SimulatorLogger logger = initialState.Logger;
 
         try {
             var stateQueue = new Queue<SimulatorState>();
@@ -271,8 +287,6 @@ public abstract class GameSimulatorBase
         }
     }
 
-    protected abstract IEnumerable<PlayerTurnAction> GetPlayerActions(SimulatorState state);
-
     private IEnumerable<SimulatorState> StepPlayerTurnState(SimulatorState state)
     {
         IEnumerable<PlayerTurnAction> actions = GetPlayerActions(state);
@@ -304,17 +318,96 @@ public abstract class GameSimulatorBase
         return state; // NB: not cloning here since we should not be forking the state
     }
 
+    private IEnumerable<PlayerTurnAction> GetPlayerActions(SimulatorState state)
+    {
+        List<PlayerTurnAction> bestPlayerActions = PlayerTurnAction.TakeTop(
+            count: _maxCardActionBranchesPerTurn,
+            minValue: 1,
+            CalculateBestPlayerActionsDrawCreature(state),
+            CalculateBestPlayerActionsDrawSacrifice(state));
+
+        if (_alwaysTryDrawingCreature && state.Creatures.RemainingCardCount > 0)
+        {
+            bestPlayerActions.Add(new PlayerTurnAction() {
+                DrawAction = DrawAction.DrawFromCreatures,
+                CardActions = new PlayCardAction[0],
+            });
+        }
+
+        if (_alwaysTryDrawingSacrifice && state.Sacrifices.RemainingCardCount > 0)
+        {
+            bestPlayerActions.Add(new PlayerTurnAction() {
+                DrawAction = DrawAction.DrawFromSacrifices,
+                CardActions = new PlayCardAction[0],
+            });
+        }
+
+        if (bestPlayerActions.Count == 0)
+        {
+            state.Logger.Log($"No action found! Let's just try drawing a card if possible.");
+
+            DrawAction drawAction = DrawAction.NoDraw;
+            if (state.Sacrifices.RemainingCardCount > 0)
+            {
+                drawAction = DrawAction.DrawFromSacrifices;
+            }
+            else if (state.Creatures.RemainingCardCount > 0)
+            {
+                drawAction = DrawAction.DrawFromCreatures;
+            }
+
+            bestPlayerActions.Add(new PlayerTurnAction() {
+                DrawAction = drawAction,
+                CardActions = new PlayCardAction[0]
+            });
+        }
+
+        state.Logger.LogHeader("Next Player Actions:");
+        state.Logger.LogActions(bestPlayerActions);
+        return bestPlayerActions;
+    }
+
+    private IEnumerable<PlayerTurnAction> CalculateBestPlayerActionsDrawCreature(SimulatorState state)
+    {
+        if (state.Creatures.RemainingCardCount == 0)
+        {
+            state.Logger.Log("Creatures deck is empty! - Skipping player actions for drawing creatures");
+            return Enumerable.Empty<PlayerTurnAction>();
+        }
+
+        var newCreature = state.Creatures.PeekTop();
+        var newHand = new SimulatorHand(state.Hand).Add(newCreature);
+
+        state.Logger.LogHeader("[Calculate Action] DRAW CREATURE");
+        return CalculateBestPlayerActions(DrawAction.DrawFromCreatures, newHand, state.Lanes, state.Logger, maxActions: _maxCardActionBranchesPerTurn);
+    }
+
+    private IEnumerable<PlayerTurnAction> CalculateBestPlayerActionsDrawSacrifice(SimulatorState state)
+    {
+        if (state.Sacrifices.RemainingCardCount == 0)
+        {
+            state.Logger.Log("Sacrifices deck is empty! - Skipping player actions for drawing sacrifices");
+            return Enumerable.Empty<PlayerTurnAction>();
+        }
+
+        var newSacrifice = state.Sacrifices.PeekTop();
+        var newHand = new SimulatorHand(state.Hand).Add(newSacrifice);
+
+        state.Logger.LogHeader("[Calculate Action] DRAW SACRIFICE");
+        return CalculateBestPlayerActions(DrawAction.DrawFromSacrifices, newHand, state.Lanes, state.Logger, maxActions: _maxCardActionBranchesPerTurn);
+    }
+
     protected static IEnumerable<PlayerTurnAction> CalculateBestPlayerActions(
         DrawAction action,
-        List<SimulatorCard> hand,
+        SimulatorHand hand,
         SimulatorLanes lanes,
-        SimulationLogger logger,
-        int maxActions = 1,
+        SimulatorLogger logger,
+        int maxActions,
         bool maxOneActionPerCard = true)
     {
         List<SimulatorCard> sacrificesOnBoard = GetAvailableSacrifices(lanes, sort: true);
-        List<SimulatorCard> sacrificesInHand = hand.Where(card => card.Card.BloodCost == CardBloodCost.Zero).ToList();
-        List<SimulatorCard> creaturesInHand = hand.Where(card => card.Card.BloodCost != CardBloodCost.Zero).ToList();
+        List<SimulatorCard> sacrificesInHand = hand.Cards.Where(card => card.Card.BloodCost == CardBloodCost.Zero).ToList();
+        List<SimulatorCard> creaturesInHand = hand.Cards.Where(card => card.Card.BloodCost != CardBloodCost.Zero).ToList();
         int openLanes = SimulatorLanes.COL_COUNT - sacrificesOnBoard.Count;
 
         var bestActions = new List<PlayerTurnAction>();
@@ -569,6 +662,92 @@ public abstract class GameSimulatorBase
     }
 }
 
+public class SimulatorCard
+{
+    public static int NextId = 1;
+
+    public int Id { get; set; }
+    public CardInfo Card { get; set; }
+    public int DamageReceived { get; set; }
+
+    public SimulatorCard(CardInfo cardInfo)
+    {
+        Id = NextId++;
+        Card = cardInfo;
+        DamageReceived = 0;
+    }
+
+    public SimulatorCard(SimulatorCard other)
+    {
+        Id = other.Id;
+        Card = other.Card;
+        DamageReceived = other.DamageReceived;
+    }
+}
+
+public class SimulatorHand
+{
+    public List<SimulatorCard> Cards { get; set; }
+
+    public SimulatorHand()
+    {
+        Cards = new List<SimulatorCard>();
+    }
+
+    public SimulatorHand(SimulatorHand other)
+    {
+        Cards = other.Cards.Select(card => new SimulatorCard(card)).ToList();
+    }
+
+    public SimulatorHand Add(SimulatorCard card)
+    {
+        Cards.Add(card);
+        return this;
+    }
+
+    public bool RemoveCardById(int cardId)
+    {
+        int idx = Cards.FindIndex(x => x.Id == cardId);
+        if (idx == -1)
+        {
+            return false;
+        }
+
+        Cards.RemoveAt(idx);
+        return true;
+    }
+}
+
+public class SimulatorDeck
+{
+    private List<SimulatorCard> _deck;
+    private int _drawnCardsCount;
+
+    public int RemainingCardCount => _deck.Count - _drawnCardsCount;
+
+    public SimulatorDeck(List<CardInfo> cards)
+    {
+        _deck = new List<SimulatorCard>(cards.Select(card => new SimulatorCard(card)));
+        _drawnCardsCount = 0;
+    }
+
+    public SimulatorDeck(SimulatorDeck other)
+    {
+        _deck = new List<SimulatorCard>(other._deck);
+        _drawnCardsCount = other._drawnCardsCount;
+    }
+
+    public SimulatorCard DrawFromTop()
+    {
+        return _deck[_deck.Count - 1 - _drawnCardsCount++];
+    }
+
+    public SimulatorCard PeekTop()
+    {
+        return _deck[_deck.Count - 1 - _drawnCardsCount];
+    }
+}
+
 public class SimulatorLanes
 {
     public static readonly int COL_COUNT = 4;
@@ -584,18 +763,16 @@ public class SimulatorLanes
         _lanes = new SimulatorCard[COL_COUNT, ROW_COUNT];
     }
 
-    public SimulatorLanes Clone()
+    public SimulatorLanes(SimulatorLanes other)
     {
-        var clone = new SimulatorLanes();
+        _lanes = new SimulatorCard[COL_COUNT, ROW_COUNT];
         for (int col = 0; col < COL_COUNT; col++)
         {
             for (int row = 0; row < ROW_COUNT; row++)
             {
-                clone._lanes[col, row] = _lanes[col, row] != null ? new SimulatorCard(_lanes[col, row]) : null;
+                _lanes[col, row] = other._lanes[col, row] != null ? new SimulatorCard(other._lanes[col, row]) : null;
             }
         }
-
-        return clone;
     }
 
     public SimulatorCard GetCardAt(int row, int col)
@@ -649,13 +826,13 @@ public class SimulatorLanes
         _lanes[laneColumn, playerLaneRow] = card;
     }
 
-    public bool TryRemoveCard(SimulatorCard card)
+    public bool TryRemoveCardById(int cardId)
     {
         for (int col = 0; col < COL_COUNT; col++)
         {
             for (int row = 0; row < ROW_COUNT; row++)
             {
-                if (_lanes[col, row] == card)
+                if (_lanes[col, row]?.Id == cardId)
                 {
                     _lanes[col, row] = null;
                     return true;
@@ -681,62 +858,10 @@ public class SimulatorLanes
     }
 }
 
-public class SimulatorDeck
-{
-    private List<SimulatorCard> _deck;
-    private int _drawnCardsCount;
-
-    public int RemainingCardCount => _deck.Count - _drawnCardsCount;
-
-    public SimulatorDeck(List<CardInfo> cards)
-    {
-        _deck = new List<SimulatorCard>(cards.Select(card => new SimulatorCard(card)));
-        _drawnCardsCount = 0;
-    }
-
-    public SimulatorDeck Clone()
-    {
-        var clone = new SimulatorDeck(_deck.Select(card => card.Card).ToList());
-        clone._drawnCardsCount = _drawnCardsCount;
-        return clone;
-    }
-    public SimulatorCard DrawFromTop()
-    {
-        return _deck[_deck.Count - 1 - _drawnCardsCount++];
-    }
-
-    public SimulatorCard PeekTop()
-    {
-        return _deck[_deck.Count - 1 - _drawnCardsCount];
-    }
-
-    public List<CardInfo> Cards => _deck.Select(card => card.Card).ToList();
-}
-
-public class SimulatorCard
-{
-    // TODO: Consider using an ID for the card for better comparison and selection between action and state
-    public CardInfo Card { get; set; }
-    public int DamageReceived { get; set; }
-
-    public SimulatorCard(CardInfo cardInfo)
-    {
-        Card = cardInfo;
-        DamageReceived = 0;
-    }
-
-    public SimulatorCard(SimulatorCard other)
-    {
-        Card = other.Card;
-        DamageReceived = other.DamageReceived;
-    }
-}
-
 public class PlayerTurnAction
 {
     public DrawAction DrawAction { get; set; }
     public PlayCardAction[] CardActions { get; set; }
-    // Heuristic score of this action - higher is better
     public int? HeuristicScore { get; set; }
 
     public static List<PlayerTurnAction> TakeTop(int count, int minValue, params IEnumerable<PlayerTurnAction>[] actionParams)
@@ -746,7 +871,7 @@ public class PlayerTurnAction
         {
             foreach (PlayerTurnAction action in actions)
             {
-                if (action.HeuristicScore > minValue)
+                if (action.HeuristicScore >= minValue)
                 {
                     AddIfInTopN(top, count, action);
                 }
@@ -776,13 +901,6 @@ public class PlayerTurnAction
     }
 }
 
-public enum DrawAction
-{
-    NoDraw,
-    DrawFromCreatures,
-    DrawFromSacrifices,
-}
-
 public class PlayCardAction
 {
     public SimulatorCard PlayedCard { get; set; }
@@ -790,12 +908,19 @@ public class PlayCardAction
     public List<SimulatorCard> SacrificeCards { get; set; }
 }
 
-public class SimulationLogger : IDisposable
+public enum DrawAction
+{
+    NoDraw,
+    DrawFromCreatures,
+    DrawFromSacrifices,
+}
+
+public class SimulatorLogger : IDisposable
 {
     private FileAccess _file;
     private const string FILENAME = "simulation.log";
 
-    public SimulationLogger(bool enableLogging = true)
+    public SimulatorLogger(bool enableLogging = true)
     {
         if (enableLogging)
         {
@@ -814,19 +939,39 @@ public class SimulationLogger : IDisposable
         Log($" --- {header.PadRight(24  )} ---------------------------------");
     }
 
-    public void LogAction(PlayerTurnAction action)
+    public void LogActions(IEnumerable<PlayerTurnAction> actions)
     {
-        Log($"[Action] {action.DrawAction}");
-        foreach (var cardAction in action.CardActions)
+        int actionId = 0;
+        foreach (PlayerTurnAction action in actions)
         {
-            Log($"[Action] Play {cardAction.PlayedCard.Card.Name} in lane {cardAction.LaneColumnIndex}");
-            Log($"[Action] Sacrifices: {string.Join(", ", cardAction.SacrificeCards.Select(card => card.Card.Name))}");
+            Log($"[Action {actionId}] {action.DrawAction}");
+            foreach (var cardAction in action.CardActions)
+            {
+                Log($"   [Action {actionId}] Play {cardAction.PlayedCard.Card.Name} in lane {cardAction.LaneColumnIndex}");
+                Log($"   [Action {actionId}] Sacrifices: {string.Join(", ", cardAction.SacrificeCards.Select(card => card.Card.Name))}");
+            }
+
+            actionId++;
         }
     }
 
-    public void LogHand(List<SimulatorCard> hand)
+    public void LogHand(SimulatorHand hand)
     {
-        Log($"[Hand] {string.Join(", ", hand.Select(card => $"{card.Card.Name}[{(int)card.Card.BloodCost}]"))}");
+        Log($"[Hand] {string.Join(", ", hand.Cards.Select(card => $"{card.Card.Name}[id: {card.Id} cost: {(int)card.Card.BloodCost}]"))}");
+    }
+
+     public void LogDeck(SimulatorDeck deck, string name)
+    {
+        int RemainingCardCount = deck.RemainingCardCount;
+        if (RemainingCardCount > 0)
+        {
+            var nextCard = deck.PeekTop();
+            Log($"[{name}] Next Card: {nextCard?.Card.Name ?? "NULL"} ({RemainingCardCount} remaining)");
+        }
+        else
+        {
+            Log($"[{name}] 0 cards remaining");
+        }
     }
 
     public void LogLanes(SimulatorLanes lanes)
@@ -881,20 +1026,6 @@ public class SimulationLogger : IDisposable
         Log($"[Result] Player Damage: {result.PlayerDamage}");
         Log($"[Result] Enemy Damage: {result.EnemyDamage}");
         Log($"[Result] Stalemate: {result.IsStalemate}");
-    }
-
-    public void LogDeck(SimulatorDeck deck, string name)
-    {
-        int RemainingCardCount = deck.RemainingCardCount;
-        if (RemainingCardCount > 0)
-        {
-            var nextCard = deck.PeekTop();
-            Log($"[{name}] Next Card: {nextCard?.Card.Name ?? "NULL"} ({RemainingCardCount} remaining)");
-        }
-        else
-        {
-            Log($"[{name}] 0 cards remaining");
-        }
     }
 
     public void Dispose()

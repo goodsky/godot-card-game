@@ -35,7 +35,7 @@ public partial class TestBench : Node2D
 		var startTime = DateTime.Now;
 		try
 		{
-			new GreedyHeuristicGameSimulator().Simulate(args);
+			new GameSimulator(maxBranchPerTurn: 2).Simulate(args);
 		}
 		catch (Exception e)
 		{

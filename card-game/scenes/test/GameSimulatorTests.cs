@@ -42,9 +42,9 @@ public static class GameSimulatorTests
     }
 
     [GameSimulatorTest]
-    public static void Test_GameSimulator_OnlyPlayerCard()
+    public static void Test_GameSimulator_OnlyPlayerCards()
     {
-        const bool LOG_SIMULATION = true;
+        const bool LOG_SIMULATION = false;
 
         var args = new SimulatorArgs
         {
@@ -63,7 +63,7 @@ public static class GameSimulatorTests
             AI = SetupEnemyAI(new ScriptedMove[0]),
         };
         
-        var result = new GreedyHeuristicGameSimulator().Simulate(args);
+        var result = new GameSimulator().Simulate(args);
         Assert(result.Rounds.Count == 1, "Should have only played 1 round");
         
         var roundResult = result.Rounds[0];
@@ -71,10 +71,35 @@ public static class GameSimulatorTests
     }
 
     [GameSimulatorTest]
+    public static void Test_GameSimulator_OnlyEnemyCards()
+    {
+        const bool LOG_SIMULATION = true;
+
+        var args = new SimulatorArgs
+        {
+            EnableLogging = LOG_SIMULATION,
+            StartingHandSize = 0,
+            SacrificesDeck = new List<CardInfo> {},
+            CreaturesDeck = new List<CardInfo> {},
+            AI = SetupEnemyAI(new ScriptedMove[] {
+                new ScriptedMove(0, SetupCardInfo("Enemy", "1", 1, 1, CardBloodCost.One)),
+                new ScriptedMove(1, SetupCardInfo("Enemy", "2", 2, 1, CardBloodCost.Two)),
+                new ScriptedMove(2, SetupCardInfo("Enemy", "3", 3, 1, CardBloodCost.Three)),
+            }),
+        };
+        
+        var result = new GameSimulator().Simulate(args);
+        Assert(result.Rounds.Count == 1, "Should have only played 1 round");
+        
+        var roundResult = result.Rounds[0];
+        Assert(!roundResult.PlayerWon, "Enemy should have won");
+    }
+
+    [GameSimulatorTest]
     public static void Test_LaneCombatAnalysis_OnlyPlayerCard()
     {
         var playerCard = SetupCardInfo("Player", "Card", 1, 1);
-        var analysis = GameSimulatorBase.AnalyzeLaneCombat(
+        var analysis = GameSimulator.AnalyzeLaneCombat(
             playerCard: new SimulatorCard(playerCard),
             enemyCard: null,
             stagedCard: null,
@@ -93,7 +118,7 @@ public static class GameSimulatorTests
     {
         var playerCard = SetupCardInfo("Player", "Card", 1, 2);
         var enemyCard = SetupCardInfo("Enemy", "Card", 1, 2);
-        var analysis = GameSimulatorBase.AnalyzeLaneCombat(
+        var analysis = GameSimulator.AnalyzeLaneCombat(
             playerCard: new SimulatorCard(playerCard),
             enemyCard: new SimulatorCard(enemyCard),
             stagedCard: null,
@@ -112,7 +137,7 @@ public static class GameSimulatorTests
     {
         var playerCard = SetupCardInfo("Player", "Card", 3, 3);
         var enemyStagedCard = SetupCardInfo("Enemy", "Card", 2, 4);
-        var analysis = GameSimulatorBase.AnalyzeLaneCombat(
+        var analysis = GameSimulator.AnalyzeLaneCombat(
             playerCard: new SimulatorCard(playerCard),
             enemyCard: null,
             stagedCard: new SimulatorCard(enemyStagedCard),
@@ -133,11 +158,11 @@ public static class GameSimulatorTests
         var actions2 = new[] { new PlayerTurnAction() { HeuristicScore = 3 }, new PlayerTurnAction() { HeuristicScore = 0 }, new PlayerTurnAction() { HeuristicScore = -10 } };
         var actions3 = new[] { new PlayerTurnAction() { HeuristicScore = 7 }, new PlayerTurnAction() { HeuristicScore = -1 }, new PlayerTurnAction() { HeuristicScore = 0 } };
 
-        var top1 = PlayerTurnAction.TakeTop(1, 0, actions1, actions2, actions3);
+        var top1 = PlayerTurnAction.TakeTop(1, 1, actions1, actions2, actions3);
         Assert(top1.Count() == 1, "Should have taken 1 action");
         Assert(top1[0].HeuristicScore == 7, "Should have taken the best action");
 
-        var top3 = PlayerTurnAction.TakeTop(3, 0, actions1, actions2, actions3);
+        var top3 = PlayerTurnAction.TakeTop(3, 1, actions1, actions2, actions3);
         Assert(top3.Count() == 3, "Should have taken 3 actions");
         Assert(top3[0].HeuristicScore == 7, "Index 0: Should have taken the best action");
         Assert(top3[1].HeuristicScore == 5, "Index 1: Should have taken the best action");
@@ -146,7 +171,7 @@ public static class GameSimulatorTests
         var top3_high_cutoff = PlayerTurnAction.TakeTop(3, 100, actions1, actions2, actions3);
         Assert(top3_high_cutoff.Count() == 0, "Should have taken 0 actions");
 
-        var top100 = PlayerTurnAction.TakeTop(100, 0, actions1, actions2, actions3);
+        var top100 = PlayerTurnAction.TakeTop(100, 1, actions1, actions2, actions3);
         Assert(top100.Count() == 4, "Should have taken all positive actions");
     }
 
