@@ -38,6 +38,10 @@ public class GameSimulator
 {
     protected class SimulatorState
     {
+        internal static int NextStateId = 1;
+
+        public int Id { get; set; }
+        public int ParentId { get; set; }
         public int Turn { get; set; }
         public bool IsPlayerMove { get; set; }
         public int PlayerDamageReceived { get; set; }
@@ -54,6 +58,8 @@ public class GameSimulator
         {
             return new SimulatorState
             {
+                Id = NextStateId++,
+                ParentId = Id,
                 Turn = Turn,
                 IsPlayerMove = IsPlayerMove,
                 PlayerDamageReceived = PlayerDamageReceived,
@@ -72,9 +78,12 @@ public class GameSimulator
     private static SimulatorState InitializeSimulationState(SimulatorArgs args)
     {
         SimulatorCard.NextId = 0; // This is not thread safe
+        SimulatorState.NextStateId = 0;
 
         var state = new SimulatorState
         {
+            Id = 0,
+            ParentId = -1,
             Turn = 1, // turn 0 is only for staging the enemy cards
             IsPlayerMove = true,
             PlayerDamageReceived = 0,
@@ -204,6 +213,7 @@ public class GameSimulator
     }
 
     private int _maxTurns;
+    private int _maxStateIterations;
     private int _maxCardActionBranchesPerTurn;
     private bool _alwaysTryDrawingCreature;
     private bool _alwaysTryDrawingSacrifice;
@@ -211,10 +221,12 @@ public class GameSimulator
     public GameSimulator(
         int maxTurns = 50,
         int maxBranchPerTurn = 1,
+        int maxStateIterations = 100000,
         bool alwaysTryDrawingCreature = false,
         bool alwaysTryDrawingSacrifice = false)
     {
         _maxTurns = maxTurns;
+        _maxStateIterations = maxStateIterations;
         _maxCardActionBranchesPerTurn = maxBranchPerTurn;
         _alwaysTryDrawingCreature = alwaysTryDrawingCreature;
         _alwaysTryDrawingSacrifice = alwaysTryDrawingSacrifice;
@@ -264,13 +276,23 @@ public class GameSimulator
                 }
             };
 
+            int iterations = 0;
+
             stateQueue.Enqueue(initialState);
             while (stateQueue.Count > 0)
             {
+                iterations++;
+                if (iterations > _maxStateIterations)
+                {  
+                    logger.Log($"Max iterations reached! {iterations} > {_maxStateIterations}");
+                    logger.Log($"State Queue Size: {stateQueue.Count}");
+                    break;
+                }
+
                 SimulatorState state = stateQueue.Dequeue();
+                state.Logger.LogHeader($"--- STATE {state.Id} - Turn #{state.Turn}  (State Queue Size: {stateQueue.Count})");
                 if (state.IsPlayerMove)
                 {
-                    state.Logger.LogHeader($"TURN {state.Turn}");
                     state.Logger.LogHeader(">> PLAYER TURN <<");
                     state.Logger.LogHand(state.Hand);
                     state.Logger.LogDeck(state.Creatures, "Creatures");

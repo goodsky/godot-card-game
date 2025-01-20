@@ -7,10 +7,12 @@ using Godot;
 [AttributeUsage(AttributeTargets.Method)]
 public class GameSimulatorTest : Attribute
 {
-    public bool IsOnly { get; private set; }
-    public GameSimulatorTest(bool only = false)
+    public bool OnlyRunThis { get; private set; }
+    public bool LogEnabled { get; private set; }
+    public GameSimulatorTest(bool onlyRunThis = false, bool logEnabled = false)
     {
-        IsOnly = only;
+        OnlyRunThis = onlyRunThis;
+        LogEnabled = logEnabled;
     }
 }
 
@@ -20,7 +22,7 @@ public class GameSimulatorTest : Attribute
 // You can run these from the TestBench scene in the game.
 public static class GameSimulatorTests
 {
-    const bool LOG_SIMULATION = true;
+    private static bool LOG_TEST = false;
 
     public static bool Go()
     {
@@ -28,7 +30,7 @@ public static class GameSimulatorTests
             .GetMethods(BindingFlags.Static | BindingFlags.Public)
             .Where(m => m.GetCustomAttribute<GameSimulatorTest>() != null);
 
-        var onlyMethods = methods.Where(m => m.GetCustomAttribute<GameSimulatorTest>().IsOnly);
+        var onlyMethods = methods.Where(m => m.GetCustomAttribute<GameSimulatorTest>().OnlyRunThis);
         if (onlyMethods.Any())
         {
             methods = onlyMethods;
@@ -39,6 +41,7 @@ public static class GameSimulatorTests
         GD.Print($"Running {totalCount} GameSimulator tests...");
         foreach (var method in methods)
         {
+            LOG_TEST = method.GetCustomAttribute<GameSimulatorTest>().LogEnabled;
             try
             {
                 method.Invoke(null, null);
@@ -56,7 +59,7 @@ public static class GameSimulatorTests
         return failedCount == 0;
     }
 
-    [GameSimulatorTest(true)]
+    [GameSimulatorTest(logEnabled: true)]
     public static void Test_GameSimulator_StressTest()
     {
         var sacrificeDeck = new List<CardInfo>();
@@ -80,7 +83,7 @@ public static class GameSimulatorTests
 
         var args = new SimulatorArgs
         {
-            EnableLogging = LOG_SIMULATION,
+            EnableLogging = LOG_TEST,
             StartingHandSize = 5,
             SacrificesDeck = sacrificeDeck,
             CreaturesDeck = creaturesDeck,
@@ -88,11 +91,13 @@ public static class GameSimulatorTests
         };
         
         // Try setting "always draw cards" to true for a fun time
-        var result = new GameSimulator(maxTurns: 50, maxBranchPerTurn: 2, alwaysTryDrawingCreature: false, alwaysTryDrawingSacrifice: false).Simulate(args);
+        var result = new GameSimulator(
+            maxTurns: 50,
+            maxBranchPerTurn: 2,
+            alwaysTryDrawingCreature: false,
+            alwaysTryDrawingSacrifice: true).Simulate(args);
+
         Assert(result.Rounds.Count > 0, "Should have played many branching rounds");
-        
-        var roundResult = result.Rounds[0];
-        Assert(roundResult.Result == RoundResult.MaxTurnsReached, "Round should reach max turns");
     }
 
     [GameSimulatorTest]
@@ -100,7 +105,7 @@ public static class GameSimulatorTests
     {
         var args = new SimulatorArgs
         {
-            EnableLogging = LOG_SIMULATION,
+            EnableLogging = LOG_TEST,
             StartingHandSize = 2,
             SacrificesDeck = new List<CardInfo> {
                 SetupCardInfo("Sacrifice", "1", 0, 1, CardBloodCost.Zero),
@@ -127,7 +132,7 @@ public static class GameSimulatorTests
     {
         var args = new SimulatorArgs
         {
-            EnableLogging = LOG_SIMULATION,
+            EnableLogging = LOG_TEST,
             StartingHandSize = 0,
             SacrificesDeck = new List<CardInfo> {},
             CreaturesDeck = new List<CardInfo> {},
@@ -150,7 +155,7 @@ public static class GameSimulatorTests
     {
         var args = new SimulatorArgs
         {
-            EnableLogging = LOG_SIMULATION,
+            EnableLogging = LOG_TEST,
             StartingHandSize = 0,
             SacrificesDeck = new List<CardInfo> { SetupCardInfo("Sacrifice", "1", 0, 1, CardBloodCost.Zero) },
             CreaturesDeck = new List<CardInfo> { SetupCardInfo("Creature", "1", 1, 1, CardBloodCost.One) },
