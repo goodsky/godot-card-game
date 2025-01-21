@@ -77,8 +77,8 @@ public class GameSimulator
     
     private static SimulatorState InitializeSimulationState(SimulatorArgs args)
     {
-        SimulatorCard.NextId = 0; // This is not thread safe
-        SimulatorState.NextStateId = 0;
+        SimulatorCard.NextCardId = 0; // This is not thread safe
+        SimulatorState.NextStateId = 1;
 
         var state = new SimulatorState
         {
@@ -130,7 +130,7 @@ public class GameSimulator
                         if (enemyCard.DamageReceived >= enemyCard.Card.Health)
                         {
                             state.Logger.Log($"Enemy card {enemyCard.Card.Name} killed!");
-                            state.Lanes.TryRemoveCardById(enemyCard.Id);
+                            if (!state.Lanes.TryRemoveCardById(enemyCard.Id)) throw new InvalidOperationException($"Failed to remove card by Id: {enemyCard.Id}");
                         }
                     }
                     else
@@ -151,7 +151,7 @@ public class GameSimulator
                         if (playerCard.DamageReceived >= playerCard.Card.Health)
                         {
                             state.Logger.Log($"Player card {playerCard.Card.Name} killed!");
-                            state.Lanes.TryRemoveCardById(playerCard.Id);
+                            if (!state.Lanes.TryRemoveCardById(playerCard.Id)) throw new InvalidOperationException($"Failed to remove card by Id: {playerCard.Id}");
                         }
                     }
                     else
@@ -212,21 +212,29 @@ public class GameSimulator
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
     }
 
+    // Maximum number of turns in any simulated game.
     private int _maxTurns;
+    // Maximum total number of game states to explore.
     private int _maxStateIterations;
+    // Circuit breaker trigger - if the state queue is larger than this then we will set maxBraches = 1 to flush out the queue
+    private int _maxStateQueueSize;
     private int _maxCardActionBranchesPerTurn;
     private bool _alwaysTryDrawingCreature;
     private bool _alwaysTryDrawingSacrifice;
 
+    private bool _stateQueueCircuitBreakerTripped = false;
+
     public GameSimulator(
         int maxTurns = 50,
         int maxBranchPerTurn = 1,
+        int maxStateQueueCircuitBreakerSize = 10000,
         int maxStateIterations = 100000,
         bool alwaysTryDrawingCreature = false,
         bool alwaysTryDrawingSacrifice = false)
     {
         _maxTurns = maxTurns;
         _maxStateIterations = maxStateIterations;
+        _maxStateQueueSize = maxStateQueueCircuitBreakerSize;
         _maxCardActionBranchesPerTurn = maxBranchPerTurn;
         _alwaysTryDrawingCreature = alwaysTryDrawingCreature;
         _alwaysTryDrawingSacrifice = alwaysTryDrawingSacrifice;
@@ -284,13 +292,19 @@ public class GameSimulator
                 iterations++;
                 if (iterations > _maxStateIterations)
                 {  
-                    logger.Log($"Max iterations reached! {iterations} > {_maxStateIterations}");
+                    logger.LogHeader($"--- MAX ITERATIONS REACHED! {iterations} > {_maxStateIterations} ---");
                     logger.Log($"State Queue Size: {stateQueue.Count}");
                     break;
                 }
 
+                if (stateQueue.Count > _maxStateQueueSize)
+                {
+                    logger.Log($"--- STATE QUEUE SIZE MAX SIZE! ({stateQueue.Count} > {_maxStateQueueSize}) SETTING CIRCUIT BREAKER to true ---");
+                    _stateQueueCircuitBreakerTripped = true;
+                }
+
                 SimulatorState state = stateQueue.Dequeue();
-                state.Logger.LogHeader($"--- STATE {state.Id} - Turn #{state.Turn}  (State Queue Size: {stateQueue.Count})");
+                state.Logger.LogHeader($"--- STATE {state.Id} (Parent: {state.ParentId}) - Turn #{state.Turn}  (State Queue Size: {stateQueue.Count})");
                 if (state.IsPlayerMove)
                 {
                     state.Logger.LogHeader(">> PLAYER TURN <<");
@@ -342,7 +356,8 @@ public class GameSimulator
     {
         state.Lanes.PromoteStagedCards();
 
-        bool[] stageLaneOccupied = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_STAGE_LANE_ROW).Select(c => c != null).ToArray();
+        var stageLane = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_STAGE_LANE_ROW);
+        bool[] stageLaneOccupied = stageLane.Select(c => c != null).ToArray();
         List<PlayedCard> enemyMoves = state.AI.GetMovesForTurn(state.Turn, stageLaneOccupied);
         foreach (var playedCard in enemyMoves)
         {
@@ -353,32 +368,20 @@ public class GameSimulator
         ResolveCombat(state, isPlayerTurn: false);
         state.Turn++;
         state.IsPlayerMove = true;
-        return state; // NB: not cloning here since we should not be forking the state
+        state.ParentId = state.Id; // NB: not cloning here since we should not be forking the state
+        state.Id = SimulatorState.NextStateId++;
+        return state; 
     }
 
+    private const int MIN_HEURISTIC_SCORE_TO_CONSIDER = 1;
     private IEnumerable<PlayerTurnAction> GetPlayerActions(SimulatorState state)
     {
+        int maxActionCount = _stateQueueCircuitBreakerTripped ? 1 : _maxCardActionBranchesPerTurn;
         List<PlayerTurnAction> bestPlayerActions = PlayerTurnAction.TakeTop(
-            count: _maxCardActionBranchesPerTurn,
-            minValue: 1,
-            CalculateBestPlayerActionsDrawCreature(state),
-            CalculateBestPlayerActionsDrawSacrifice(state));
-
-        if (_alwaysTryDrawingCreature && state.Creatures.RemainingCardCount > 0)
-        {
-            bestPlayerActions.Add(new PlayerTurnAction() {
-                DrawAction = DrawAction.DrawFromCreatures,
-                CardActions = new PlayCardAction[0],
-            });
-        }
-
-        if (_alwaysTryDrawingSacrifice && state.Sacrifices.RemainingCardCount > 0)
-        {
-            bestPlayerActions.Add(new PlayerTurnAction() {
-                DrawAction = DrawAction.DrawFromSacrifices,
-                CardActions = new PlayCardAction[0],
-            });
-        }
+            count: maxActionCount,
+            minValue: MIN_HEURISTIC_SCORE_TO_CONSIDER,
+            CalculateBestPlayerActionsDrawSacrifice(state),
+            CalculateBestPlayerActionsDrawCreature(state));
 
         if (bestPlayerActions.Count == 0)
         {
@@ -405,37 +408,57 @@ public class GameSimulator
         return bestPlayerActions;
     }
 
-    private IEnumerable<PlayerTurnAction> CalculateBestPlayerActionsDrawCreature(SimulatorState state)
+    private List<PlayerTurnAction> CalculateBestPlayerActionsDrawCreature(SimulatorState state)
     {
         if (state.Creatures.RemainingCardCount == 0)
         {
             state.Logger.Log("Creatures deck is empty! - Skipping player actions for drawing creatures");
-            return Enumerable.Empty<PlayerTurnAction>();
+            return new List<PlayerTurnAction>();
         }
 
         var newCreature = state.Creatures.PeekTop();
         var newHand = new SimulatorHand(state.Hand).Add(newCreature);
 
         state.Logger.LogHeader("[Calculate Action] DRAW CREATURE");
-        return CalculateBestPlayerActions(DrawAction.DrawFromCreatures, newHand, state.Lanes, state.Logger, maxActions: _maxCardActionBranchesPerTurn);
+        List<PlayerTurnAction> bestPlayerActions = CalculateBestPlayerActions(DrawAction.DrawFromCreatures, newHand, state.Lanes, state.Logger, maxActions: _maxCardActionBranchesPerTurn);
+        if (_alwaysTryDrawingCreature)
+        {
+            bestPlayerActions.Add(new PlayerTurnAction() {
+                DrawAction = DrawAction.DrawFromCreatures,
+                CardActions = new PlayCardAction[0],
+                HeuristicScore = MIN_HEURISTIC_SCORE_TO_CONSIDER, // Just above the cutoff to consider
+            });
+        }
+
+        return bestPlayerActions;
     }
 
-    private IEnumerable<PlayerTurnAction> CalculateBestPlayerActionsDrawSacrifice(SimulatorState state)
+    private List<PlayerTurnAction> CalculateBestPlayerActionsDrawSacrifice(SimulatorState state)
     {
         if (state.Sacrifices.RemainingCardCount == 0)
         {
             state.Logger.Log("Sacrifices deck is empty! - Skipping player actions for drawing sacrifices");
-            return Enumerable.Empty<PlayerTurnAction>();
+            return new List<PlayerTurnAction>();
         }
 
         var newSacrifice = state.Sacrifices.PeekTop();
         var newHand = new SimulatorHand(state.Hand).Add(newSacrifice);
 
         state.Logger.LogHeader("[Calculate Action] DRAW SACRIFICE");
-        return CalculateBestPlayerActions(DrawAction.DrawFromSacrifices, newHand, state.Lanes, state.Logger, maxActions: _maxCardActionBranchesPerTurn);
+        List<PlayerTurnAction> bestPlayerActions = CalculateBestPlayerActions(DrawAction.DrawFromSacrifices, newHand, state.Lanes, state.Logger, maxActions: _maxCardActionBranchesPerTurn);
+        if (_alwaysTryDrawingSacrifice)
+        {
+            bestPlayerActions.Add(new PlayerTurnAction() {
+                DrawAction = DrawAction.DrawFromSacrifices,
+                CardActions = new PlayCardAction[0],
+                HeuristicScore = MIN_HEURISTIC_SCORE_TO_CONSIDER, // Just above the cutoff to consider
+            });
+        }
+
+        return bestPlayerActions;
     }
 
-    protected static IEnumerable<PlayerTurnAction> CalculateBestPlayerActions(
+    protected static List<PlayerTurnAction> CalculateBestPlayerActions(
         DrawAction action,
         SimulatorHand hand,
         SimulatorLanes lanes,
@@ -725,7 +748,7 @@ public class GameSimulator
 
 public class SimulatorCard
 {
-    public static int NextId = 1;
+    public static int NextCardId = 1;
 
     public int Id { get; set; }
     public CardInfo Card { get; set; }
@@ -733,7 +756,7 @@ public class SimulatorCard
 
     public SimulatorCard(CardInfo cardInfo)
     {
-        Id = NextId++;
+        Id = NextCardId++;
         Card = cardInfo;
         DamageReceived = 0;
     }

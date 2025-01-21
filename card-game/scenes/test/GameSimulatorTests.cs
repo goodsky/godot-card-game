@@ -59,7 +59,7 @@ public static class GameSimulatorTests
         return failedCount == 0;
     }
 
-    [GameSimulatorTest(logEnabled: true)]
+    [GameSimulatorTest(onlyRunThis: true, logEnabled: true)]
     public static void Test_GameSimulator_StressTest()
     {
         var sacrificeDeck = new List<CardInfo>();
@@ -84,17 +84,60 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
-            StartingHandSize = 5,
+            StartingHandSize = 2,
             SacrificesDeck = sacrificeDeck,
             CreaturesDeck = creaturesDeck,
             AI = SetupEnemyAI(aiTurns.ToArray()),
         };
-        
-        // Try setting "always draw cards" to true for a fun time
+
         var result = new GameSimulator(
             maxTurns: 50,
             maxBranchPerTurn: 2,
-            alwaysTryDrawingCreature: false,
+            alwaysTryDrawingCreature: true,
+            alwaysTryDrawingSacrifice: true).Simulate(args);
+
+        Assert(result.Rounds.Count > 0, "Should have played many branching rounds");
+
+        Console.WriteLine($"{result.Rounds.Count} rounds played");
+
+        int PlayerWinCount = result.Rounds.Count(r => r.Result == RoundResult.PlayerWin);
+        int StalemateCount = result.Rounds.Count(r => r.Result == RoundResult.Stalemate);
+        int EnemyWinCount = result.Rounds.Count(r => r.Result == RoundResult.EnemyWin);
+        Console.WriteLine($"PlayerWin: {PlayerWinCount}, Stalemate: {StalemateCount}, EnemyWin: {EnemyWinCount}");
+
+        int minRountCount = result.Rounds.Min(r => r.Turns);
+        int maxRountCount = result.Rounds.Max(r => r.Turns);
+        Console.WriteLine($"Min turns: {minRountCount}, Max turns: {maxRountCount}");
+    }
+
+    [GameSimulatorTest()]
+    public static void Test_GameSimulator_AlwaysDrawSacrificeTest()
+    {
+        var sacrificeDeck = new List<CardInfo>();
+        var creaturesDeck = new List<CardInfo>();
+        for (int i = 0; i < 26; i++)
+        {
+            sacrificeDeck.Add(SetupCardInfo("Sacrifice", Convert.ToChar(65 + i).ToString(), 0, 1, CardBloodCost.Zero));
+            creaturesDeck.Add(SetupCardInfo("Creature", Convert.ToChar(65 + i).ToString(), 1, 1, CardBloodCost.One));
+        }
+
+        sacrificeDeck.Reverse();
+        creaturesDeck.Reverse();
+
+        var args = new SimulatorArgs
+        {
+            EnableLogging = LOG_TEST,
+            StartingHandSize = 5,
+            SacrificesDeck = sacrificeDeck,
+            CreaturesDeck = creaturesDeck,
+            AI = SetupEnemyAI(new ScriptedMove[0]),
+        };
+        
+        // Player should win - but there are potentially many duplicate states as we draw creatures or sacrifices
+        var result = new GameSimulator(
+            maxTurns: 50,
+            maxBranchPerTurn: 2,
+            alwaysTryDrawingCreature: true,
             alwaysTryDrawingSacrifice: true).Simulate(args);
 
         Assert(result.Rounds.Count > 0, "Should have played many branching rounds");

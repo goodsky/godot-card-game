@@ -54,6 +54,11 @@ public class EnemyAI
                 {
                     continue;
                 }
+                else
+                {
+                    // NB: don't forget to update in case two moves in the same turn try to play in the same lane
+                    backLaneHasCard[move.Lane.Value] = true;
+                }
             }
             else
             {
