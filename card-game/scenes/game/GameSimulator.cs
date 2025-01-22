@@ -32,11 +32,12 @@ public enum RoundResult
 public class SimulatorResult
 {
     public List<SimulatorRoundResult> Rounds { get; set; }
+    public int DuplicateStates { get; set; }
 }
 
 public class GameSimulator
 {
-    protected class SimulatorState
+    internal class SimulatorState
     {
         internal static int NextStateId = 1;
 
@@ -52,7 +53,6 @@ public class GameSimulator
         public SimulatorDeck Sacrifices { get; set; }
         public EnemyAI AI { get; set; }
         public SimulatorLogger Logger { get; set; }
-        public List<SimulatorRoundResult> Results { get; set; }
 
         public SimulatorState Clone()
         {
@@ -68,11 +68,49 @@ public class GameSimulator
                 Lanes = new SimulatorLanes(Lanes),
                 Creatures = new SimulatorDeck(Creatures),
                 Sacrifices = new SimulatorDeck(Sacrifices),
-                AI = AI.Clone(),
+                AI = AI?.Clone(),
                 Logger = Logger,
-                Results = Results,
             };
         }
+
+        public override int GetHashCode()
+        {
+            // the hash ignores cards on the field - we check that in Equals
+            return HashCode.Combine(Turn, IsPlayerMove, PlayerDamageReceived, EnemyDamageReceived, Hand.Cards.Count, Creatures.RemainingCardCount, Sacrifices.RemainingCardCount);
+        }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj is SimulatorState other)
+            {
+                bool intsAreEqual =
+                    Turn == other.Turn &&
+                    IsPlayerMove == other.IsPlayerMove &&
+                    PlayerDamageReceived == other.PlayerDamageReceived &&
+                    EnemyDamageReceived == other.EnemyDamageReceived &&
+                    Hand.Cards.Count == other.Hand.Cards.Count &&
+                    Creatures.RemainingCardCount == other.Creatures.RemainingCardCount &&
+                    Sacrifices.RemainingCardCount == other.Sacrifices.RemainingCardCount;
+                if (intsAreEqual)
+                {
+                    var handCardIds1 = Hand.Cards.Select(card => card.Id);
+                    var handCardIds2 = other.Hand.Cards.Select(card => card.Id);
+                    
+                    var laneCardIds1 = Lanes.GetCards().Select(card => card?.Id ?? -1);
+                    var laneCardIds2 = other.Lanes.GetCards().Select(card => card?.Id ?? -1);
+
+                    var laneCardDmg1 = Lanes.GetCards().Select(card => card?.DamageReceived ?? -1);
+                    var laneCardDmg2 = other.Lanes.GetCards().Select(card => card?.DamageReceived ?? -1);
+
+                    return new HashSet<int>(handCardIds1).SetEquals(handCardIds2) // don't care about order of cards in hand
+                        && laneCardIds1.SequenceEqual(laneCardIds2) // we do care about the order of cards on the board
+                        && laneCardDmg1.SequenceEqual(laneCardDmg2);
+                }
+            }
+            return false;
+        }
+
     }
     
     private static SimulatorState InitializeSimulationState(SimulatorArgs args)
@@ -94,7 +132,6 @@ public class GameSimulator
             Sacrifices = new SimulatorDeck(args.SacrificesDeck),
             AI = args.AI,
             Logger = new SimulatorLogger(args.EnableLogging),
-            Results = new List<SimulatorRoundResult>(),
         };
 
         for (int i = 0; i < args.StartingHandSize; i++)
@@ -248,9 +285,19 @@ public class GameSimulator
 
         try {
             var stateQueue = new Queue<SimulatorState>();
+            var seenStates = new HashSet<SimulatorState>();
+
+            int duplicateStatesCount = 0;
             var roundResults = new List<SimulatorRoundResult>();
             var enqueueStateIfNotGameOver = (SimulatorState state) =>
             {
+                if (seenStates.Contains(state))
+                {
+                    duplicateStatesCount++;
+                    logger.Log($"State {state.Id} already seen - skipping.");
+                    return;
+                }
+
                 RoundResult? result = null;
                 if (IsGameOver(state))
                 {
@@ -328,8 +375,10 @@ public class GameSimulator
             }
             
             logger.Log($"Completed simulation with {roundResults.Count} rounds.");
+            logger.Log($"Saw {duplicateStatesCount} duplicate states.");
             return new SimulatorResult
             {
+                DuplicateStates = duplicateStatesCount,
                 Rounds = roundResults,
             };
         }
@@ -817,7 +866,7 @@ public class SimulatorDeck
 
     public SimulatorDeck(SimulatorDeck other)
     {
-        _deck = new List<SimulatorCard>(other._deck);
+        _deck = other._deck.Select(card => new SimulatorCard(card)).ToList();
         _drawnCardsCount = other._drawnCardsCount;
     }
 
@@ -894,6 +943,20 @@ public class SimulatorLanes
         for (int col = 0; col < COL_COUNT; col++)
         {
             cards.Add(_lanes[col, row]);
+        }
+
+        return cards;
+    }
+
+    public List<SimulatorCard> GetCards()
+    {
+        var cards = new List<SimulatorCard>();
+        for (int col = 0; col < COL_COUNT; col++)
+        {
+            for (int row = 0; row < ROW_COUNT; row++)
+            {
+                cards.Add(_lanes[col, row]);
+            }
         }
 
         return cards;
