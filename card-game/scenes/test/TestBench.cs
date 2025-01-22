@@ -56,6 +56,26 @@ public partial class TestBench : Node2D
 		resultsLabel.Text = $"{(allPass ? "All tests passed!" : "TEST FAILURES")}";
 	}
 
+	public void Click_AnalyzeGameBalance()
+	{
+		var resultsLabel = FindChild("SimulatorResultsLabel") as Label;
+
+		var startTime = DateTime.Now;
+		try
+		{
+			GameAnalyzer.AnalyzeGameBalance(cardPoolCount: 1, gamesCount: 100, minLevel: 1, maxLevel: 12);
+		}
+		catch (Exception e)
+		{
+			resultsLabel.Text = $"EXCEPTION: {e.Message}";
+			GD.Print(e.ToString());
+			return;
+		}
+
+		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
+		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
+	}
+
 	public void Click_GenerateCardPool()
 	{
 		var cardPool = CardGenerator.GenerateRandomCardPool("TestBench Card Pool");

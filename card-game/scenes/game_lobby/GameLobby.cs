@@ -759,7 +759,7 @@ public partial class GameLobby : Control
 		}
 	}
 
-	public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
+	public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd, bool log = true)
 	{
 		const int TOTAL_CARDS_RATE = 1;
 		int totalCards = LinearScale(level, TOTAL_CARDS_RATE, min: 4, max: 12, y_intercept: 4, random_amount: 1, rnd: rnd);
@@ -779,7 +779,7 @@ public partial class GameLobby : Control
 		var twoCostProbabilities = new[] { 00, 05, 25, 45, 50, 50, 50, 50, 50, 50 };
 		var threeCostProbabilities = new[] { 00, 00, 00, 05, 05, 10, 20, 30, 40, 50 };
 
-		GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
+		if (log) GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
 
 		int turnId = 0;
 		var moves = new List<ScriptedMove>();
@@ -796,7 +796,7 @@ public partial class GameLobby : Control
 			int threeCostProbability = threeCostProbabilities[costProbabilityIdx];
 			int zeroCostProbability = 100 - oneCostProbability - twoCostProbability - threeCostProbability;
 
-			GD.Print($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
+			if (log) GD.Print($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
 
 			for (int i = 0; i < concurrentCount; i++)
 			{
@@ -816,7 +816,7 @@ public partial class GameLobby : Control
 					rarity = CardRarity.Sacrifice;
 				}
 
-				GD.Print($"      {cost}:{rarity}");
+				if (log) GD.Print($"      {cost}:{rarity}");
 				moves.Add(new ScriptedMove(turnId, cost, rarity));
 			}
 
