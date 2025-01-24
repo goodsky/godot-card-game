@@ -8,6 +8,40 @@ public partial class TestBench : Node2D
 	{
 	}
 
+	public void Click_AnalyzeGameBalance()
+	{
+		var cardPoolTextEdit = FindChild("CardPoolCount") as TextEdit;
+		var gamesToSimTextEdit = FindChild("CardPoolCount") as TextEdit;
+		var resultsLabel = FindChild("BalanceResultsLabel") as Label;
+
+		if (!TryReadTextEdit(cardPoolTextEdit, 1, 100, out int cardPoolCount))
+		{
+			resultsLabel.Text = "Invalid Card Pool Size";
+			return;
+		}
+
+		if (!TryReadTextEdit(gamesToSimTextEdit, 1, 100, out int gamesCount))
+		{
+			resultsLabel.Text = "Invalid Games To Simulate Count";
+			return;
+		}
+
+		var startTime = DateTime.Now;
+		try
+		{
+			GameAnalyzer.AnalyzeGameBalance(cardPoolCount, gamesCount, minLevel: 1, maxLevel: 12);
+		}
+		catch (Exception e)
+		{
+			resultsLabel.Text = $"EXCEPTION: {e.Message}";
+			GD.Print(e.ToString());
+			return;
+		}
+
+		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
+		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
+	}
+
 	public void Click_SimulateSaveFile()
 	{
 		var resultsLabel = FindChild("SimulatorResultsLabel") as Label;
@@ -56,26 +90,6 @@ public partial class TestBench : Node2D
 		resultsLabel.Text = $"{(allPass ? "All tests passed!" : "TEST FAILURES")}";
 	}
 
-	public void Click_AnalyzeGameBalance()
-	{
-		var resultsLabel = FindChild("SimulatorResultsLabel") as Label;
-
-		var startTime = DateTime.Now;
-		try
-		{
-			GameAnalyzer.AnalyzeGameBalance(cardPoolCount: 1, gamesCount: 100, minLevel: 1, maxLevel: 12);
-		}
-		catch (Exception e)
-		{
-			resultsLabel.Text = $"EXCEPTION: {e.Message}";
-			GD.Print(e.ToString());
-			return;
-		}
-
-		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
-		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
-	}
-
 	public void Click_GenerateCardPool()
 	{
 		var cardPool = CardGenerator.GenerateRandomCardPool("TestBench Card Pool");
@@ -86,15 +100,13 @@ public partial class TestBench : Node2D
 	{
 		var textEdit = FindChild("AnalyzeCardsCount") as TextEdit;
 		var label = FindChild("AnalyzeCardsLabel") as Label;
-		int poolsCount;
-		if (textEdit == null ||
-			!int.TryParse(textEdit.Text, out poolsCount) ||
-			poolsCount < 1 || poolsCount > 1000)
+
+		if (!TryReadTextEdit(textEdit, 1, 1000, out int poolsCount))
 		{
-			label.Text = "Invalid Sample Size";
+			label.Text = "Invalid Card Pool Count";
 			return;
 		}
-
+		
 		var startTime = DateTime.Now;
 		CardPoolAnalyzer.AnalyzeCardPools(poolsCount);
 
@@ -110,6 +122,19 @@ public partial class TestBench : Node2D
 	public void Click_BackToMainMenu()
 	{
 		SceneLoader.Instance.LoadMainMenu();
+	}
+
+	private bool TryReadTextEdit(TextEdit textEdit, int minValue, int maxValue, out int value)
+	{
+		if (textEdit == null ||
+			!int.TryParse(textEdit.Text, out value) ||
+			value < minValue || value > maxValue)
+		{
+			value = default;
+			return false;
+		}
+
+		return true;
 	}
 
 	#region One-off Experiments

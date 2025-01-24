@@ -117,7 +117,7 @@ public static class CardPoolAnalyzer
 		public override int GetHashCode()
 		{
 			string abilitiesStr = string.Join("", Abilities);
-			return Rarity.GetHashCode() ^ BloodCost.GetHashCode() ^ Attack.GetHashCode() ^ Health.GetHashCode() & abilitiesStr.GetHashCode();
+			return HashCode.Combine(Rarity, BloodCost, Attack, Health, abilitiesStr);
 		}
 
 		public int CompareTo(CardAnalysisKey other)

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Godot;
+using static CardPoolAnalyzer;
 
 public class SimulatorArgs
 {
@@ -15,8 +16,8 @@ public class SimulatorArgs
 
 public struct SimulatorRoundResult
 {
-    public int Turns { get; set; }
     public RoundResult Result { get; set; }
+    public int Turns { get; set; }
     public int PlayerDamageReceived { get; set; }
     public int EnemyDamageReceived { get; set; }
 }
@@ -32,7 +33,89 @@ public enum RoundResult
 public class SimulatorResult
 {
     public List<SimulatorRoundResult> Rounds { get; set; }
+    public CardPerformanceSummary PlayerCardPerformanceSummary { get; set; }
+    public CardPerformanceSummary EnemyCardPerformanceSummary { get; set; }
     public int DuplicateStates { get; set; }
+}
+
+public class CardPerformanceSummary
+{
+    private Dictionary<CardAnalysisKey, CardPlaySummary> _cardSummaries = new Dictionary<CardAnalysisKey, CardPlaySummary>();
+    public void CardPlayed(CardInfo card)
+    {
+        GetSummaryForCard(card).TimesPlayed++;
+    }
+
+    public void DamageDealt(CardInfo card, int damage)
+    {
+        GetSummaryForCard(card).DamageDealt += damage;
+    }
+
+    public void DamageReceived(CardInfo card, int damage)
+    {
+        GetSummaryForCard(card).DamageReceived += damage;
+    }
+
+    public void CardsWon(IEnumerable<CardInfo> cards)
+    {
+        foreach (var card in cards)
+        {
+            GetSummaryForCard(card).TimesWon++;
+        }
+    }
+
+    public void CardLost(IEnumerable<CardInfo> cards)
+    {
+        foreach (var card in cards)
+        {
+            GetSummaryForCard(card).TimesLost++;
+        }
+    }
+
+    public void Merge(CardPerformanceSummary other)
+    {
+        foreach (var kvp in other._cardSummaries)
+        {
+            if (_cardSummaries.TryGetValue(kvp.Key, out var summary))
+            {
+                summary.TimesPlayed += kvp.Value.TimesPlayed;
+                summary.DamageDealt += kvp.Value.DamageDealt;
+                summary.DamageReceived += kvp.Value.DamageReceived;
+                summary.TimesWon += kvp.Value.TimesWon;
+                summary.TimesLost += kvp.Value.TimesLost;
+            }
+            else
+            {
+                _cardSummaries[kvp.Key] = kvp.Value;
+            }
+        }
+    }
+
+    public IEnumerable<(CardAnalysisKey, CardPlaySummary)> GetSummaries()
+    {
+        return _cardSummaries.Select(kvp => (kvp.Key, kvp.Value));
+    }
+
+    private CardPlaySummary GetSummaryForCard(CardInfo card)
+    {
+        var key = new CardAnalysisKey(card);
+        if (!_cardSummaries.TryGetValue(key, out var summary))
+        {
+            summary = new CardPlaySummary();
+            _cardSummaries[key] = summary;
+        }
+
+        return summary;
+    }
+}
+
+public class CardPlaySummary
+{
+    public int TimesPlayed { get; set; }
+    public int DamageDealt { get; set; }
+    public int DamageReceived { get; set; }
+    public int TimesWon { get; set; }
+    public int TimesLost { get; set; }
 }
 
 public class GameSimulator
@@ -51,8 +134,12 @@ public class GameSimulator
         public SimulatorLanes Lanes { get; set; }
         public SimulatorDeck Creatures { get; set; }
         public SimulatorDeck Sacrifices { get; set; }
+        public List<SimulatorCard> PlayerGraveyard { get; set; }
+        public List<SimulatorCard> EnemyGraveyard { get; set; }
         public EnemyAI AI { get; set; }
         public SimulatorLogger Logger { get; set; }
+        public CardPerformanceSummary PlayerCardPerformanceSummary { get; set; }
+        public CardPerformanceSummary EnemyCardPerformanceSummary { get; set; }
 
         public SimulatorState Clone()
         {
@@ -70,6 +157,14 @@ public class GameSimulator
                 Sacrifices = new SimulatorDeck(Sacrifices),
                 AI = AI?.Clone(),
                 Logger = Logger,
+
+                // NB: graveyard do not deep copy SimulatorCard refs
+                PlayerGraveyard = new List<SimulatorCard>(PlayerGraveyard),
+                EnemyGraveyard = new List<SimulatorCard>(EnemyGraveyard),
+
+                // NB: the card performance summaries are "global" and not deep copied during clone
+                PlayerCardPerformanceSummary = PlayerCardPerformanceSummary,
+                EnemyCardPerformanceSummary = EnemyCardPerformanceSummary,
             };
         }
 
@@ -132,6 +227,10 @@ public class GameSimulator
             Sacrifices = new SimulatorDeck(args.SacrificesDeck),
             AI = args.AI,
             Logger = new SimulatorLogger(args.EnableLogging),
+            PlayerGraveyard = new List<SimulatorCard>(),
+            EnemyGraveyard = new List<SimulatorCard>(),
+            PlayerCardPerformanceSummary = new CardPerformanceSummary(),
+            EnemyCardPerformanceSummary = new CardPerformanceSummary(),
         };
 
         for (int i = 0; i < args.StartingHandSize; i++)
@@ -161,13 +260,18 @@ public class GameSimulator
                 if (playerCard != null)
                 {
                     int damage = CombatHelper.CardDamage(playerCard.Card, enemyCard?.Card);
+                    state.PlayerCardPerformanceSummary.DamageDealt(playerCard.Card, damage);
+
                     if (CombatHelper.IsBlocked(playerCard.Card, enemyCard?.Card))
                     {
                         enemyCard.DamageReceived += damage;
+                        state.EnemyCardPerformanceSummary.DamageReceived(enemyCard.Card, damage);
+
                         if (enemyCard.DamageReceived >= enemyCard.Card.Health)
                         {
                             state.Logger.Log($"Enemy card {enemyCard.Card.Name} killed!");
                             if (!state.Lanes.TryRemoveCardById(enemyCard.Id)) throw new InvalidOperationException($"Failed to remove card by Id: {enemyCard.Id}");
+                            state.EnemyGraveyard.Add(enemyCard);
                         }
                     }
                     else
@@ -182,13 +286,18 @@ public class GameSimulator
                 if (enemyCard != null)
                 {
                     int damage = CombatHelper.CardDamage(enemyCard.Card, playerCard?.Card);
+                    state.EnemyCardPerformanceSummary.DamageDealt(enemyCard.Card, damage);
+
                     if (CombatHelper.IsBlocked(enemyCard.Card, playerCard?.Card))
                     {
                         playerCard.DamageReceived += damage;
+                        state.PlayerCardPerformanceSummary.DamageReceived(playerCard.Card, damage);
+
                         if (playerCard.DamageReceived >= playerCard.Card.Health)
                         {
                             state.Logger.Log($"Player card {playerCard.Card.Name} killed!");
                             if (!state.Lanes.TryRemoveCardById(playerCard.Id)) throw new InvalidOperationException($"Failed to remove card by Id: {playerCard.Id}");
+                            state.PlayerGraveyard.Add(playerCard);
                         }
                     }
                     else
@@ -232,6 +341,7 @@ public class GameSimulator
             else if (state.Lanes.TryRemoveCardById(sacrifice.Id))
             {
                 state.Logger.Log($"Sacrificed {sacrifice.Card.Name} from board.");
+                state.PlayerGraveyard.Add(sacrifice);
             }
             else
             {
@@ -247,6 +357,7 @@ public class GameSimulator
 
         // Play the card in the lane
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
+        state.PlayerCardPerformanceSummary.CardPlayed(card.Card);
     }
 
     // Maximum number of turns in any simulated game.
@@ -258,6 +369,7 @@ public class GameSimulator
     private int _maxCardActionBranchesPerTurn;
     private bool _alwaysTryDrawingCreature;
     private bool _alwaysTryDrawingSacrifice;
+    private bool _checkDuplicateStates;
 
     private bool _stateQueueCircuitBreakerTripped = false;
 
@@ -267,7 +379,8 @@ public class GameSimulator
         int maxStateQueueCircuitBreakerSize = 10000,
         int maxStateIterations = 100000,
         bool alwaysTryDrawingCreature = false,
-        bool alwaysTryDrawingSacrifice = false)
+        bool alwaysTryDrawingSacrifice = false,
+        bool checkDuplicateStates = true)
     {
         _maxTurns = maxTurns;
         _maxStateIterations = maxStateIterations;
@@ -275,6 +388,7 @@ public class GameSimulator
         _maxCardActionBranchesPerTurn = maxBranchPerTurn;
         _alwaysTryDrawingCreature = alwaysTryDrawingCreature;
         _alwaysTryDrawingSacrifice = alwaysTryDrawingSacrifice;
+        _checkDuplicateStates = checkDuplicateStates;
     }
 
     /** Game Simulator entry point */
@@ -291,7 +405,7 @@ public class GameSimulator
             var roundResults = new List<SimulatorRoundResult>();
             var enqueueStateIfNotGameOver = (SimulatorState state) =>
             {
-                if (seenStates.Contains(state))
+                if (_checkDuplicateStates && seenStates.Contains(state))
                 {
                     duplicateStatesCount++;
                     logger.Log($"State {state.Id} already seen - skipping.");
@@ -324,10 +438,33 @@ public class GameSimulator
 
                     logger.LogRoundResult(roundResult);
                     roundResults.Add(roundResult);
+
+                    var playerCardsInLane = state.Lanes.GetRowCards(SimulatorLanes.PLAYER_LANE_ROW).Where(c => c != null);
+                    var playerCardsInGraveyard = state.PlayerGraveyard;
+                    var allPlayerCards = playerCardsInLane.Concat(playerCardsInGraveyard).Select(c => c.Card);
+
+                    var enemyCardsInLane = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_LANE_ROW).Where(c => c != null);
+                    var enemyCardsInGraveyard = state.EnemyGraveyard;
+                    var allEnemyCards = enemyCardsInLane.Concat(enemyCardsInGraveyard).Select(c => c.Card);
+
+                    if (result == RoundResult.PlayerWin)
+                    {
+                        state.PlayerCardPerformanceSummary.CardsWon(allPlayerCards);
+                        state.EnemyCardPerformanceSummary.CardLost(allEnemyCards);
+                    }
+                    else if (result == RoundResult.EnemyWin)
+                    {
+                        state.PlayerCardPerformanceSummary.CardLost(allPlayerCards);
+                        state.EnemyCardPerformanceSummary.CardsWon(allEnemyCards);
+                    }
                 }
                 else
                 {
                     stateQueue.Enqueue(state);
+                    if (_checkDuplicateStates)
+                    {
+                        seenStates.Add(state);
+                    }
                 }
             };
 
@@ -378,8 +515,10 @@ public class GameSimulator
             logger.Log($"Saw {duplicateStatesCount} duplicate states.");
             return new SimulatorResult
             {
-                DuplicateStates = duplicateStatesCount,
                 Rounds = roundResults,
+                PlayerCardPerformanceSummary = initialState.PlayerCardPerformanceSummary,
+                EnemyCardPerformanceSummary = initialState.EnemyCardPerformanceSummary,
+                DuplicateStates = duplicateStatesCount,
             };
         }
         finally

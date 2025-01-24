@@ -59,7 +59,7 @@ public static class GameSimulatorTests
         return failedCount == 0;
     }
 
-    [GameSimulatorTest()]
+    [GameSimulatorTest(logEnabled: true, onlyRunThis: true)]
     public static void Test_GameSimulator_StressTest()
     {
         var sacrificeDeck = new List<CardInfo>();
@@ -95,7 +95,8 @@ public static class GameSimulatorTests
             maxBranchPerTurn: 2,
             maxStateQueueCircuitBreakerSize: 2000,
             alwaysTryDrawingCreature: true,
-            alwaysTryDrawingSacrifice: true).Simulate(args);
+            alwaysTryDrawingSacrifice: true,
+            checkDuplicateStates: true).Simulate(args);
 
         Assert(result.Rounds.Count > 0, "Should have played many branching rounds");
 
@@ -144,7 +145,7 @@ public static class GameSimulatorTests
         Assert(result.Rounds.Any(result => result.Result == RoundResult.PlayerWin), "Player should be able to win");
     }
 
-    [GameSimulatorTest(logEnabled: true)]
+    [GameSimulatorTest()]
     public static void Test_GameSimulator_ShouldDrawSacrificesForStrongCreature()
     {
         var args = new SimulatorArgs
