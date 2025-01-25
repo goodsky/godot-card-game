@@ -6,6 +6,9 @@ using Godot;
 
 public static class GameAnalyzer
 {
+    public static int STARTING_DECK_SIZE = 6;
+    public static int STARTING_HAND_SIZE = 2;
+
     public static void AnalyzeGameBalance(int cardPoolCount = 3, int gamesCount = 10, int minLevel = 1, int maxLevel = 12)
     {
         var results = new List<(int poolId, int level, SimulatorResult result)>();
@@ -49,14 +52,14 @@ public static class GameAnalyzer
         var results = new List<SimulatorResult>();
         for (int gameId = 0; gameId < gamesCount; gameId++)
         {
-            var (playerCreatures, playerSacrifices) = GeneratePlayerDeck(cardPool);
+            var (playerCreatures, playerSacrifices, handSize) = GeneratePlayerDeck(cardPool, level, rnd);
             ShuffleCards(playerCreatures, rnd);
             ShuffleCards(playerSacrifices, rnd);
             
             var args = new SimulatorArgs
             {
                 EnableLogging = false,
-                StartingHandSize = 2, // TODO: make this configurable
+                StartingHandSize = handSize,
                 SacrificesDeck = playerSacrifices,
                 CreaturesDeck = playerCreatures,
                 AI = GameLobby.GenerateEnemyAI(cardPool, level, rnd, log: false),
@@ -75,22 +78,51 @@ public static class GameAnalyzer
         return results;
     }
 
-    private static (List<CardInfo> playerCreatures, List<CardInfo> playerSacrifices) GeneratePlayerDeck(CardPool cardPool)
+    private static (List<CardInfo> playerCreatures, List<CardInfo> playerSacrifices, int handSize) GeneratePlayerDeck(CardPool cardPool, int level, RandomGenerator rnd)
     {
-        var sacrifices = cardPool.Cards.Where(c => c.Rarity == CardRarity.Sacrifice).ToList();
-        var oneCostCards = cardPool.Cards.Where(c => c.BloodCost == CardBloodCost.One).ToList();
-        var twoCostCards = cardPool.Cards.Where(c => c.BloodCost == CardBloodCost.Two).ToList();
-        var threeCostCards = cardPool.Cards.Where(c => c.BloodCost == CardBloodCost.Three).ToList();
+        int handSize = STARTING_HAND_SIZE;
+        var playerDeck = GameLobby.GenerateStartingDeck(cardPool, STARTING_DECK_SIZE, rnd);
 
-        // TODO: randomize this a bit more
-        var playerCreatures =
-            oneCostCards.Take(4).Concat(
-                twoCostCards.Take(2)).Concat(
-                    threeCostCards.Take(1)).ToList();
+        for (int i = 0; i < level; i++)
+        {
+            var pretendDifficulty = rnd.SelectRandomOdds(
+                new[] { LevelDifficulty.Easy, LevelDifficulty.Medium, LevelDifficulty.Hard },
+                new[] { 50, 30, 20 }); // I invented these odds
+            if (level == 1) pretendDifficulty = LevelDifficulty.Easy;
+            if (level <= 3 && pretendDifficulty == LevelDifficulty.Hard) pretendDifficulty = LevelDifficulty.Medium;
+            var reward = GameLobby.GenerateLevelReward(pretendDifficulty, rnd);
 
-        var playerSacrifices = sacrifices.Take(6).ToList();
+            switch (reward)
+            {
+                case LevelReward.AddResource:
+                    playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: 1, rnd, CardRarity.Sacrifice));
+                    break;
+                case LevelReward.AddCreature:
+                    playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: 1, rnd, CardRarity.Common));
+                    break;
+                case LevelReward.AddUncommonCreature:
+                    playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: 1, rnd, CardRarity.Uncommon));
+                    break;
+                case LevelReward.AddRareCreature:
+                    playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: 1, rnd, CardRarity.Rare));
+                    break;
+                case LevelReward.IncreaseHandSize:
+                    handSize++;
+                    break;
+                case LevelReward.RemoveCard:
+                    // Let's only remove common creatures for now
+                    var commonCreatures = playerDeck.Where(card => card.Rarity == CardRarity.Common).ToList();
+                    if (commonCreatures.Count > 0)
+                    {
+                        playerDeck.Remove(rnd.SelectRandom(commonCreatures));
+                    }
+                    break;
+            }
+        }
 
-        return (playerCreatures, playerSacrifices);
+        var playerCreatures = playerDeck.Where(card => card.Rarity != CardRarity.Sacrifice).ToList();
+        var playerSacrifices = playerDeck.Where(card => card.Rarity == CardRarity.Sacrifice).ToList();
+        return (playerCreatures, playerSacrifices, handSize);
     }
 
     private static void ShuffleCards(List<CardInfo> cards, RandomGenerator rnd)
@@ -128,7 +160,7 @@ public static class GameAnalyzer
             int maxTurnsCount = result.Rounds.Count(round => round.Result == RoundResult.MaxTurnsReached);
 
             float winRate = (float)playerWinCount / gamesPlayed;
-            csvBuilder.AppendLine($"{poolId}, {level}, gamesPlayed, {winRate:f2}, {playerWinCount}, {enemyWinCount}, {stalemateCount}, {maxTurnsCount}");
+            csvBuilder.AppendLine($"{poolId}, {level}, {gamesPlayed}, {winRate:f2}, {playerWinCount}, {enemyWinCount}, {stalemateCount}, {maxTurnsCount}");
         }
 
         file.StoreString(csvBuilder.ToString());

@@ -41,10 +41,6 @@ public class SimulatorResult
 public class CardPerformanceSummary
 {
     private Dictionary<CardAnalysisKey, CardPlaySummary> _cardSummaries = new Dictionary<CardAnalysisKey, CardPlaySummary>();
-    public void CardPlayed(CardInfo card)
-    {
-        GetSummaryForCard(card).TimesPlayed++;
-    }
 
     public void DamageDealt(CardInfo card, int damage)
     {
@@ -54,6 +50,14 @@ public class CardPerformanceSummary
     public void DamageReceived(CardInfo card, int damage)
     {
         GetSummaryForCard(card).DamageReceived += damage;
+    }
+
+    public void CardsPlayed(IEnumerable<CardInfo> cards)
+    {
+        foreach (var card in cards)
+        {
+            GetSummaryForCard(card).TimesPlayed++;
+        }
     }
 
     public void CardsWon(IEnumerable<CardInfo> cards)
@@ -235,6 +239,11 @@ public class GameSimulator
 
         for (int i = 0; i < args.StartingHandSize; i++)
         {
+            if (state.Creatures.RemainingCardCount <= 0)
+            {
+                break;
+            }
+
             state.Hand.Add(state.Creatures.DrawFromTop());
         }
 
@@ -357,7 +366,6 @@ public class GameSimulator
 
         // Play the card in the lane
         state.Lanes.PlayCard(card, laneCol, isEnemy: false);
-        state.PlayerCardPerformanceSummary.CardPlayed(card.Card);
     }
 
     // Maximum number of turns in any simulated game.
@@ -442,10 +450,12 @@ public class GameSimulator
                     var playerCardsInLane = state.Lanes.GetRowCards(SimulatorLanes.PLAYER_LANE_ROW).Where(c => c != null);
                     var playerCardsInGraveyard = state.PlayerGraveyard;
                     var allPlayerCards = playerCardsInLane.Concat(playerCardsInGraveyard).Select(c => c.Card);
+                    state.PlayerCardPerformanceSummary.CardsPlayed(allPlayerCards);
 
                     var enemyCardsInLane = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_LANE_ROW).Where(c => c != null);
                     var enemyCardsInGraveyard = state.EnemyGraveyard;
                     var allEnemyCards = enemyCardsInLane.Concat(enemyCardsInGraveyard).Select(c => c.Card);
+                    state.EnemyCardPerformanceSummary.CardsPlayed(allEnemyCards);
 
                     if (result == RoundResult.PlayerWin)
                     {

@@ -91,6 +91,7 @@ text = "Analyze Balance"
 
 [node name="BalanceResultsLabel" type="Label" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
 
 [node name="SimulatorPanel" type="PanelContainer" parent="RootControl/VBoxContainer/Panels"]
 layout_mode = 2
@@ -112,6 +113,7 @@ text = "Run Tests"
 
 [node name="SimulatorResultsLabel" type="Label" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
 layout_mode = 2
+theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
 
 [node name="CardsPanel" type="PanelContainer" parent="RootControl/VBoxContainer/Panels"]
 layout_mode = 2

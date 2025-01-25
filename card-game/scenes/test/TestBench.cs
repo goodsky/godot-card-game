@@ -29,6 +29,7 @@ public partial class TestBench : Node2D
 		var startTime = DateTime.Now;
 		try
 		{
+			resultsLabel.Text = "Analyzing...";
 			GameAnalyzer.AnalyzeGameBalance(cardPoolCount, gamesCount, minLevel: 1, maxLevel: 12);
 		}
 		catch (Exception e)
@@ -69,6 +70,7 @@ public partial class TestBench : Node2D
 		var startTime = DateTime.Now;
 		try
 		{
+			resultsLabel.Text = "Simulating...";
 			new GameSimulator(maxBranchPerTurn: 2).Simulate(args);
 		}
 		catch (Exception e)
@@ -86,6 +88,7 @@ public partial class TestBench : Node2D
 	{
 		var resultsLabel = FindChild("SimulatorResultsLabel") as Label;
 
+		resultsLabel.Text = "Running tests...";
 		bool allPass = GameSimulatorTests.Go();
 		resultsLabel.Text = $"{(allPass ? "All tests passed!" : "TEST FAILURES")}";
 	}
@@ -108,6 +111,7 @@ public partial class TestBench : Node2D
 		}
 		
 		var startTime = DateTime.Now;
+		label.Text = "Analyzing...";
 		CardPoolAnalyzer.AnalyzeCardPools(poolsCount);
 
 		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
