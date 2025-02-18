@@ -1,6 +1,8 @@
 using Godot;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public partial class TestBench : Node2D
 {
@@ -43,6 +45,88 @@ public partial class TestBench : Node2D
 		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
 	}
 
+	public void Click_AnalyzeLevelGeneration()
+	{
+		const string LEVEL_GENERATION_ANALYSIS_FILENAME = "LevelGenerationAnalysis.csv";
+		const int MIN_LEVEL = 1;
+		const int MAX_LEVEL = 12;
+
+		var cardPoolTextEdit = FindChild("CardPoolCount") as TextEdit;
+		var gamesToSimTextEdit = FindChild("CardPoolCount") as TextEdit;
+		var resultsLabel = FindChild("BalanceResultsLabel") as Label;
+
+		if (!TryReadTextEdit(cardPoolTextEdit, 1, 100, out int cardPoolCount))
+		{
+			resultsLabel.Text = "Invalid Card Pool Size";
+			return;
+		}
+
+		if (!TryReadTextEdit(gamesToSimTextEdit, 1, 100, out int gamesCount))
+		{
+			resultsLabel.Text = "Invalid Games To Simulate Count";
+			return;
+		}
+
+		var startTime = DateTime.Now;
+		var rootRnd = new RandomGenerator();
+
+		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+        var file = FileAccess.Open($"{Constants.UserDataDirectory}/{LEVEL_GENERATION_ANALYSIS_FILENAME}", FileAccess.ModeFlags.Write);
+		var generatedLevels = new List<GameLevel>();
+		try
+		{
+			resultsLabel.Text = "Analyzing...";
+			for (int cardPoolId = 0; cardPoolId < cardPoolCount; cardPoolId++)
+			{
+				CardPool cardPool = CardGenerator.GenerateRandomCardPool("Level Generation Pool");
+				
+				for (int gameId = 0; gameId < gamesCount; gameId++)
+				{
+					int handSize = GameAnalyzer.STARTING_HAND_SIZE;
+					for (int level = MIN_LEVEL; level <= MAX_LEVEL; level++)
+					{
+						var rnd = new RandomGenerator(rootRnd.Next());
+						var fakeProgress = GameAnalyzer.GenerateSimulatedProgress(cardPool, level, rnd);
+            			(Deck sacrificeDeck, Deck creatureDeck, GameLevel gameLevel) = GameLobby.InitializeGame(fakeProgress, rnd);
+						generatedLevels.Add(gameLevel);
+					}
+				}
+			}
+
+			var difficultyEnums = Enum.GetValues(typeof(LevelDifficulty)).Cast<LevelDifficulty>().ToList();
+			var difficultyNamesString = string.Join(",", difficultyEnums.Select(d => d.ToString()));
+			var rewardEnums = Enum.GetValues(typeof(LevelReward)).Cast<LevelReward>().ToList();
+			var rewardNamesString = string.Join(",", rewardEnums.Select(d => d.ToString()));
+			
+			file.StoreLine($"Level,TotalGames,{difficultyNamesString},{rewardNamesString}");
+			for (int level = MIN_LEVEL; level <= MAX_LEVEL; level++)
+			{
+				var gamesAtThisLevel = generatedLevels.Where(l => l.Level == level).ToList();
+				int totalGames = gamesAtThisLevel.Count;
+				int[] difficultyCounts = new int[difficultyEnums.Count];
+				int[] rewardCounts = new int[rewardEnums.Count];
+				foreach (var gameLevel in gamesAtThisLevel)
+				{
+					difficultyCounts[(int)gameLevel.Difficulty]++;
+					rewardCounts[(int)gameLevel.Reward]++;
+				}
+
+				file.StoreLine($"{level},{totalGames},{string.Join(",", difficultyCounts)},{string.Join(",", rewardCounts)}");
+			}
+		}
+		catch (Exception e)
+		{
+			resultsLabel.Text = $"EXCEPTION: {e.Message}";
+			GD.Print(e.ToString());
+			return;
+		}
+
+		file.Close();
+
+		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
+		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
+	}
+
 	public void Click_SimulateSaveFile()
 	{
 		var resultsLabel = FindChild("SimulatorResultsLabel") as Label;
@@ -50,17 +134,19 @@ public partial class TestBench : Node2D
 		GameManager.Instance.RefreshSavedGame();
 
 		GameProgress progress = GameManager.Instance.Progress;
+		RandomGenerator rnd = GameManager.Instance.Random;
 		if (progress == null || progress.CurrentState != LobbyState.PlayGame)
 		{
 			resultsLabel.Text = "Error: Make sure current save is an active game!";
 			return;
 		}
 
-		var (sacrificeDeck, creatureDeck, gameLevel) = GameLobby.InitializeGame();
+		var (sacrificeDeck, creatureDeck, gameLevel) = GameLobby.InitializeGame(progress, rnd);
 
 		SimulatorArgs args = new SimulatorArgs
 		{
 			EnableLogging = true,
+			EnableCardSummary = false,
 			StartingHandSize = progress.HandSize,
 			SacrificesDeck = sacrificeDeck.Cards,
 			CreaturesDeck = creatureDeck.Cards,

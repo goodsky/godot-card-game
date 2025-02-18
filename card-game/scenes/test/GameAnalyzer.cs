@@ -48,21 +48,22 @@ public static class GameAnalyzer
 
     private static List<SimulatorResult> SimulateGames(CardPool cardPool, int gamesCount, int level)
     {
-        var rnd = new RandomGenerator();
+        var rootRnd = new RandomGenerator();
         var results = new List<SimulatorResult>();
         for (int gameId = 0; gameId < gamesCount; gameId++)
         {
-            var (playerCreatures, playerSacrifices, handSize) = GeneratePlayerDeck(cardPool, level, rnd);
-            ShuffleCards(playerCreatures, rnd);
-            ShuffleCards(playerSacrifices, rnd);
+            var rnd = new RandomGenerator(rootRnd.Next());
+            var fakeProgress = GenerateSimulatedProgress(cardPool, level, rnd);
+            (Deck sacrificeDeck, Deck creatureDeck, GameLevel gameLevel) = GameLobby.InitializeGame(fakeProgress, rnd);
             
             var args = new SimulatorArgs
             {
                 EnableLogging = false,
-                StartingHandSize = handSize,
-                SacrificesDeck = playerSacrifices,
-                CreaturesDeck = playerCreatures,
-                AI = GameLobby.GenerateEnemyAI(cardPool, level, rnd, log: false),
+                EnableCardSummary = true,
+                StartingHandSize = fakeProgress.HandSize,
+                SacrificesDeck = sacrificeDeck.Cards,
+                CreaturesDeck = creatureDeck.Cards,
+                AI = gameLevel.AI,
             };
 
             var result = new GameSimulator(
@@ -78,7 +79,7 @@ public static class GameAnalyzer
         return results;
     }
 
-    private static (List<CardInfo> playerCreatures, List<CardInfo> playerSacrifices, int handSize) GeneratePlayerDeck(CardPool cardPool, int level, RandomGenerator rnd)
+    public static GameProgress GenerateSimulatedProgress(CardPool cardPool, int level, RandomGenerator rnd)
     {
         int handSize = STARTING_HAND_SIZE;
         var playerDeck = GameLobby.GenerateStartingDeck(cardPool, STARTING_DECK_SIZE, rnd);
@@ -120,9 +121,13 @@ public static class GameAnalyzer
             }
         }
 
-        var playerCreatures = playerDeck.Where(card => card.Rarity != CardRarity.Sacrifice).ToList();
-        var playerSacrifices = playerDeck.Where(card => card.Rarity == CardRarity.Sacrifice).ToList();
-        return (playerCreatures, playerSacrifices, handSize);
+        return new GameProgress
+        {
+            CardPool = cardPool,
+            DeckCards = playerDeck,
+            HandSize = handSize,
+            Level = level,
+        };;
     }
 
     private static void ShuffleCards(List<CardInfo> cards, RandomGenerator rnd)

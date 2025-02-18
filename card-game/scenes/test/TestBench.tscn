@@ -89,6 +89,10 @@ placeholder_text = "Count"
 layout_mode = 2
 text = "Analyze Balance"
 
+[node name="AnalyzeLevelGenButton" type="Button" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
+layout_mode = 2
+text = "Analyze Level Gen"
+
 [node name="BalanceResultsLabel" type="Label" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
@@ -222,6 +226,7 @@ layout_mode = 2
 
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/GoBackButton" to="." method="Click_BackToMainMenu"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer/AnalyzeBalanceButton" to="." method="Click_AnalyzeGameBalance"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer/AnalyzeLevelGenButton" to="." method="Click_AnalyzeLevelGeneration"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/SimulateSaveButton" to="." method="Click_SimulateSaveFile"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/UnitTestsButton" to="." method="Click_GameSimulatorTests"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/GenerateCardsButton" to="." method="Click_GenerateCardPool"]

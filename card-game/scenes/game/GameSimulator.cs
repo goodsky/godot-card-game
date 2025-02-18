@@ -7,7 +7,11 @@ using static CardPoolAnalyzer;
 
 public class SimulatorArgs
 {
+    /** Enable writing a verbose summary to dsik for the simulation */
     public bool EnableLogging { get; set; }
+
+    /** Enable detailed performance summary for each card. When false, card summary will be null. */
+    public bool EnableCardSummary { get; set; }
     public int StartingHandSize { get; set; }
     public List<CardInfo> CreaturesDeck { get; set; }
     public List<CardInfo> SacrificesDeck { get; set; }
@@ -171,14 +175,11 @@ public class GameSimulator
                 EnemyCardPerformanceSummary = EnemyCardPerformanceSummary,
             };
         }
-
         public override int GetHashCode()
         {
             // the hash ignores cards on the field - we check that in Equals
             return HashCode.Combine(Turn, IsPlayerMove, PlayerDamageReceived, EnemyDamageReceived, Hand.Cards.Count, Creatures.RemainingCardCount, Sacrifices.RemainingCardCount);
         }
-
-
         public override bool Equals(object obj)
         {
             if (obj is SimulatorState other)
@@ -233,8 +234,8 @@ public class GameSimulator
             Logger = new SimulatorLogger(args.EnableLogging),
             PlayerGraveyard = new List<SimulatorCard>(),
             EnemyGraveyard = new List<SimulatorCard>(),
-            PlayerCardPerformanceSummary = new CardPerformanceSummary(),
-            EnemyCardPerformanceSummary = new CardPerformanceSummary(),
+            PlayerCardPerformanceSummary = args.EnableCardSummary ? new CardPerformanceSummary() : null,
+            EnemyCardPerformanceSummary = args.EnableCardSummary ? new CardPerformanceSummary() : null,
         };
 
         for (int i = 0; i < args.StartingHandSize; i++)
@@ -269,12 +270,12 @@ public class GameSimulator
                 if (playerCard != null)
                 {
                     int damage = CombatHelper.CardDamage(playerCard.Card, enemyCard?.Card);
-                    state.PlayerCardPerformanceSummary.DamageDealt(playerCard.Card, damage);
+                    state.PlayerCardPerformanceSummary?.DamageDealt(playerCard.Card, damage);
 
                     if (CombatHelper.IsBlocked(playerCard.Card, enemyCard?.Card))
                     {
                         enemyCard.DamageReceived += damage;
-                        state.EnemyCardPerformanceSummary.DamageReceived(enemyCard.Card, damage);
+                        state.EnemyCardPerformanceSummary?.DamageReceived(enemyCard.Card, damage);
 
                         if (enemyCard.DamageReceived >= enemyCard.Card.Health)
                         {
@@ -295,12 +296,12 @@ public class GameSimulator
                 if (enemyCard != null)
                 {
                     int damage = CombatHelper.CardDamage(enemyCard.Card, playerCard?.Card);
-                    state.EnemyCardPerformanceSummary.DamageDealt(enemyCard.Card, damage);
+                    state.EnemyCardPerformanceSummary?.DamageDealt(enemyCard.Card, damage);
 
                     if (CombatHelper.IsBlocked(enemyCard.Card, playerCard?.Card))
                     {
                         playerCard.DamageReceived += damage;
-                        state.PlayerCardPerformanceSummary.DamageReceived(playerCard.Card, damage);
+                        state.PlayerCardPerformanceSummary?.DamageReceived(playerCard.Card, damage);
 
                         if (playerCard.DamageReceived >= playerCard.Card.Health)
                         {
@@ -450,22 +451,22 @@ public class GameSimulator
                     var playerCardsInLane = state.Lanes.GetRowCards(SimulatorLanes.PLAYER_LANE_ROW).Where(c => c != null);
                     var playerCardsInGraveyard = state.PlayerGraveyard;
                     var allPlayerCards = playerCardsInLane.Concat(playerCardsInGraveyard).Select(c => c.Card);
-                    state.PlayerCardPerformanceSummary.CardsPlayed(allPlayerCards);
+                    state.PlayerCardPerformanceSummary?.CardsPlayed(allPlayerCards);
 
                     var enemyCardsInLane = state.Lanes.GetRowCards(SimulatorLanes.ENEMY_LANE_ROW).Where(c => c != null);
                     var enemyCardsInGraveyard = state.EnemyGraveyard;
                     var allEnemyCards = enemyCardsInLane.Concat(enemyCardsInGraveyard).Select(c => c.Card);
-                    state.EnemyCardPerformanceSummary.CardsPlayed(allEnemyCards);
+                    state.EnemyCardPerformanceSummary?.CardsPlayed(allEnemyCards);
 
                     if (result == RoundResult.PlayerWin)
                     {
-                        state.PlayerCardPerformanceSummary.CardsWon(allPlayerCards);
-                        state.EnemyCardPerformanceSummary.CardLost(allEnemyCards);
+                        state.PlayerCardPerformanceSummary?.CardsWon(allPlayerCards);
+                        state.EnemyCardPerformanceSummary?.CardLost(allEnemyCards);
                     }
                     else if (result == RoundResult.EnemyWin)
                     {
-                        state.PlayerCardPerformanceSummary.CardLost(allPlayerCards);
-                        state.EnemyCardPerformanceSummary.CardsWon(allEnemyCards);
+                        state.PlayerCardPerformanceSummary?.CardLost(allPlayerCards);
+                        state.EnemyCardPerformanceSummary?.CardsWon(allEnemyCards);
                     }
                 }
                 else

@@ -84,6 +84,7 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
+            EnableCardSummary = false,
             StartingHandSize = 2,
             SacrificesDeck = sacrificeDeck,
             CreaturesDeck = creaturesDeck,
@@ -129,6 +130,7 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
+            EnableCardSummary = false,
             StartingHandSize = 5,
             SacrificesDeck = sacrificeDeck,
             CreaturesDeck = creaturesDeck,
@@ -151,6 +153,7 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
+            EnableCardSummary = false,
             StartingHandSize = 1,
             SacrificesDeck = new List<CardInfo> {
                 SetupCardInfo("Sacrifice", "C", 0, 1, CardBloodCost.Zero),
@@ -183,6 +186,7 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
+            EnableCardSummary = false,
             StartingHandSize = 2,
             SacrificesDeck = new List<CardInfo> {
                 SetupCardInfo("Sacrifice", "1", 0, 1, CardBloodCost.Zero),
@@ -210,6 +214,7 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
+            EnableCardSummary = false,
             StartingHandSize = 0,
             SacrificesDeck = new List<CardInfo> {},
             CreaturesDeck = new List<CardInfo> {},
@@ -233,6 +238,7 @@ public static class GameSimulatorTests
         var args = new SimulatorArgs
         {
             EnableLogging = LOG_TEST,
+            EnableCardSummary = false,
             StartingHandSize = 0,
             SacrificesDeck = new List<CardInfo> { SetupCardInfo("Sacrifice", "1", 0, 1, CardBloodCost.Zero) },
             CreaturesDeck = new List<CardInfo> { SetupCardInfo("Creature", "1", 1, 1, CardBloodCost.One) },
