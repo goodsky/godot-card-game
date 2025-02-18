@@ -648,7 +648,7 @@ public partial class GameLobby : Control
 
         var args = new SimulatorArgs
         {
-            EnableLogging = false,
+            EnableLogging = false, // NB: Disable this for real gameplay
             EnableCardSummary = false,
             StartingHandSize = startingHandSize,
             SacrificesDeck = sacrificeDeck.Cards,

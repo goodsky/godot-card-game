@@ -47,7 +47,9 @@ public partial class TestBench : Node2D
 
 	public void Click_AnalyzeLevelGeneration()
 	{
-		const string LEVEL_GENERATION_ANALYSIS_FILENAME = "LevelGenerationAnalysis.csv";
+		const string LEVEL_GENERATION_ANALYSIS_FILENAME = "LevelGenerationAnalysis.txt";
+		const string LEVEL_GENERATION_ANALYSIS_FILENAME_CSV = "LevelGenerationAnalysis.csv";
+
 		const int MIN_LEVEL = 1;
 		const int MAX_LEVEL = 12;
 
@@ -71,7 +73,8 @@ public partial class TestBench : Node2D
 		var rootRnd = new RandomGenerator();
 
 		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
-        var file = FileAccess.Open($"{Constants.UserDataDirectory}/{LEVEL_GENERATION_ANALYSIS_FILENAME}", FileAccess.ModeFlags.Write);
+        var summaryFile = FileAccess.Open($"{Constants.UserDataDirectory}/{LEVEL_GENERATION_ANALYSIS_FILENAME}", FileAccess.ModeFlags.Write);
+		var csvFile = FileAccess.Open($"{Constants.UserDataDirectory}/{LEVEL_GENERATION_ANALYSIS_FILENAME_CSV}", FileAccess.ModeFlags.Write);
 		var generatedLevels = new List<GameLevel>();
 		try
 		{
@@ -94,24 +97,58 @@ public partial class TestBench : Node2D
 			}
 
 			var difficultyEnums = Enum.GetValues(typeof(LevelDifficulty)).Cast<LevelDifficulty>().ToList();
-			var difficultyNamesString = string.Join(",", difficultyEnums.Select(d => d.ToString()));
 			var rewardEnums = Enum.GetValues(typeof(LevelReward)).Cast<LevelReward>().ToList();
-			var rewardNamesString = string.Join(",", rewardEnums.Select(d => d.ToString()));
 			
-			file.StoreLine($"Level,TotalGames,{difficultyNamesString},{rewardNamesString}");
+			var difficultyNamesString = string.Join(",", difficultyEnums.Select(d => d.ToString()));
+			var rewardNamesString = string.Join(",", rewardEnums.Select(d => d.ToString()));
+			csvFile.StoreLine($"Level,TotalGames,{difficultyNamesString},{rewardNamesString}");
+
+			
 			for (int level = MIN_LEVEL; level <= MAX_LEVEL; level++)
 			{
+				summaryFile.StoreLine($"=== Level {level} ===");
+
 				var gamesAtThisLevel = generatedLevels.Where(l => l.Level == level).ToList();
 				int totalGames = gamesAtThisLevel.Count;
+
+				summaryFile.StoreLine($"Generated {totalGames} levels");
+
 				int[] difficultyCounts = new int[difficultyEnums.Count];
 				int[] rewardCounts = new int[rewardEnums.Count];
+				var guardrailReasonCount = new Dictionary<string, int>();
 				foreach (var gameLevel in gamesAtThisLevel)
 				{
 					difficultyCounts[(int)gameLevel.Difficulty]++;
 					rewardCounts[(int)gameLevel.Reward]++;
+					if (!string.IsNullOrEmpty(gameLevel.GuardrailReason))
+					{
+						if (!guardrailReasonCount.ContainsKey(gameLevel.GuardrailReason))
+						{
+							guardrailReasonCount[gameLevel.GuardrailReason] = 0;
+						}
+						guardrailReasonCount[gameLevel.GuardrailReason]++;
+					}
 				}
 
-				file.StoreLine($"{level},{totalGames},{string.Join(",", difficultyCounts)},{string.Join(",", rewardCounts)}");
+				summaryFile.StoreLine("Difficulty:");
+				foreach (var difficulty in difficultyEnums)
+				{
+					summaryFile.StoreLine($"\t{difficulty}: {100.0 * difficultyCounts[(int)difficulty]/totalGames:0.00}%");
+				}
+
+				summaryFile.StoreLine("Guardrail Reasons:");
+				foreach (var kvp in guardrailReasonCount)
+				{
+					summaryFile.StoreLine($"\t{kvp.Key}: {kvp.Value}");
+				}
+
+				summaryFile.StoreLine("Rewards:");
+				foreach (var reward in rewardEnums)
+				{
+					summaryFile.StoreLine($"\t{reward}: {100.0 * rewardCounts[(int)reward]/totalGames:0.00}%");
+				}
+
+				csvFile.StoreLine($"{level},{totalGames},{string.Join(",", difficultyCounts)},{string.Join(",", rewardCounts)}");
 			}
 		}
 		catch (Exception e)
@@ -121,7 +158,8 @@ public partial class TestBench : Node2D
 			return;
 		}
 
-		file.Close();
+		summaryFile.Close();
+		csvFile.Close();
 
 		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
 		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
