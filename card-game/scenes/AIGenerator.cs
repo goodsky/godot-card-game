@@ -90,11 +90,25 @@ public static class AIGenerator
             int threeCostProbability = threeCostProbabilities[costProbabilityIdx];
             int zeroCostProbability = 100 - oneCostProbability - twoCostProbability - threeCostProbability;
 
-            // Bake-in the guardrails to make sure we play at least one card by turn 2
+            // Guardrail help: make sure we play at least one card by turn 2
             int cardsPlayed = moves.Count;
             if (cardsPlayed == 0 && turnId == 1)
             {
                 concurrentCount = 1;
+                GD.Print("Guardrail help: ensuring card played by turn 2");
+            }
+
+            // Guardrail help: make sure we play at least one attack by turn 3
+            int? minAttack = null;
+            int attackPlayed = moves.Sum(move => move.CardToPlay?.Attack ?? 0);
+            if (attackPlayed == 0 && turnId == 2)
+            {
+                concurrentCount = 1;
+                minAttack = 1;
+
+                // Remove zero cost cards (which mostly have 0 attack)
+                zeroCostProbability = 0;
+                GD.Print("Guardrail help: removing zero cost cards");
             }
 
             if (log) GD.Print($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
@@ -118,13 +132,44 @@ public static class AIGenerator
                 }
 
                 if (log) GD.Print($"      {cost}:{rarity}");
-                moves.Add(new ScriptedMove(turnId, cost, rarity));
+                
+                // I've switched to only using fully resolved CardInfo scripted moves.
+                // This allows me to build in more guardrails for required attack played by the AI.
+                var resolvedCardInfo = GetCardByCostRarityAndStats(turnId, cardPool, rnd, cost, rarity, minAttack);
+                if (resolvedCardInfo == null)
+                {
+                    GD.PushError($"Could not find a card for move! Cost = {cost}; Rarity = {rarity};");
+                    continue;
+                }
+
+                moves.Add(new ScriptedMove(turnId, resolvedCardInfo.Value));
             }
 
             turnId++;
         }
 
         return new EnemyAI(cardPool, moves, rnd);
+    }
+
+    public static CardInfo? GetCardByCostRarityAndStats(int turn, CardPool cardPool, RandomGenerator rnd, CardBloodCost cost, CardRarity? rarity, int? minAttack = null)
+    {
+        var possibleCards = cardPool.Cards.Where(card => card.BloodCost == cost);
+        if (rarity != null)
+        {
+            possibleCards = possibleCards.Where(card => card.Rarity == rarity.Value);
+        }
+
+        if (minAttack != null)
+        {
+            possibleCards = possibleCards.Where(card => card.Attack >= minAttack.Value);
+        }
+
+        if (!possibleCards.Any())
+        {
+            return null;
+        }
+
+        return rnd.SelectRandom(possibleCards);
     }
 
     private struct LevelState
@@ -145,6 +190,7 @@ public static class AIGenerator
     {
         const float MAX_SIMULATED_WIN_RATE = 0.99f;
         const float MIN_SIMULATED_WIN_RATE = 0.01f;
+        const int MIN_ENEMY_DAMAGE_DEALT = 3; // while simulating - make sure the enemy at least gets some damage in
         if (!PassGeneratedLevelGuardrails(ai.Clone()))
         {
             return (LevelDifficulty.FailedGuardrail, "BasicMarkers");
@@ -176,6 +222,7 @@ public static class AIGenerator
             checkDuplicateStates: true).Simulate(args);
 
         int gamesPlayed = result.Rounds.Count;
+        int enemyDamageDealt = result.Rounds.Sum(round => round.PlayerDamageReceived);
         int playerWinCount = result.Rounds.Count(round => round.Result == RoundResult.PlayerWin);
         int enemyWinCount = result.Rounds.Count(round => round.Result == RoundResult.EnemyWin);
         int stalemateCount = result.Rounds.Count(round => round.Result == RoundResult.Stalemate);
@@ -188,9 +235,9 @@ public static class AIGenerator
             GD.Print($"FAILED GUARDRAIL. Win rate is too low: {winRate:0.00} < {MIN_SIMULATED_WIN_RATE:0.00}");
             return (LevelDifficulty.FailedGuardrail, "TooHard");
         }
-        else if (winRate > MAX_SIMULATED_WIN_RATE)
+        else if (winRate > MAX_SIMULATED_WIN_RATE && enemyDamageDealt < MIN_ENEMY_DAMAGE_DEALT)
         {
-            GD.Print($"FAILED GUARDRAIL. Win rate is too high: {winRate:0.00} > {MAX_SIMULATED_WIN_RATE:0.00}");
+            GD.Print($"FAILED GUARDRAIL. Win rate is too high: {winRate:0.00} > {MAX_SIMULATED_WIN_RATE:0.00} and enemy damage dealt is too low: {enemyDamageDealt} < {MIN_ENEMY_DAMAGE_DEALT}");
             return (LevelDifficulty.FailedGuardrail, "TooEasy");
         }
         else if (winRate >= 0.80f)

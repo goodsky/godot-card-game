@@ -88,7 +88,7 @@ public class EnemyAI
             }
             else if (move.CardCostToPlay != null)
             {
-                cardInfo = GetCardByCostAndRarity(turn, move.CardCostToPlay.Value, move.CardRarityToPlay);
+                cardInfo = AIGenerator.GetCardByCostRarityAndStats(turn, _cardPool, _rnd, move.CardCostToPlay.Value, move.CardRarityToPlay);
             }
 
             if (cardInfo == null)
@@ -103,36 +103,6 @@ public class EnemyAI
         }
 
         return playedCards;
-    }
-
-    private CardInfo? GetCardByCostAndRarity(int turn, CardBloodCost cost, CardRarity? rarity)
-    {
-        var possibleCards = _cardPool.Cards.Where(card => card.BloodCost == cost);
-        if (rarity != null)
-        {
-            possibleCards = possibleCards.Where(card => card.Rarity == rarity.Value);
-        }
-
-        // Guardrail help: limit the 0 attack cards before turn 3
-        const int MAX_ZERO_ATTACK_CARDS_BEFORE_TURN_THREE = 2;
-        var zeroAttackCards = possibleCards.Where(card => card.Attack == 0).ToList();
-        if (turn < 3 && zeroAttackCards.Count > MAX_ZERO_ATTACK_CARDS_BEFORE_TURN_THREE)
-        {
-            var possibleCardsList = possibleCards.ToList();
-            foreach (var zeroAttackCard in zeroAttackCards.Skip(MAX_ZERO_ATTACK_CARDS_BEFORE_TURN_THREE))
-            {
-                possibleCardsList.Remove(zeroAttackCard);
-            }
-
-            possibleCards = possibleCardsList;
-        }
-
-        if (!possibleCards.Any())
-        {
-            return null;
-        }
-
-        return _rnd.SelectRandom(possibleCards);
     }
 }
 
