@@ -1036,8 +1036,8 @@ public class SimulatorLanes
     public static readonly int COL_COUNT = 4;
     public static readonly int ROW_COUNT = 3;
     public static readonly int PLAYER_LANE_ROW = 0;
-	public static readonly int ENEMY_LANE_ROW = 1;
-	public static readonly int ENEMY_STAGE_LANE_ROW = 2;
+    public static readonly int ENEMY_LANE_ROW = 1;
+    public static readonly int ENEMY_STAGE_LANE_ROW = 2;
 
     private SimulatorCard[,] _lanes;
 

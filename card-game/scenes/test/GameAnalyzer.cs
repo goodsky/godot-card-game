@@ -91,7 +91,7 @@ public static class GameAnalyzer
                 new[] { 50, 30, 20 }); // I invented these odds
             if (level == 1) pretendDifficulty = LevelDifficulty.Easy;
             if (level <= 3 && pretendDifficulty == LevelDifficulty.Hard) pretendDifficulty = LevelDifficulty.Medium;
-            var reward = GameLobby.GenerateLevelReward(pretendDifficulty, rnd);
+            var reward = AIGenerator.GenerateLevelReward(pretendDifficulty, rnd);
 
             switch (reward)
             {

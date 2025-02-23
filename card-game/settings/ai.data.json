@@ -1,0 +1,64 @@
+{
+    "ai_templates": [
+        {
+            "name": "Alternative attack and defense",
+            "min_level": 1,
+            "max_level": 4,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "defense": 2
+                },
+                {
+                    "turn": 1,
+                    "attack": 1
+                },
+                {
+                    "turn": 2,
+                    "defense": 2
+                },
+                {
+                    "turn": 3,
+                    "attack": 1
+                },
+                {
+                    "turn": 5,
+                    "defense": 2
+                },
+                {
+                    "turn": 6,
+                    "attack": 1
+                }
+            ]
+        },
+        {
+            "name": "Common, Uncommon, and then Rare",
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "rarity": "Common"
+                },
+                {
+                    "turn": 0,
+                    "rarity": "Common"
+                },
+                {
+                    "turn": 2,
+                    "rarity": "Uncommon"
+                },
+                {
+                    "turn": 4,
+                    "rarity": "Uncommon"
+                },
+                {
+                    "turn": 6,
+                    "rarity": "Rare"
+                },
+                {
+                    "turn": 6,
+                    "rarity": "Rare"
+                }
+            ]
+        }
+    ]
+}
