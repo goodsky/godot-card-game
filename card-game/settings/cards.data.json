@@ -1,4 +1,9 @@
 {
+   "starting_deck": {
+      "starting_deck_size": 9,
+      "starting_sacrifice_count": 5,
+      "starting_hand_size": 2
+   },
    "stats": {
       "pool_size": {
          "sacrifice": 8,

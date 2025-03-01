@@ -85,7 +85,6 @@ public partial class TestBench : Node2D
 				
 				for (int gameId = 0; gameId < gamesCount; gameId++)
 				{
-					int handSize = GameAnalyzer.STARTING_HAND_SIZE;
 					for (int level = MIN_LEVEL; level <= MAX_LEVEL; level++)
 					{
 						var rnd = new RandomGenerator(rootRnd.Next());

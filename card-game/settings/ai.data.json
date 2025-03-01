@@ -1,8 +1,32 @@
 {
-    "ai_parameters": {
+    "levels": {
         "use_template_probability": [
             100, 75, 60, 50
         ],
+        "reward_odds": {
+            "Easy": {
+                "AddResource": 30,
+                "AddCreature": 60,
+                "RemoveCard": 10
+            },
+            "Medium": {
+                "AddResource": 20,
+                "AddCreature": 20,
+                "AddUncommonCreature": 25,
+                "AddRareCreature": 10,
+                "RemoveCard": 10,
+                "IncreaseHandSize": 15
+            },
+            "Hard": {
+                "AddUncommonCreature": 50,
+                "AddRareCreature": 25,
+                "RemoveCard": 10,
+                "IncreaseHandSize": 15
+            }
+        },
+        "sacrifices_to_add_per_reward": 2
+    },
+    "ai_generator_probabilities": {
         "total_cards": {
             "min": 4,
             "max": 12,

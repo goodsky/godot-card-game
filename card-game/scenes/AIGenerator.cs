@@ -13,14 +13,27 @@ public static class AIGenerator
 
     public class GeneratorData
     {
-        [JsonPropertyName("ai_parameters")]
-        public AiParameters Parameters { get; set; }
+        [JsonPropertyName("levels")]
+        public LevelParameters Levels { get; set; }
+
+        [JsonPropertyName("ai_generator_probabilities")]
+        public RandomAIParameters RandomParameters { get; set; }
 
         [JsonPropertyName("ai_templates")]
         public AITemplate[] Templates { get; set; }
     }
 
-    public class AiParameters
+    public class LevelParameters
+    {
+        [JsonPropertyName("use_template_probability")]
+        public int[] TemplateProbability { get; set; }
+        [JsonPropertyName("reward_odds")]
+        public Dictionary<LevelDifficulty, Dictionary<LevelReward, int>> RewardOdds { get; set; }
+        [JsonPropertyName("sacrifices_to_add_per_reward")]
+        public int SacrificesToAddPerReward { get; set; }
+    }
+
+    public class RandomAIParameters
     {
         [JsonPropertyName("total_cards")]
         public LinearScaleParameters TotalCards { get; set; }
@@ -83,29 +96,30 @@ public static class AIGenerator
     public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd, bool log = true)
     {
         var aiData = LoadGeneratorData();
-        var aiParameters = aiData.Parameters;
+        var rndParams = aiData.RandomParameters;
 
-        int totalCards = LinearScale(level, aiParameters.TotalCards, rnd: rnd);
+        int totalCards = LinearScale(level, rndParams.TotalCards, rnd: rnd);
 
-        int oneCardsProbability = LinearScale(level, aiParameters.PlayOneCardProbability);
-        int twoCardsProbability = LinearScale(level, aiParameters.PlayTwoCardsProbability);
-        int threeCardsProbability = LinearScale(level, aiParameters.PlayThreeCardsProbability);
-        int fourCardsProbability = LinearScale(level, aiParameters.PlayFourCardsProbability);
+        int oneCardsProbability = LinearScale(level, rndParams.PlayOneCardProbability);
+        int twoCardsProbability = LinearScale(level, rndParams.PlayTwoCardsProbability);
+        int threeCardsProbability = LinearScale(level, rndParams.PlayThreeCardsProbability);
+        int fourCardsProbability = LinearScale(level, rndParams.PlayFourCardsProbability);
         int zeroCardsProbability = 100 - oneCardsProbability - twoCardsProbability - threeCardsProbability - fourCardsProbability;
 
-        int uncommonProbability = LinearScale(level, aiParameters.PlayUncommonProbability);
-        int rareProbability = LinearScale(level, aiParameters.PlayRareProbability);
+        int uncommonProbability = LinearScale(level, rndParams.PlayUncommonProbability);
+        int rareProbability = LinearScale(level, rndParams.PlayRareProbability);
         int commonProbability = 100 - uncommonProbability - rareProbability;
 
-        var oneCostProbabilities = aiParameters.PlayOneCostProbability;
-        var twoCostProbabilities = aiParameters.PlayTwoCostProbability;
-        var threeCostProbabilities = aiParameters.PlayThreeCostProbability;
+        var oneCostProbabilities = rndParams.PlayOneCostProbability;
+        var twoCostProbabilities = rndParams.PlayTwoCostProbability;
+        var threeCostProbabilities = rndParams.PlayThreeCostProbability;
 
         if (log) GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
 
         int turnId = 0;
+        int playedCards = 0;
         var moves = new List<ScriptedMove>();
-        while (moves.Count < totalCards)
+        while (playedCards < totalCards)
         {
             int concurrentCount = rnd.SelectRandomOdds(
                 new[] { 0, 1, 2, 3, 4 },
@@ -169,7 +183,21 @@ public static class AIGenerator
                     continue;
                 }
 
+                // Balance help: Uncommon and Rare cards count as more than one card played
+                if (rarity == CardRarity.Sacrifice || rarity == CardRarity.Common) {
+                    playedCards += 1;
+                } else {
+                    playedCards += 2; // uncommon and rare cards are worth more
+                }
+
                 moves.Add(new ScriptedMove(turnId, resolvedCardInfo.Value));
+            }
+
+            // Balance help: If we just played 3 or 4 cards, skip the next turn
+            if (concurrentCount == 3) {
+                turnId += 1;
+            } else if (concurrentCount == 4) {
+                turnId += 2;
             }
 
             turnId++;
@@ -374,27 +402,20 @@ public static class AIGenerator
 
     public static LevelReward GenerateLevelReward(LevelDifficulty difficulty, RandomGenerator rnd)
     {
-        if (difficulty == LevelDifficulty.Hard)
+        var aiData = LoadGeneratorData();
+
+        if (difficulty == LevelDifficulty.FailedGuardrail) difficulty = LevelDifficulty.Easy;
+        var rewardOdds = aiData.Levels.RewardOdds[difficulty];     
+
+        var rewardList = new List<LevelReward>();
+        var oddsList = new List<int>();
+        foreach (var kvp in rewardOdds)
         {
-            return rnd.SelectRandomOdds(
-                new[] { LevelReward.AddCreature, LevelReward.AddUncommonCreature, LevelReward.AddRareCreature, LevelReward.RemoveCard, LevelReward.IncreaseHandSize },
-                new[] { 20, 40, 20, 10, 10 }
-            );
+            rewardList.Add(kvp.Key);
+            oddsList.Add(kvp.Value);
         }
-        else if (difficulty == LevelDifficulty.Medium)
-        {
-            return rnd.SelectRandomOdds(
-                new[] { LevelReward.AddCreature, LevelReward.AddUncommonCreature, LevelReward.AddRareCreature, LevelReward.RemoveCard, LevelReward.IncreaseHandSize },
-                new[] { 50, 15, 05, 25, 05 }
-            );
-        }
-        else
-        {
-            return rnd.SelectRandomOdds(
-                new[] { LevelReward.AddResource, LevelReward.AddCreature },
-                new[] { 20, 80 }
-            );
-        }
+
+        return rnd.SelectRandomOdds(rewardList.ToArray(), oddsList.ToArray());
     }
 
     public static float LinearScalef(
@@ -477,7 +498,7 @@ public static class AIGenerator
     }
 
     private static GeneratorData _cachedGeneratorData = null;
-    private static GeneratorData LoadGeneratorData()
+    public static GeneratorData LoadGeneratorData()
     {
         if (_cachedGeneratorData != null) return _cachedGeneratorData;
 

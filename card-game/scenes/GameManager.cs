@@ -65,7 +65,7 @@ public partial class GameManager : Node
         {
             Level = 1,
             Score = 0,
-            HandSize = 2,
+            HandSize = CardGenerator.LoadGeneratorData().StartingDeck.StartingHandSize,
             CardPool = cardPool,
             DeckCards = new List<CardInfo>(),
             Seed = Random.Seed,

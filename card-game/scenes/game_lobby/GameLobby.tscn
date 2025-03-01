@@ -9,7 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://c63reeulblwrp" path="res://assets/sprites/deck-icon.png" id="7_r3x1p"]
 [ext_resource type="Texture2D" uid="uid://xl83ydp2ptv" path="res://assets/sprites/deck-icon-2.png" id="8_xpivi"]
 
-[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "RemoveCardContainer", "SelectLevelContainer", "BackButton", "ShowDeckButton")]
+[node name="GameLobby" type="Control" node_paths=PackedStringArray("GeneratingCardsPanel", "HelloDeckContainer", "DraftCardsContainer", "RemoveCardContainer", "StatUpPanel", "SelectLevelContainer", "BackButton", "ShowDeckButton")]
 layout_mode = 3
 anchors_preset = 0
 offset_right = 800.0
@@ -21,6 +21,7 @@ GeneratingCardsPanel = NodePath("GeneratingCardsPanel")
 HelloDeckContainer = NodePath("HelloTeamContainer")
 DraftCardsContainer = NodePath("DraftCardsContainer")
 RemoveCardContainer = NodePath("RemoveCardContainer")
+StatUpPanel = NodePath("StatsUpPanel")
 SelectLevelContainer = NodePath("SelectLevelContainer")
 BackButton = NodePath("BackButton")
 ShowDeckButton = NodePath("DeckButton")
@@ -63,8 +64,8 @@ layout_mode = 2
 size_flags_horizontal = 4
 value = 100.0
 fill_mode = 4
-texture_progress = ExtResource("2_6eo2a")
 radial_fill_degrees = 60.0
+texture_progress = ExtResource("2_6eo2a")
 
 [node name="HelloTeamContainer" type="VBoxContainer" parent="."]
 visible = false
@@ -85,10 +86,12 @@ layout_mode = 2
 text = "Say hello to your team!"
 horizontal_alignment = 1
 
-[node name="CardButtonContainer" type="HBoxContainer" parent="HelloTeamContainer"]
+[node name="CardButtonContainer" type="GridContainer" parent="HelloTeamContainer"]
 layout_mode = 2
-theme_override_constants/separation = 16
-alignment = 1
+size_flags_horizontal = 4
+theme_override_constants/h_separation = 24
+theme_override_constants/v_separation = 24
+columns = 6
 
 [node name="ContinueButton" type="Button" parent="HelloTeamContainer"]
 custom_minimum_size = Vector2(200, 0)

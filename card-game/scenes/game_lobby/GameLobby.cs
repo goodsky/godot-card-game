@@ -26,9 +26,6 @@ public partial class GameLobby : Control
     public bool IsNewGame { get; set; } = false;
 
     [Export]
-    public int StartingDeckSize { get; set; } = 6;
-
-    [Export]
     public bool AutoStartingDeck { get; set; }
 
     [Export]
@@ -87,7 +84,7 @@ public partial class GameLobby : Control
                 deck.Add(cardInfo);
 
                 if (GameManager.Instance.Progress.Level == 1 &&
-                    deck.Count < StartingDeckSize)
+                    deck.Count < CardGenerator.LoadGeneratorData().StartingDeck.StartingDeckSize)
                 {
                     TransitionToState(LobbyState.DraftCreature);
                 }
@@ -193,12 +190,12 @@ public partial class GameLobby : Control
                 break;
 
             case LobbyState.GenerateStartingDeck:
+            case LobbyState.DraftResource:
                 await this.StartCoroutine(FadeOutStartingDeckCoroutine(fadeOutSpeed: 0.025f));
                 BackButton.Visible = true;
                 ShowDeckButton.Visible = true;
                 break;
 
-            case LobbyState.DraftResource:
             case LobbyState.DraftCreature:
             case LobbyState.DraftUncommonCreature:
             case LobbyState.DraftRareCreature:
@@ -233,7 +230,7 @@ public partial class GameLobby : Control
 
             case LobbyState.DraftResource:
                 GameManager.Instance.UpdateProgress(LobbyState.DraftResource, updateSeed: true);
-                await this.StartCoroutine(DraftCardsCoroutine(fadeInSpeed: 0.05f, CardRarity.Sacrifice));
+                await this.StartCoroutine(AddMoreSacrificesToDeckCoroutine(fadeInSpeed: 0.05f));
                 break;
 
             case LobbyState.DraftCreature:
@@ -349,9 +346,11 @@ public partial class GameLobby : Control
         bool startingDeckIsAcceptable = false;
         do
         {
-            startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, StartingDeckSize, rnd);
+            startingDeck = GenerateStartingDeck(GameManager.Instance.Progress.CardPool, rnd);
 
             int startingDeckAttack = startingDeck.Sum(info => info.Attack);
+
+            // Guardrail: Starting deck should have at least 3 attack
             startingDeckIsAcceptable = startingDeckAttack >= 3;
         }
         while (!startingDeckIsAcceptable);
@@ -359,6 +358,49 @@ public partial class GameLobby : Control
         GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: startingDeck);
 
         foreach (CardInfo cardInfo in startingDeck)
+        {
+            // We don't need to show sacrifice cards
+            if (cardInfo.Rarity == CardRarity.Sacrifice)
+                continue;
+
+            var card = Constants.CardButtonScene.Instantiate<CardButton>();
+            card.ShowCardBack = false;
+            card.SetDisabled(true, fade: false);
+            card.SetCard(cardInfo);
+            cardsContainer.AddChild(card);
+        }
+
+        HelloDeckContainer.Visible = true;
+        yield return HelloDeckContainer.FadeTo(1, startAlpha: 0, speed: fadeInSpeed);
+    }
+
+    private IEnumerable AddMoreSacrificesToDeckCoroutine(float fadeInSpeed)
+    {
+        Node cardsContainer = HelloDeckContainer.FindChild("CardButtonContainer");
+        Label helloLabel = HelloDeckContainer.FindChild("SayHello") as Label;
+
+        foreach (Node child in cardsContainer.GetChildren())
+        {
+            child.QueueFree();
+        }
+
+        var labelOptions = new[] {
+            "New Sacrifices Available!",
+        };
+
+        GameProgress progress = GameManager.Instance.Progress;
+        RandomGenerator rnd = GameManager.Instance.Random;
+        List<CardInfo> deck = progress.DeckCards;
+                
+        helloLabel.Text = labelOptions[rnd.Next(labelOptions.Length)];
+
+        int numberOfSacrificesToAdd = AIGenerator.LoadGeneratorData().Levels.SacrificesToAddPerReward;
+        var newSacrificeCards = SelectRandomCards(progress.CardPool.Cards, count: numberOfSacrificesToAdd, rnd, CardRarity.Sacrifice);
+        deck.AddRange(newSacrificeCards);
+
+        GameManager.Instance.UpdateProgress(LobbyState.SelectLevel, updatedDeck: deck);
+
+        foreach (CardInfo cardInfo in newSacrificeCards)
         {
             var card = Constants.CardButtonScene.Instantiate<CardButton>();
             card.ShowCardBack = false;
@@ -490,15 +532,18 @@ public partial class GameLobby : Control
         StatUpPanel.Visible = false;
     }
 
-    public static List<CardInfo> GenerateStartingDeck(CardPool cardPool, int startingDeckSize, RandomGenerator rnd)
+    public static List<CardInfo> GenerateStartingDeck(CardPool cardPool, RandomGenerator rnd)
     {
         var deck = new List<CardInfo>();
 
-        // 3 sacrifices (so you can afford a 3 cost card)
-        // 20-40% starting deck is one cost cards
+        var startingDeckParams = CardGenerator.LoadGeneratorData().StartingDeck;
+        int startingDeckSize = startingDeckParams.StartingDeckSize;
+        int sacrificeCount = startingDeckParams.StartingSacrificeCount;
+
+        // 25-50% starting creatures should be 1 cost
         // remainder is random 2-3 cost cards
-        int sacrificeCount = 3;
-        int oneCostCount = Mathf.CeilToInt(rnd.Nextf(0.2f, 0.4f) * startingDeckSize);
+        int creatureCount = startingDeckSize - sacrificeCount;
+        int oneCostCount = Mathf.CeilToInt(rnd.Nextf(0.25f, 0.50f) * creatureCount);
         int otherCount = startingDeckSize - sacrificeCount - oneCostCount;
 
         GD.Print($"Starting deck: {sacrificeCount} sacrifices; {oneCostCount} one cost; {otherCount} other;");

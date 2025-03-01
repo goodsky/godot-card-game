@@ -27,6 +27,9 @@ public static class CardGenerator
 
     public class GeneratorData
     {
+        [JsonPropertyName("starting_deck")]
+        public StartingDeckData StartingDeck { get; set; }
+
         [JsonPropertyName("stats")]
         public StatsData Stats { get; set; }
 
@@ -35,6 +38,16 @@ public static class CardGenerator
 
         [JsonPropertyName("adjectives")]
         public Dictionary<string, AdjectiveData> Adjectives { get; set; }
+    }
+
+    public class StartingDeckData
+    {
+        [JsonPropertyName("starting_deck_size")]
+        public int StartingDeckSize { get; set; }
+        [JsonPropertyName("starting_hand_size")]
+        public int StartingHandSize { get; set; }
+        [JsonPropertyName("starting_sacrifice_count")]
+        public int StartingSacrificeCount { get; set; }
     }
 
     public class StatsData
@@ -307,8 +320,11 @@ public static class CardGenerator
         return data.Adjectives.Where(a => a.Value.Level == adjectiveLevel).ToDictionary(a => a.Key, a => a.Value);
     }
 
-    private static GeneratorData LoadGeneratorData()
+    private static GeneratorData _cachedGeneratorData = null;
+    public static GeneratorData LoadGeneratorData()
     {
+        if (_cachedGeneratorData != null) return _cachedGeneratorData;
+
         if (OS.IsDebugBuild() || !Godot.FileAccess.FileExists(UserDeckGeneratorDataPath))
         {
             GD.Print("Copying over cards.data.json...");
@@ -318,6 +334,8 @@ public static class CardGenerator
         var dataStr = Godot.FileAccess.GetFileAsString(UserDeckGeneratorDataPath);
         var data = JsonSerializer.Deserialize<GeneratorData>(dataStr, new JsonSerializerOptions() { IncludeFields = true });
         GD.Print($"Loaded Deck Generator Data with {data.Nouns?.Count} nouns and {data.Adjectives?.Count} adjectives.");
+        
+         _cachedGeneratorData = data;
         return data;
     }
 }

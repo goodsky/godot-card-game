@@ -6,9 +6,6 @@ using Godot;
 
 public static class GameAnalyzer
 {
-    public static int STARTING_DECK_SIZE = 6;
-    public static int STARTING_HAND_SIZE = 2;
-
     public static void AnalyzeGameBalance(int cardPoolCount = 3, int gamesCount = 10, int minLevel = 1, int maxLevel = 12)
     {
         var results = new List<(int poolId, int level, SimulatorResult result)>();
@@ -81,8 +78,8 @@ public static class GameAnalyzer
 
     public static GameProgress GenerateSimulatedProgress(CardPool cardPool, int level, RandomGenerator rnd)
     {
-        int handSize = STARTING_HAND_SIZE;
-        var playerDeck = GameLobby.GenerateStartingDeck(cardPool, STARTING_DECK_SIZE, rnd);
+        int handSize = CardGenerator.LoadGeneratorData().StartingDeck.StartingHandSize;
+        var playerDeck = GameLobby.GenerateStartingDeck(cardPool, rnd);
 
         for (int i = 0; i < level; i++)
         {
@@ -96,7 +93,8 @@ public static class GameAnalyzer
             switch (reward)
             {
                 case LevelReward.AddResource:
-                    playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: 1, rnd, CardRarity.Sacrifice));
+                    int numberOfSacrificesToAdd = AIGenerator.LoadGeneratorData().Levels.SacrificesToAddPerReward;
+                    playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: numberOfSacrificesToAdd, rnd, CardRarity.Sacrifice));
                     break;
                 case LevelReward.AddCreature:
                     playerDeck.AddRange(GameLobby.SelectRandomCards(cardPool.Cards, count: 1, rnd, CardRarity.Common));
