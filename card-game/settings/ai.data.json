@@ -1,4 +1,61 @@
 {
+    "ai_parameters": {
+        "use_template_probability": [
+            100, 75, 60, 50
+        ],
+        "total_cards": {
+            "min": 4,
+            "max": 12,
+            "rate": 1.0,
+            "y_intercept": 4,
+            "random": 1
+        },
+        "play_one_card_probability": {
+            "min": 20,
+            "max": 70,
+            "rate": -5.0,
+            "y_intercept": 75
+        },
+        "play_two_cards_probability": {
+            "min": 0,
+            "max": 30,
+            "rate": 5.0,
+            "x_intercept": 1
+        },
+        "play_three_cards_probability": {
+            "min": 0,
+            "max": 15,
+            "rate": 2.5,
+            "x_intercept": 4
+        },
+        "play_four_cards_probability": {
+            "min": 0,
+            "max": 10,
+            "rate": 2.5,
+            "x_intercept": 8
+        },
+        "play_uncommon_probability": {
+            "min": 0,
+            "max": 25,
+            "rate": 2.5,
+            "x_intercept": 0
+        },
+        "play_rare_probability": {
+            "min": 0,
+            "max": 25,
+            "rate": 2.5,
+            "x_intercept": 2
+        },
+        "play_one_cost_probability": [
+            50, 75, 60, 50, 45, 40, 30, 20, 10, 0
+        ],
+        "play_two_cost_probability": [
+            0, 5, 25, 45, 50, 50, 50, 50, 50, 50 
+        ],
+        "play_three_cost_probability": [
+            0, 0, 0, 5, 5, 10, 20, 30, 40, 50
+        ]
+    },
     "ai_templates": [
         {
             "name": "Alternative attack and defense",

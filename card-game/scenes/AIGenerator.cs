@@ -13,8 +13,35 @@ public static class AIGenerator
 
     public class GeneratorData
     {
+        [JsonPropertyName("ai_parameters")]
+        public AiParameters Parameters { get; set; }
+
         [JsonPropertyName("ai_templates")]
         public AITemplate[] Templates { get; set; }
+    }
+
+    public class AiParameters
+    {
+        [JsonPropertyName("total_cards")]
+        public LinearScaleParameters TotalCards { get; set; }
+        [JsonPropertyName("play_one_card_probability")]
+        public LinearScaleParameters PlayOneCardProbability { get; set; }
+        [JsonPropertyName("play_two_cards_probability")]
+        public LinearScaleParameters PlayTwoCardsProbability { get; set; }
+        [JsonPropertyName("play_three_cards_probability")]
+        public LinearScaleParameters PlayThreeCardsProbability { get; set; }
+        [JsonPropertyName("play_four_cards_probability")]
+        public LinearScaleParameters PlayFourCardsProbability { get; set; }
+        [JsonPropertyName("play_uncommon_probability")]
+        public LinearScaleParameters PlayUncommonProbability { get; set; }
+        [JsonPropertyName("play_rare_probability")]
+        public LinearScaleParameters PlayRareProbability { get; set; }
+        [JsonPropertyName("play_one_cost_probability")]
+        public int[] PlayOneCostProbability { get; set; }
+        [JsonPropertyName("play_two_cost_probability")]
+        public int[] PlayTwoCostProbability { get; set; }
+        [JsonPropertyName("play_three_cost_probability")]
+        public int[] PlayThreeCostProbability { get; set; }
     }
 
     public class AITemplate
@@ -55,23 +82,24 @@ public static class AIGenerator
 
     public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd, bool log = true)
     {
-        const int TOTAL_CARDS_RATE = 1;
-        int totalCards = LinearScale(level, TOTAL_CARDS_RATE, min: 4, max: 12, y_intercept: 4, random_amount: 1, rnd: rnd);
+        var aiData = LoadGeneratorData();
+        var aiParameters = aiData.Parameters;
 
-        int oneCardsProbability = LinearScale(level, -5f, min: 20, max: 70, y_intercept: 85);
-        int twoCardsProbability = LinearScale(level, 5f, min: 0, max: 30, x_intercept: 2);
-        int threeCardsProbability = LinearScale(level, 2.5f, min: 0, max: 15, x_intercept: 4);
-        int fourCardsProbability = LinearScale(level, 2.5f, min: 0, max: 10, x_intercept: 8);
+        int totalCards = LinearScale(level, aiParameters.TotalCards, rnd: rnd);
+
+        int oneCardsProbability = LinearScale(level, aiParameters.PlayOneCardProbability);
+        int twoCardsProbability = LinearScale(level, aiParameters.PlayTwoCardsProbability);
+        int threeCardsProbability = LinearScale(level, aiParameters.PlayThreeCardsProbability);
+        int fourCardsProbability = LinearScale(level, aiParameters.PlayFourCardsProbability);
         int zeroCardsProbability = 100 - oneCardsProbability - twoCardsProbability - threeCardsProbability - fourCardsProbability;
 
-        int uncommonProbability = LinearScale(level, 2.5f, min: 0, max: 25);
-        int rareProbability = LinearScale(level, 2.5f, min: 0, max: 25, x_intercept: 2);
+        int uncommonProbability = LinearScale(level, aiParameters.PlayUncommonProbability);
+        int rareProbability = LinearScale(level, aiParameters.PlayRareProbability);
         int commonProbability = 100 - uncommonProbability - rareProbability;
 
-        // probability of card cost per turn Idx
-        var oneCostProbabilities = new[] { 50, 75, 60, 50, 45, 40, 30, 20, 10, 00 };
-        var twoCostProbabilities = new[] { 00, 05, 25, 45, 50, 50, 50, 50, 50, 50 };
-        var threeCostProbabilities = new[] { 00, 00, 00, 05, 05, 10, 20, 30, 40, 50 };
+        var oneCostProbabilities = aiParameters.PlayOneCostProbability;
+        var twoCostProbabilities = aiParameters.PlayTwoCostProbability;
+        var threeCostProbabilities = aiParameters.PlayThreeCostProbability;
 
         if (log) GD.Print($"Generating Enemy AI for level {level}: total={totalCards}; seed={rnd.Seed}[{rnd.N}]; concurrent probabilities=[{zeroCardsProbability:0.00}, {oneCardsProbability:0.00}, {twoCardsProbability:0.00}, {threeCardsProbability:0.00}, {fourCardsProbability:0.00}]; rarity probabilities=[{commonProbability:0.00},{uncommonProbability:0.00},{rareProbability:0.00}]");
 
@@ -84,10 +112,9 @@ public static class AIGenerator
                 new[] { zeroCardsProbability, oneCardsProbability, twoCardsProbability, threeCardsProbability, fourCardsProbability }
             );
 
-            int costProbabilityIdx = Math.Clamp(turnId, 0, 9);
-            int oneCostProbability = oneCostProbabilities[costProbabilityIdx];
-            int twoCostProbability = twoCostProbabilities[costProbabilityIdx];
-            int threeCostProbability = threeCostProbabilities[costProbabilityIdx];
+            int oneCostProbability = GetValueFromArray(turnId, oneCostProbabilities);
+            int twoCostProbability = GetValueFromArray(turnId, twoCostProbabilities);
+            int threeCostProbability = GetValueFromArray(turnId, threeCostProbabilities);
             int zeroCostProbability = 100 - oneCostProbability - twoCostProbability - threeCostProbability;
 
             // Guardrail help: make sure we play at least one card by turn 2
@@ -403,6 +430,42 @@ public static class AIGenerator
         return Math.Clamp(Mathf.RoundToInt(y + 1e-6f), min, max);
     }
 
+    public class LinearScaleParameters
+    {
+        [JsonPropertyName("rate")]
+        public float Rate { get; set; }
+        [JsonPropertyName("min")]
+        public int Min { get; set; }
+        [JsonPropertyName("max")]
+        public int Max { get; set; }
+        [JsonPropertyName("x_intercept")]
+        public int XIntercept { get; set; }
+        [JsonPropertyName("y_intercept")]
+        public int YIntercept { get; set; }
+        [JsonPropertyName("random")]
+        public int RandomAmount { get; set; }
+    }
+
+    public static int LinearScale(int x, LinearScaleParameters parameters, RandomGenerator rnd = null)
+    {
+        return LinearScale(
+            x: x,
+            rate: parameters.Rate,
+            min: parameters.Min,
+            max: parameters.Max,
+            x_intercept: parameters.XIntercept,
+            y_intercept: parameters.YIntercept,
+            random_amount: parameters.RandomAmount,
+            rnd: rnd
+        );
+    }
+
+    public static T GetValueFromArray<T>(int turn, T[] values)
+    {
+        int idx = Math.Clamp(turn, 0, values.Length - 1);
+        return values[idx];
+    }
+
     public static void ResetAiGeneratorSettings()
     {
         DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
@@ -410,10 +473,14 @@ public static class AIGenerator
         // DirAccess.CopyAbsolute(TemplateDeckGeneratorDataPath, UserDeckGeneratorDataPath);
         var dir = DirAccess.Open("res://");
         dir.Copy(ResourceAiGeneratorDataPath, UserAiGeneratorDataPath);
+        _cachedGeneratorData = null;
     }
 
+    private static GeneratorData _cachedGeneratorData = null;
     private static GeneratorData LoadGeneratorData()
     {
+        if (_cachedGeneratorData != null) return _cachedGeneratorData;
+
         if (OS.IsDebugBuild() || !Godot.FileAccess.FileExists(UserAiGeneratorDataPath))
         {
             GD.Print("Copying over ai.data.json...");
@@ -423,6 +490,8 @@ public static class AIGenerator
         var dataStr = Godot.FileAccess.GetFileAsString(UserAiGeneratorDataPath);
         var data = JsonSerializer.Deserialize<GeneratorData>(dataStr, new JsonSerializerOptions() { IncludeFields = true });
         GD.Print($"Loaded AI Generator Data with {data.Templates.Length} templates.");
+
+        _cachedGeneratorData = data;
         return data;
     }
 }
