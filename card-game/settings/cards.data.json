@@ -27,11 +27,11 @@
          }
       },
       "ability_costs": {
-         "agile": 4,
+         "flying": 4,
          "attack": 2,
-         "guard": 2,
+         "tall": 2,
          "health": 1,
-         "poisoned": 3
+         "lethal": 3
       },
       "card_templates": {
          "sacrifice": {

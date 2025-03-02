@@ -62,17 +62,31 @@ public static class AIGenerator
         [JsonPropertyName("name")]
         public string Name { get; set; }
         [JsonPropertyName("weight")]
-        public string ProbabilityWeight { get; set; }
+        public int? ProbabilityWeight { get; set; }
         [JsonPropertyName("min_level")]
         public int? MinLevel { get; set; }
         [JsonPropertyName("max_level")]
         public int? MaxLevel { get; set; }
-
+        [JsonPropertyName("scripted_moves")]
+        public GeneratorScriptedMove[] ScriptedMoves { get; set; }
     }
 
     public class GeneratorScriptedMove
     {
-
+        [JsonPropertyName("turn")]
+        public int Turn { get; set; }
+        [JsonPropertyName("lane")]
+        public int? Lane { get; set; }
+        [JsonPropertyName("attack")]
+        public int? Attack { get; set; }
+        [JsonPropertyName("health")]
+        public int? Health { get; set; }
+        [JsonPropertyName("cost")]
+        public CardBloodCost? BloodCost { get; set; }
+        [JsonPropertyName("rarity")]
+        public CardRarity? Rarity { get; set; }
+        [JsonPropertyName("ability")]
+        public CardAbilities? Ability { get; set; }
     }
 
     public static GameLevel GenerateGameLevel(CardPool cardPool, List<CardInfo> playerDeck, int level, int startingHandSize, int seed)
@@ -93,11 +107,91 @@ public static class AIGenerator
         };
     }
 
-    public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd, bool log = true)
+    public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
     {
         var aiData = LoadGeneratorData();
         var rndParams = aiData.RandomParameters;
 
+        var levelTemplates = aiData.Templates
+            .Where(t => t.MinLevel == null || t.MinLevel <= level)
+            .Where(t => t.MaxLevel == null || t.MaxLevel >= level)
+            .ToArray();
+
+        int useTemplateProbability = GetValueFromArray(level, aiData.Levels.TemplateProbability);
+        if (levelTemplates.Length > 0 && rnd.Next(100) < useTemplateProbability)
+        {
+            AITemplate selectedLevelTemplate = rnd.SelectRandomOdds(
+                levelTemplates,
+                levelTemplates.Select(t => t.ProbabilityWeight ?? 1).ToArray());
+
+            GD.Print($"Generating AI using Template. {levelTemplates.Length} templates available. Selected '{selectedLevelTemplate.Name}'.");
+            return GenerateTemplateEnemyAI(
+                cardPool,
+                selectedLevelTemplate.ScriptedMoves,
+                level,
+                rndParams,
+                rnd);
+        }
+
+        GD.Print("Generating random AI");
+        return GenerateRandomEnemyAI(cardPool, level, rnd, rndParams, log: false);
+    }
+
+    public static EnemyAI GenerateTemplateEnemyAI(CardPool cardPool, GeneratorScriptedMove[] moves, int level, RandomAIParameters rndParams, RandomGenerator rnd)
+    {
+        var scriptedMoves = new List<ScriptedMove>();
+        foreach (var move in moves)
+        {
+            // If the blood cost is not specified, then match the curve for randomly generated AIs
+            if (move.BloodCost == null)
+            {
+                int oneCostProbability = GetValueFromArray(move.Turn, rndParams.PlayOneCostProbability);
+                int twoCostProbability = GetValueFromArray(move.Turn, rndParams.PlayOneCostProbability);
+                int threeCostProbability = GetValueFromArray(move.Turn, rndParams.PlayOneCostProbability);
+                int zeroCostProbability = 100 - oneCostProbability - twoCostProbability - threeCostProbability;
+                move.BloodCost = rnd.SelectRandomOdds(
+                    new[] { CardBloodCost.Zero, CardBloodCost.One, CardBloodCost.Two, CardBloodCost.Three },
+                    new[] { zeroCostProbability, oneCostProbability, twoCostProbability, threeCostProbability }
+                );
+            }
+
+            // If the rarity is not specified, then match the curve for randomly generated AIs
+            if (move.Rarity == null)
+            {
+                int uncommonProbability = LinearScale(level, rndParams.PlayUncommonProbability);
+                int rareProbability = LinearScale(level, rndParams.PlayRareProbability);
+                int commonProbability = 100 - uncommonProbability - rareProbability;
+                move.Rarity = rnd.SelectRandomOdds(
+                    new[] { CardRarity.Common, CardRarity.Uncommon, CardRarity.Rare },
+                    new[] { commonProbability, uncommonProbability, rareProbability }
+                );
+            }
+
+            CardInfo? cardInfo = GetBestMatchingCard(
+                turn: move.Turn,
+                cardPool: cardPool,
+                rnd: rnd,
+                cost: move.BloodCost,
+                rarity: move.Rarity,
+                ability: move.Ability,
+                attack: move.Attack,
+                health: move.Health
+            );
+
+            if (cardInfo == null)
+            {
+                GD.PushError($"Could not find a card for move! Cost = {move.BloodCost}; Rarity = {move.Rarity}; Attack = {move.Attack}; Health = {move.Health}; Ability = {move.Ability};");
+                continue;
+            }
+
+            scriptedMoves.Add(new ScriptedMove(move.Turn, cardInfo.Value, move.Lane));
+        }
+
+        return new EnemyAI(cardPool, scriptedMoves, rnd);
+    }
+
+    public static EnemyAI GenerateRandomEnemyAI(CardPool cardPool, int level, RandomGenerator rnd, RandomAIParameters rndParams, bool log)
+    {
         int totalCards = LinearScale(level, rndParams.TotalCards, rnd: rnd);
 
         int oneCardsProbability = LinearScale(level, rndParams.PlayOneCardProbability);
@@ -136,7 +230,7 @@ public static class AIGenerator
             if (cardsPlayed == 0 && turnId == 1)
             {
                 concurrentCount = 1;
-                GD.Print("Guardrail help: ensuring card played by turn 2");
+                if (log) GD.Print("Guardrail help: ensuring card played by turn 2");
             }
 
             // Guardrail help: make sure we play at least one attack by turn 3
@@ -149,7 +243,7 @@ public static class AIGenerator
 
                 // Remove zero cost cards (which mostly have 0 attack)
                 zeroCostProbability = 0;
-                GD.Print("Guardrail help: removing zero cost cards");
+                if (log) GD.Print("Guardrail help: removing zero cost cards");
             }
 
             if (log) GD.Print($"   Turn {turnId}: {concurrentCount} cards; cost probabilities=[{zeroCostProbability:0.00},{oneCostProbability:0.00},{twoCostProbability:0.00},{threeCostProbability:0.00}]");
@@ -225,6 +319,63 @@ public static class AIGenerator
         }
 
         return rnd.SelectRandom(possibleCards);
+    }
+
+    public static CardInfo? GetBestMatchingCard(
+        int turn,
+        CardPool cardPool,
+        RandomGenerator rnd,
+        CardBloodCost? cost,
+        CardRarity? rarity,
+        CardAbilities? ability,
+        int? attack,
+        int? health)
+    {
+        IEnumerable<CardInfo> possibleCards = cardPool.Cards;
+
+        // The order of these filters is important. If any filter leaves us with an empty set, then it is skipped.
+        // So the first filters are more likely to be applied.
+        if (ability != null)
+        {
+            possibleCards = FilterIfPossible(possibleCards, card => card.Abilities.Contains(ability.Value));
+        }
+
+        if (attack != null)
+        {
+            possibleCards = FilterIfPossible(possibleCards, card => card.Attack == attack.Value);
+        }
+
+        if (health != null)
+        {
+            possibleCards = FilterIfPossible(possibleCards, card => card.Health == health.Value);
+        }
+
+        if (cost != null)
+        {
+            possibleCards = FilterIfPossible(possibleCards, card => card.BloodCost == cost.Value);
+        }
+
+        if (rarity != null)
+        {
+            possibleCards = FilterIfPossible(possibleCards, card => card.Rarity == rarity.Value);
+        }
+
+        if (!possibleCards.Any())
+        {
+            return null;
+        }
+
+        return rnd.SelectRandom(possibleCards);
+    }
+
+    private static IEnumerable<CardInfo> FilterIfPossible(IEnumerable<CardInfo> cards, Func<CardInfo, bool> filter)
+    {
+        if (cards == null || cards.Where(filter).Count() == 0)
+        {
+            return cards;
+        }
+
+        return cards.Where(filter);
     }
 
     private struct LevelState

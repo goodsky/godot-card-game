@@ -14,9 +14,9 @@ public static class CombatHelper
 
         CardInfo attackerInfo = attacker.Value;
         CardInfo defenderInfo = defender.Value;
-        if (attackerInfo.Abilities.Contains(CardAbilities.Agile) &&
-                !defenderInfo.Abilities.Contains(CardAbilities.Agile) &&
-                !defenderInfo.Abilities.Contains(CardAbilities.Guard))
+        if (attackerInfo.Abilities.Contains(CardAbilities.Flying) &&
+                !defenderInfo.Abilities.Contains(CardAbilities.Flying) &&
+                !defenderInfo.Abilities.Contains(CardAbilities.Tall))
         {
             return false; // agile attacker flies over defenders
         }

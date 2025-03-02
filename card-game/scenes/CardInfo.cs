@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardBloodCost
 {
     Zero = 0,
@@ -9,6 +10,7 @@ public enum CardBloodCost
     Three = 3,
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardRarity
 {
     Sacrifice = 0,
@@ -17,11 +19,12 @@ public enum CardRarity
     Rare = 3,
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardAbilities
 {
     None = 0,
-    Agile = 1,
-    Guard = 2,
+    Flying = 1,
+    Tall = 2,
     Lethal = 3,
 }
 

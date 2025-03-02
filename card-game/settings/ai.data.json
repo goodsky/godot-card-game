@@ -1,7 +1,7 @@
 {
     "levels": {
         "use_template_probability": [
-            100, 75, 60, 50
+            75, 60, 50, 40, 30
         ],
         "reward_odds": {
             "Easy": {
@@ -82,33 +82,316 @@
     },
     "ai_templates": [
         {
-            "name": "Alternative attack and defense",
+            "name": "Defender then attacker in same lane",
             "min_level": 1,
             "max_level": 4,
             "scripted_moves": [
                 {
                     "turn": 0,
-                    "defense": 2
+                    "lane": 1,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 0,
+                    "lane": 2,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 0
                 },
                 {
                     "turn": 1,
+                    "lane": 1,
+                    "rarity": "Common",
+                    "attack": 2
+                },
+                {
+                    "turn": 1,
+                    "lane": 2,
+                    "rarity": "Common",
+                    "attack": 2
+                },
+                {
+                    "turn": 3,
+                    "lane": 0,
+                    "rarity": "Uncommon",
+                    "attack": 0
+                },
+                {
+                    "turn": 4,
+                    "lane": 0,
+                    "rarity": "Uncommon",
+                    "attack": 3
+                }
+            ]
+        },
+        {
+            "name": "One Two Three",
+            "min_level": 1,
+            "max_level": 4,
+            "scripted_moves": [
+                {
+                    "turn": 0
+                },
+                {
+                    "turn": 3
+                },
+                {
+                    "turn": 3
+                },
+                {
+                    "turn": 6
+                },
+                {
+                    "turn": 6
+                },
+                {
+                    "turn": 6
+                }
+            ]
+        },
+        {
+            "name": "All tall",
+            "min_level": 1,
+            "max_level": 4,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "ability": "Tall"
+                },
+                {
+                    "turn": 1,
+                    "ability": "Tall"
+                },
+                {
+                    "turn": 4,
+                    "ability": "Tall"
+                },
+                {
+                    "turn": 4,
+                    "ability": "Tall"
+                },
+                {
+                    "turn": 6,
+                    "ability": "Tall"
+                },
+                {
+                    "turn": 8,
+                    "ability": "Tall"
+                }
+            ]
+        },
+        {
+            "name": "Zerg Rush",
+            "min_level": 1,
+            "max_level": 4,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 1,
+                    "cost": "One",
+                    "rarity": "Common",
                     "attack": 1
                 },
                 {
                     "turn": 2,
-                    "defense": 2
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
                 },
                 {
                     "turn": 3,
+                    "cost": "One",
+                    "rarity": "Common",
                     "attack": 1
                 },
                 {
-                    "turn": 5,
-                    "defense": 2
+                    "turn": 4,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                }
+            ]
+        },
+        {
+            "name": "All Lethal",
+            "min_level": 3,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "ability": "Lethal"
+                },
+                {
+                    "turn": 1,
+                    "ability": "Lethal"
+                },
+                {
+                    "turn": 4,
+                    "ability": "Lethal"
+                },
+                {
+                    "turn": 4,
+                    "ability": "Lethal"
                 },
                 {
                     "turn": 6,
-                    "attack": 1
+                    "ability": "Lethal"
+                },
+                {
+                    "turn": 8,
+                    "ability": "Lethal"
+                }
+            ]
+        },
+        {
+            "name": "All Flying",
+            "min_level": 3,
+            "scripted_moves": [
+                {
+                    "turn": 1,
+                    "ability": "Flying"
+                },
+                {
+                    "turn": 1,
+                    "ability": "Flying"
+                },
+                {
+                    "turn": 4,
+                    "ability": "Flying"
+                },
+                {
+                    "turn": 5,
+                    "ability": "Flying"
+                },
+                {
+                    "turn": 7,
+                    "ability": "Flying"
+                },
+                {
+                    "turn": 9,
+                    "ability": "Flying"
+                }
+            ]
+        },
+        {
+            "name": "Calm before the storm",
+            "min_level": 3,
+            "scripted_moves": [
+                {
+                    "turn": 1,
+                    "cost": "One",
+                    "rarity": "Common"
+                },
+                {
+                    "turn": 5,
+                    "cost": "Three"
+                },
+                {
+                    "turn": 5,
+                    "cost": "Three"
+                },
+                {
+                    "turn": 7,
+                    "cost": "Three"
+                },
+                {
+                    "turn": 7,
+                    "cost": "Three"
+                }
+            ]
+        },
+        {
+            "name": "Wall of defenders",
+            "min_level": 2,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "lane": 0,
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 0,
+                    "lane": 1,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 0,
+                    "lane": 2,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 0,
+                    "lane": 3,
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 3
+                },
+                {
+                    "turn": 4
+                },
+                {
+                    "turn": 5
+                },
+                {
+                    "turn": 9,
+                    "rarity": "Rare"
+                }
+            ]
+        },
+        {
+            "name": "Surprise attack",
+            "min_level": 5,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "lane": 1,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 0,
+                    "lane": 2,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 0
+                },
+                {
+                    "turn": 3,
+                    "lane": 0,
+                    "rarity": "Common",
+                    "attack": 2
+                },
+                {
+                    "turn": 3,
+                    "lane": 3,
+                    "rarity": "Common",
+                    "attack": 2
+                },
+                {
+                    "turn": 5,
+                    "lane": 1,
+                    "rarity": "Uncommon",
+                    "attack": 3
+                },
+                {
+                    "turn": 6,
+                    "lane": 2,
+                    "rarity": "Uncommon",
+                    "attack": 3
                 }
             ]
         },
@@ -116,19 +399,21 @@
             "name": "Common, Uncommon, and then Rare",
             "scripted_moves": [
                 {
-                    "turn": 0,
+                    "turn": 1,
+                    "cost": "One",
                     "rarity": "Common"
                 },
                 {
-                    "turn": 0,
+                    "turn": 1,
+                    "cost": "One",
                     "rarity": "Common"
                 },
                 {
-                    "turn": 2,
+                    "turn": 3,
                     "rarity": "Uncommon"
                 },
                 {
-                    "turn": 4,
+                    "turn": 3,
                     "rarity": "Uncommon"
                 },
                 {

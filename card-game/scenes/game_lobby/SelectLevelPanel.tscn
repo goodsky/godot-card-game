@@ -169,7 +169,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_rsn27")
 layout_mode = 2
 theme_type_variation = &"SmallLabel"
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-text = "Resource+"
+text = "Sacrifice+"
 
 [node name="NewCard" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
 visible = false
@@ -183,6 +183,7 @@ theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "New Card"
 
 [node name="NewCardUncommon" type="PanelContainer" parent="VBoxContainer/RewardHBox"]
+visible = false
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_g4g6f")
 

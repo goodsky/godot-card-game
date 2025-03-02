@@ -172,12 +172,12 @@ public static class CardGenerator
     {
         new StatAction()
         {
-            StatName = "agile",
+            StatName = "flying",
             CanApply = (cardInfo) =>
                 cardInfo.Abilities.Count < MaxCardAbilities &&
-                !cardInfo.Abilities.Contains(CardAbilities.Agile) &&
-                !cardInfo.Abilities.Contains(CardAbilities.Guard), // semi-redundant
-            ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Agile); return cardInfo; }
+                !cardInfo.Abilities.Contains(CardAbilities.Flying) &&
+                !cardInfo.Abilities.Contains(CardAbilities.Tall), // semi-redundant
+            ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Flying); return cardInfo; }
         },
         new StatAction()
         {
@@ -187,12 +187,12 @@ public static class CardGenerator
         },
         new StatAction()
         {
-            StatName = "guard",
+            StatName = "tall",
             CanApply = (cardInfo) =>
                 cardInfo.Abilities.Count < MaxCardAbilities &&
-                !cardInfo.Abilities.Contains(CardAbilities.Guard) &&
-                !cardInfo.Abilities.Contains(CardAbilities.Agile), // redundant
-            ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Guard); return cardInfo; }
+                !cardInfo.Abilities.Contains(CardAbilities.Tall) &&
+                !cardInfo.Abilities.Contains(CardAbilities.Flying), // redundant
+            ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Tall); return cardInfo; }
         },
         new StatAction()
         {
@@ -202,7 +202,7 @@ public static class CardGenerator
         },
         new StatAction()
         {
-            StatName = "poisoned",
+            StatName = "lethal",
             CanApply = (cardInfo) => cardInfo.Abilities.Count < MaxCardAbilities &&
                 !cardInfo.Abilities.Contains(CardAbilities.Lethal),
             ApplyStat = (cardInfo) => { cardInfo.Abilities.Add(CardAbilities.Lethal); return cardInfo; }
