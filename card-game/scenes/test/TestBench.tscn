@@ -43,12 +43,6 @@ theme_override_constants/h_separation = 32
 theme_override_constants/v_separation = 16
 alignment = 1
 
-[node name="GoBackButton" type="Button" parent="RootControl/VBoxContainer/Panels"]
-custom_minimum_size = Vector2(160, 42)
-layout_mode = 2
-size_flags_horizontal = 4
-text = "Back to Menu"
-
 [node name="GameBalancePanel" type="PanelContainer" parent="RootControl/VBoxContainer/Panels"]
 layout_mode = 2
 
@@ -58,6 +52,8 @@ layout_mode = 2
 [node name="GameBalanceTitle" type="Label" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
 layout_mode = 2
 text = "Game Balance"
+horizontal_alignment = 1
+uppercase = true
 
 [node name="CardPoolCountBox" type="HBoxContainer" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
 layout_mode = 2
@@ -93,6 +89,19 @@ text = "Analyze Balance"
 layout_mode = 2
 text = "Analyze Level Gen"
 
+[node name="TemplatesTitle" type="Label" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
+layout_mode = 2
+text = "AI Templates"
+horizontal_alignment = 1
+uppercase = true
+
+[node name="TemplateSelectButton" type="OptionButton" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="AnalyzeTemplates" type="Button" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
+layout_mode = 2
+text = "Analyze Templates"
+
 [node name="BalanceResultsLabel" type="Label" parent="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.290196, 0.290196, 0.290196, 1)
@@ -106,6 +115,8 @@ layout_mode = 2
 [node name="SimulatorTitle" type="Label" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
 layout_mode = 2
 text = "Game Simulator"
+horizontal_alignment = 1
+uppercase = true
 
 [node name="SimulateSaveButton" type="Button" parent="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer"]
 layout_mode = 2
@@ -129,6 +140,8 @@ layout_mode = 2
 layout_mode = 2
 text = "Card Generator
 "
+horizontal_alignment = 1
+clip_text = true
 
 [node name="GenerateCardsButton" type="Button" parent="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 42)
@@ -176,6 +189,8 @@ layout_mode = 2
 layout_mode = 2
 text = "Data Controls
 "
+horizontal_alignment = 1
+uppercase = true
 
 [node name="SampleCoroutineButton" type="Button" parent="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer"]
 visible = false
@@ -198,6 +213,8 @@ layout_mode = 2
 [node name="VolumeTitle" type="Label" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
 layout_mode = 2
 text = "Volume Tests"
+horizontal_alignment = 1
+uppercase = true
 
 [node name="PitchScaleLineEdit" type="LineEdit" parent="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer"]
 layout_mode = 2
@@ -220,13 +237,19 @@ custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Play Sound x3"
 
+[node name="GoBackButton" type="Button" parent="RootControl/VBoxContainer"]
+custom_minimum_size = Vector2(160, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+text = "Back to Menu"
+
 [node name="Buffer" type="Control" parent="RootControl/VBoxContainer"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
-[connection signal="pressed" from="RootControl/VBoxContainer/Panels/GoBackButton" to="." method="Click_BackToMainMenu"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer/AnalyzeBalanceButton" to="." method="Click_AnalyzeGameBalance"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer/AnalyzeLevelGenButton" to="." method="Click_AnalyzeLevelGeneration"]
+[connection signal="pressed" from="RootControl/VBoxContainer/Panels/GameBalancePanel/VBoxContainer/AnalyzeTemplates" to="." method="Click_AnalyzeAiTemplates"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/SimulateSaveButton" to="." method="Click_SimulateSaveFile"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/SimulatorPanel/VBoxContainer/UnitTestsButton" to="." method="Click_GameSimulatorTests"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/CardsPanel/VBoxContainer/GenerateCardsButton" to="." method="Click_GenerateCardPool"]
@@ -236,3 +259,4 @@ layout_mode = 2
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/DataPanel/VBoxContainer/ResetSettingsButton" to="." method="Click_ResetSettings"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer/PlaySoundButton" to="." method="Click_PlaySound"]
 [connection signal="pressed" from="RootControl/VBoxContainer/Panels/VolumePanel/VBoxContainer/PlayMultipleButton" to="." method="Click_PlayManySounds"]
+[connection signal="pressed" from="RootControl/VBoxContainer/GoBackButton" to="." method="Click_BackToMainMenu"]

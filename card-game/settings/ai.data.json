@@ -85,6 +85,7 @@
             "name": "Defender then attacker in same lane",
             "min_level": 1,
             "max_level": 4,
+            "difficulty_override": "Easy",
             "scripted_moves": [
                 {
                     "turn": 0,
@@ -141,13 +142,13 @@
                     "turn": 3
                 },
                 {
-                    "turn": 6
+                    "turn": 8
                 },
                 {
-                    "turn": 6
+                    "turn": 8
                 },
                 {
-                    "turn": 6
+                    "turn": 8
                 }
             ]
         },
@@ -161,11 +162,7 @@
                     "ability": "Tall"
                 },
                 {
-                    "turn": 1,
-                    "ability": "Tall"
-                },
-                {
-                    "turn": 4,
+                    "turn": 2,
                     "ability": "Tall"
                 },
                 {
@@ -174,6 +171,10 @@
                 },
                 {
                     "turn": 6,
+                    "ability": "Tall"
+                },
+                {
+                    "turn": 8,
                     "ability": "Tall"
                 },
                 {
@@ -236,10 +237,6 @@
                     "ability": "Lethal"
                 },
                 {
-                    "turn": 4,
-                    "ability": "Lethal"
-                },
-                {
                     "turn": 6,
                     "ability": "Lethal"
                 },
@@ -258,7 +255,7 @@
                     "ability": "Flying"
                 },
                 {
-                    "turn": 1,
+                    "turn": 4,
                     "ability": "Flying"
                 },
                 {
@@ -266,15 +263,11 @@
                     "ability": "Flying"
                 },
                 {
-                    "turn": 5,
-                    "ability": "Flying"
-                },
-                {
                     "turn": 7,
                     "ability": "Flying"
                 },
                 {
-                    "turn": 9,
+                    "turn": 7,
                     "ability": "Flying"
                 }
             ]

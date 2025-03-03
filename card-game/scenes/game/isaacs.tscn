@@ -9,23 +9,23 @@
 [ext_resource type="PackedScene" uid="uid://ynfxrvh0bp1x" path="res://scenes/game/Hand.tscn" id="4_wiasx"]
 [ext_resource type="Script" path="res://scenes/game/InfoArea.cs" id="5_sd7tc"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xci7l"]
-bg_color = Color(0.0784314, 0.592157, 1, 1)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pi0m1"]
-bg_color = Color(0.513726, 0.843137, 1, 1)
+bg_color = Color(0.487927, 0.901738, 0.570519, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e271m"]
-bg_color = Color(0, 0.505882, 0.996078, 1)
+bg_color = Color(0.33902, 0.79129, 0.38017, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi54p"]
-bg_color = Color(0.85098, 0.690196, 0.168627, 1)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xci7l"]
+bg_color = Color(0.206565, 0.538123, 0.262092, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_a6pfy"]
-bg_color = Color(0.85098, 0.72549, 0.321569, 1)
+bg_color = Color(0.85098, 0.054902, 0.321569, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cmdlw"]
-bg_color = Color(0.729412, 0.560784, 0, 1)
+bg_color = Color(1, 0.512533, 0.424451, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_xi54p"]
+bg_color = Color(0.85098, 0.027451, 0.168627, 1)
 
 [node name="Main" type="Node2D" node_paths=PackedStringArray("Board", "Hand")]
 script = ExtResource("1_32l42")
@@ -153,13 +153,13 @@ offset_left = 667.75
 offset_top = 460.0
 offset_right = 776.75
 offset_bottom = 514.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_styles/normal = SubResource("StyleBoxFlat_xci7l")
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_styles/hover = SubResource("StyleBoxFlat_pi0m1")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_e271m")
+theme_override_styles/normal = SubResource("StyleBoxFlat_xci7l")
 text = "Draw
 Card"
 
@@ -168,13 +168,13 @@ offset_left = 667.0
 offset_top = 540.0
 offset_right = 776.0
 offset_bottom = 594.0
-theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_hover_color = Color(0, 0, 0, 1)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 1)
 theme_override_colors/font_focus_color = Color(0, 0, 0, 1)
-theme_override_styles/normal = SubResource("StyleBoxFlat_xi54p")
+theme_override_colors/font_color = Color(0, 0, 0, 1)
 theme_override_styles/hover = SubResource("StyleBoxFlat_a6pfy")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_cmdlw")
+theme_override_styles/normal = SubResource("StyleBoxFlat_xi54p")
 text = "Clear Cards"
 
 [connection signal="pressed" from="DrawCardButton" to="." method="Isaac_DrawCard"]

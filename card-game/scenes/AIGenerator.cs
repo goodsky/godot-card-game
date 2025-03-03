@@ -67,6 +67,8 @@ public static class AIGenerator
         public int? MinLevel { get; set; }
         [JsonPropertyName("max_level")]
         public int? MaxLevel { get; set; }
+        [JsonPropertyName("difficulty_override")]
+        public LevelDifficulty? DifficultyOverride { get; set; }
         [JsonPropertyName("scripted_moves")]
         public GeneratorScriptedMove[] ScriptedMoves { get; set; }
     }
@@ -92,8 +94,10 @@ public static class AIGenerator
     public static GameLevel GenerateGameLevel(CardPool cardPool, List<CardInfo> playerDeck, int level, int startingHandSize, int seed)
     {
         var rnd = new RandomGenerator(seed);
-        var ai = GenerateEnemyAI(cardPool, level, rnd);
-        (var difficulty, string guardrailReason) = CalculateLevelDifficulty(playerDeck, ai, level, startingHandSize, seed);
+        var (ai, difficultyOverride) = GenerateEnemyAI(cardPool, level, rnd);
+        (var difficulty, string guardrailReason) = CalculateLevelDifficulty(playerDeck, ai, level, startingHandSize, seed, useGuardrails: !ai.IsTemplate);
+
+        if (difficultyOverride != null) difficulty = difficultyOverride.Value;
         var reward = GenerateLevelReward(difficulty, rnd);
         
         return new GameLevel
@@ -107,7 +111,7 @@ public static class AIGenerator
         };
     }
 
-    public static EnemyAI GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
+    public static (EnemyAI, LevelDifficulty?) GenerateEnemyAI(CardPool cardPool, int level, RandomGenerator rnd)
     {
         var aiData = LoadGeneratorData();
         var rndParams = aiData.RandomParameters;
@@ -125,16 +129,18 @@ public static class AIGenerator
                 levelTemplates.Select(t => t.ProbabilityWeight ?? 1).ToArray());
 
             GD.Print($"Generating AI using Template. {levelTemplates.Length} templates available. Selected '{selectedLevelTemplate.Name}'.");
-            return GenerateTemplateEnemyAI(
+            EnemyAI templateAi = GenerateTemplateEnemyAI(
                 cardPool,
                 selectedLevelTemplate.ScriptedMoves,
                 level,
                 rndParams,
                 rnd);
+            return (templateAi, selectedLevelTemplate.DifficultyOverride);
         }
 
         GD.Print("Generating random AI");
-        return GenerateRandomEnemyAI(cardPool, level, rnd, rndParams, log: false);
+        EnemyAI randomAi = GenerateRandomEnemyAI(cardPool, level, rnd, rndParams, log: false);
+        return (randomAi, null);
     }
 
     public static EnemyAI GenerateTemplateEnemyAI(CardPool cardPool, GeneratorScriptedMove[] moves, int level, RandomAIParameters rndParams, RandomGenerator rnd)
@@ -187,7 +193,7 @@ public static class AIGenerator
             scriptedMoves.Add(new ScriptedMove(move.Turn, cardInfo.Value, move.Lane));
         }
 
-        return new EnemyAI(cardPool, scriptedMoves, rnd);
+        return new EnemyAI(cardPool, scriptedMoves, rnd, isTemplate: true);
     }
 
     public static EnemyAI GenerateRandomEnemyAI(CardPool cardPool, int level, RandomGenerator rnd, RandomAIParameters rndParams, bool log)
@@ -392,12 +398,12 @@ public static class AIGenerator
         public Func<LevelState, bool> Check { get; set; }
     }
 
-    public static (LevelDifficulty difficulty, string error) CalculateLevelDifficulty(List<CardInfo> playerDeck, EnemyAI ai, int level, int startingHandSize, int seed)
+    public static (LevelDifficulty difficulty, string error) CalculateLevelDifficulty(List<CardInfo> playerDeck, EnemyAI ai, int level, int startingHandSize, int seed, bool useGuardrails = true)
     {
         const float MAX_SIMULATED_WIN_RATE = 0.99f;
         const float MIN_SIMULATED_WIN_RATE = 0.01f;
         const int MIN_ENEMY_DAMAGE_DEALT = 3; // while simulating - make sure the enemy at least gets some damage in
-        if (!PassGeneratedLevelGuardrails(ai.Clone()))
+        if (useGuardrails && !PassGeneratedLevelGuardrails(ai.Clone()))
         {
             return (LevelDifficulty.FailedGuardrail, "BasicMarkers");
         }

@@ -9,16 +9,18 @@ public class EnemyAI
     private List<ScriptedMove> _moves;
     private RandomGenerator _rnd;
 
+    public bool IsTemplate { get; private set; }
     public int MaxTurn { get; private set; }
 
     public RandomGenerator SnapshotRandomGenerator => new RandomGenerator(_rnd.Seed, _rnd.N); 
 
-    public EnemyAI(CardPool cards, List<ScriptedMove> moves, RandomGenerator rnd)
+    public EnemyAI(CardPool cards, List<ScriptedMove> moves, RandomGenerator rnd, bool isTemplate = false)
     {
         _cardPool = cards;
         _moves = moves;
         _rnd = new RandomGenerator(rnd.Seed, rnd.N); // copy so other game state doesn't affect this
 
+        IsTemplate = isTemplate;
         MaxTurn = moves.Count > 0 ? moves.Max(move => move.Turn) : 0;
     }
 

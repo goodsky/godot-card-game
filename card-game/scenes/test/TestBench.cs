@@ -6,8 +6,19 @@ using System.Linq;
 
 public partial class TestBench : Node2D
 {
+	private static readonly string DEFAULT_TEMPLATE_NAME = "<All>";
 	public override void _Ready()
 	{
+		var aiData = AIGenerator.LoadGeneratorData();
+		var templates = aiData.Templates;
+
+		var templateSelectButton = FindChild("TemplateSelectButton") as OptionButton;
+		templateSelectButton.Clear();
+		templateSelectButton.AddItem(DEFAULT_TEMPLATE_NAME);
+		foreach (var template in templates)
+		{
+			templateSelectButton.AddItem(template.Name);
+		}
 	}
 
 	public void Click_AnalyzeGameBalance()
@@ -159,6 +170,111 @@ public partial class TestBench : Node2D
 
 		summaryFile.Close();
 		csvFile.Close();
+
+		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
+		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
+	}
+
+	public void Click_AnalyzeAiTemplates()
+	{
+		const string LEVEL_GENERATION_ANALYSIS_FILENAME = "TemplateAnalysis.txt";
+
+		const int MIN_LEVEL = 1;
+		const int MAX_LEVEL = 12;
+
+		var cardPoolTextEdit = FindChild("CardPoolCount") as TextEdit;
+		var gamesToSimTextEdit = FindChild("CardPoolCount") as TextEdit;
+		var resultsLabel = FindChild("BalanceResultsLabel") as Label;
+
+		if (!TryReadTextEdit(cardPoolTextEdit, 1, 100, out int cardPoolCount))
+		{
+			resultsLabel.Text = "Invalid Card Pool Size";
+			return;
+		}
+
+		if (!TryReadTextEdit(gamesToSimTextEdit, 1, 100, out int gamesCount))
+		{
+			resultsLabel.Text = "Invalid Games To Simulate Count";
+			return;
+		}
+
+		var templateSelectButton = FindChild("TemplateSelectButton") as OptionButton;
+		var selectedTemplateIndex = templateSelectButton.Selected;
+		var selectedTemplateName = templateSelectButton.GetItemText(selectedTemplateIndex);
+
+		var startTime = DateTime.Now;
+		var rootRnd = new RandomGenerator();
+
+		var difficultyEnums = Enum.GetValues(typeof(LevelDifficulty)).Cast<LevelDifficulty>().ToList();
+
+		DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
+        var summaryFile = FileAccess.Open($"{Constants.UserDataDirectory}/{LEVEL_GENERATION_ANALYSIS_FILENAME}", FileAccess.ModeFlags.Write);
+		
+		var aiData = AIGenerator.LoadGeneratorData();
+		var templates = selectedTemplateName == DEFAULT_TEMPLATE_NAME ? aiData.Templates : aiData.Templates.Where(t => t.Name == selectedTemplateName);
+		try
+		{
+			resultsLabel.Text = "Analyzing...";
+
+			foreach (var template in templates)
+			{
+				summaryFile.StoreLine($"=== {template.Name} ===");
+				
+				for (int level = MIN_LEVEL; level <= MAX_LEVEL; level++)
+				{
+					if (level < template.MinLevel || level > template.MaxLevel)
+					{
+						continue;
+					}
+
+					int[] difficultyCounts = new int[difficultyEnums.Count];
+					var guardrailReasonCount = new Dictionary<string, int>();
+					int totalGames = 0;
+					for (int cardPoolId = 0; cardPoolId < cardPoolCount; cardPoolId++)
+					{
+						CardPool cardPool = CardGenerator.GenerateRandomCardPool("Level Generation Pool");
+						
+						for (int gameId = 0; gameId < gamesCount; gameId++)
+						{
+							var rnd = new RandomGenerator(rootRnd.Next());
+							var fakeProgress = GameAnalyzer.GenerateSimulatedProgress(cardPool, level, rnd);
+							var ai = AIGenerator.GenerateTemplateEnemyAI(cardPool, template.ScriptedMoves, level, aiData.RandomParameters, rnd);
+							(var difficulty, string guardrailReason) = AIGenerator.CalculateLevelDifficulty(fakeProgress.DeckCards, ai, level, fakeProgress.HandSize, rnd.Next(), useGuardrails: false);
+							difficultyCounts[(int)difficulty]++;
+							if (!string.IsNullOrEmpty(guardrailReason))
+							{
+								if (!guardrailReasonCount.ContainsKey(guardrailReason))
+								{
+									guardrailReasonCount[guardrailReason] = 0;
+								}
+								guardrailReasonCount[guardrailReason]++;
+							}
+							totalGames++;
+						}
+					}
+					summaryFile.StoreLine($"\tLevel {level}:");
+					foreach (var difficulty in difficultyEnums)
+					{
+						summaryFile.StoreLine($"\t\t{difficulty}: {100.0 * difficultyCounts[(int)difficulty]/totalGames:0.00}%");
+					}
+					summaryFile.StoreLine("\n\t\tGuardrail Reasons:");
+					foreach (var kvp in guardrailReasonCount)
+					{
+						summaryFile.StoreLine($"\t\t\t{kvp.Key}: {kvp.Value}");
+					}
+					summaryFile.StoreLine("");
+				}
+				summaryFile.StoreLine("");
+			}
+		}
+		catch (Exception e)
+		{
+			resultsLabel.Text = $"EXCEPTION: {e.Message}";
+			GD.Print(e.ToString());
+			return;
+		}
+
+		summaryFile.Close();
 
 		var analysisTime = DateTime.Now.Subtract(startTime).TotalMilliseconds;
 		resultsLabel.Text = $"Analysis completed in {analysisTime}ms";
