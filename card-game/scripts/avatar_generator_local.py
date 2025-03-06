@@ -81,7 +81,7 @@ def generate_image(prompt: str, negative_prompt: str, output_dir: str, filename:
             prompt=prompt,
             negative_prompt=negative_prompt,
             num_inference_steps=4,
-            guidance_scale=2,
+            guidance_scale=1.5,
             width=1216,
             height=832).images[0]
         
