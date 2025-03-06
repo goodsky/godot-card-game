@@ -6,6 +6,11 @@ import os
 import base64
 import time
 
+###
+# THIS SCRIPT IS DEPRECATED
+# Use avatar_generator_local.py instead to use the local model.
+###
+
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)

@@ -5,9 +5,10 @@ import json
 import shutil
 from datetime import datetime
 
-from avatar_generator import format_image, generate_pixel_art_avatar
+from diffusers import StableDiffusionXLPipeline
+from avatar_generator_local import format_image, generate_pixel_art_avatar, initialize_diffusion_pipeline
 
-data_path = "../decks/generator/data.json"
+data_path = "../settings/cards.data.json"
 
 raw_img_path = "../assets/sprites/avatars/raw/"
 avatar_img_path = "../assets/sprites/avatars/"
@@ -34,30 +35,38 @@ def load_array(value: str) -> list[str]:
     return [ value ]
 
 
-def save_data(data, backup=True, sort=False):
+def save_data(new_data, backup=True, sort=False):
     if sort:
-        data = {
-            "nouns": { k: v for k, v in sorted(data["nouns"].items(), key=lambda x: (x[1]['level'], x[0])) },
-            "adjectives": { k: v for k, v in sorted(data["adjectives"].items(), key=lambda x: (x[1]['level'], x[0])) }
+        new_data = {
+            "nouns": { k: v for k, v in sorted(new_data["nouns"].items(), key=lambda x: (x[1]['level'], x[0])) },
+            "adjectives": { k: v for k, v in sorted(new_data["adjectives"].items(), key=lambda x: (x[1]['level'], x[0])) }
         }
 
     if backup:
-        backup_dir = os.path.join(os.environ['USERPROFILE'], 'Documents', 'Backups')
-        os.makedirs(backup_dir, exist_ok=True)
+        backup_data()    
 
-        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-        backup_file = os.path.join(backup_dir, f"cardgame.data.{timestamp}.json")
-        shutil.copy(data_path, backup_file)
-        print(f"Backed up file to {backup_file}")
-
-        backups = sorted([os.path.join(backup_dir, f) for f in os.listdir(backup_dir) if f.startswith('cardgame.data')], key=os.path.getctime)
-        if len(backups) > MAX_BACKUPS:
-            for old_backup in backups[:-MAX_BACKUPS]:
-                os.remove(old_backup)
-                print(f"Removed old backup: {old_backup}")
+    data = load_data()
+    data["nouns"] = new_data["nouns"]
+    data["adjectives"] = new_data["adjectives"]
 
     with open(data_path, "w") as file:
         file.write(json.dumps(data, indent=3))
+
+
+def backup_data():
+    backup_dir = os.path.join(os.environ['USERPROFILE'], 'Documents', 'Backups')
+    os.makedirs(backup_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+    backup_file = os.path.join(backup_dir, f"cards.data.{timestamp}.json")
+    shutil.copy(data_path, backup_file)
+    print(f"Backed up file to {backup_file}")
+
+    backups = sorted([os.path.join(backup_dir, f) for f in os.listdir(backup_dir) if f.startswith('cards.data')], key=os.path.getctime)
+    if len(backups) > MAX_BACKUPS:
+        for old_backup in backups[:-MAX_BACKUPS]:
+            os.remove(old_backup)
+            print(f"Removed old backup: {old_backup}")
 
 
 def print_data(data: dict, details=False):
@@ -98,7 +107,7 @@ def add_data(data: dict, type: str, values: list[str], level: int, overwrite=Fal
         print(f'Added {value} to the {type} list.')
 
 
-def generate_avatars(data: dict, creature_name: str, n: int) -> None:
+def generate_avatars(data: dict, creature_name: str, pipeline: StableDiffusionXLPipeline, n: int) -> None:
     if creature_name not in data["nouns"]:
         print(f"ERROR: Unknown creature {args.creature}")
         return
@@ -112,7 +121,7 @@ def generate_avatars(data: dict, creature_name: str, n: int) -> None:
     if new_n <= 0:
         return
 
-    raw_img_paths = generate_pixel_art_avatar(creature_name, raw_img_path, new_n)
+    raw_img_paths = generate_pixel_art_avatar(creature_name, raw_img_path, pipeline, new_n)
     for img_path in raw_img_paths:
         new_avatar_path = format_image(img_path, avatar_img_path)
         new_avatar_filename = os.path.basename(new_avatar_path)
@@ -175,12 +184,16 @@ if __name__ == "__main__":
         add_data(data, data_type, values, args.level, overwrite=args.force)
         save_data(data, sort=True)
     elif args.command == "avatars":
+        pipeline = initialize_diffusion_pipeline()
         if args.creature:
-            generate_avatars(data, args.creature, args.n)
+            generate_avatars(data, args.creature, pipeline, args.n)
             save_data(data, sort=True)
         else:
+            noun_count = len(data["nouns"])
             for noun in data["nouns"].keys():
-                generate_avatars(data, noun, args.n)
+                noun_count -= 1
+                print(f"Generating avatars for {noun} ({noun_count} remaining)")
+                generate_avatars(data, noun, pipeline, args.n)
                 save_data(data, sort=True)
     elif args.command == "clean":
         remove_dangling_resources(data)
