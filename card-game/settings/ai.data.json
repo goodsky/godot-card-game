@@ -184,8 +184,33 @@
             ]
         },
         {
-            "name": "Zerg Rush",
+            "name": "Zerg Rush - 1",
             "min_level": 1,
+            "max_level": 2,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 1,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 2,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                }
+            ]
+        },
+        {
+            "name": "Zerg Rush - 2",
+            "min_level": 3,
             "max_level": 4,
             "scripted_moves": [
                 {
@@ -209,13 +234,40 @@
                 {
                     "turn": 3,
                     "cost": "One",
+                    "attack": 1
+                }
+            ]
+        },
+        {
+            "name": "Zerg Rush - 3",
+            "min_level": 5,
+            "scripted_moves": [
+                {
+                    "turn": 0,
+                    "cost": "One",
                     "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 1,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 2,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 3,
+                    "cost": "One",
                     "attack": 1
                 },
                 {
                     "turn": 4,
                     "cost": "One",
-                    "rarity": "Common",
                     "attack": 1
                 }
             ]
@@ -237,11 +289,11 @@
                     "ability": "Lethal"
                 },
                 {
-                    "turn": 6,
+                    "turn": 7,
                     "ability": "Lethal"
                 },
                 {
-                    "turn": 8,
+                    "turn": 10,
                     "ability": "Lethal"
                 }
             ]
@@ -263,11 +315,11 @@
                     "ability": "Flying"
                 },
                 {
-                    "turn": 7,
+                    "turn": 8,
                     "ability": "Flying"
                 },
                 {
-                    "turn": 7,
+                    "turn": 8,
                     "ability": "Flying"
                 }
             ]
