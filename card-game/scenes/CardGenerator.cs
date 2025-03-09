@@ -286,6 +286,79 @@ public static class CardGenerator
         return cardInfo;
     }
 
+    public static CardPool OverrideCardPool(CardPool cardPool, RandomGenerator rnd, int level, string nounOverride, string adjectiveOverride)
+    {
+        var data = LoadGeneratorData();
+
+        // Resources use the following levels to pick noun/adjectives:
+        //      Noun: 0=ZeroCost; 1=OneCost; 2=TwoCost; 3=ThreeCost;
+        //      Adj: 0=Sacrifice; 1=Common; 2=Uncommon&Rare;
+        if (nounOverride == "*")
+        {
+            int nounLevel;
+            if (level == 1) nounLevel = 0;
+            else if (level <= 4) nounLevel = 1;
+            else if (level <= 7) nounLevel = 2;
+            else nounLevel = 3;
+
+            nounOverride = rnd.SelectRandom(data.Nouns.Where(n => n.Value.Level == nounLevel).Select(n => n.Key));
+        }
+
+        if (adjectiveOverride == "*")
+        {
+            int adjLevel;
+            if (level == 1) adjLevel = 0;
+            else if (level <= 5) adjLevel = 1;
+            else adjLevel = 2;
+
+            adjectiveOverride = rnd.SelectRandom(data.Adjectives.Where(a => a.Value.Level == adjLevel).Select(a => a.Key));
+        }
+
+        var overrideCards = cardPool.Cards.Select(card => 
+            OverrideCardFields(
+                card,
+                data,
+                rnd,
+                noun: nounOverride,
+                adjective: adjectiveOverride));
+        
+        return new CardPool(overrideCards, $"Override_{cardPool.Name}");
+    }
+
+    public static CardInfo OverrideCardFields(CardInfo originalCard, GeneratorData data, RandomGenerator rnd, string noun, string adjective)
+    {
+        CardInfo card = originalCard; // struct copy by value
+
+        if (!string.IsNullOrEmpty(noun))
+        {
+            NounData nounData = data.Nouns.FirstOrDefault(n => n.Key == noun).Value;
+            if (nounData == null)
+            {
+                GD.PrintErr($"[OverrideCard] Noun {noun} not found in generator data.");
+            }
+            else
+            {
+                card.NameNoun = noun;
+                card.AvatarResource = rnd.SelectRandom(nounData.AvatarResources);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(adjective))
+        {
+            AdjectiveData adjData = data.Adjectives.FirstOrDefault(n => n.Key == adjective).Value;
+            if (adjData == null)
+            {
+                GD.PrintErr($"[OverrideCard] Adjective {adjective} not found in generator data.");
+            }
+            else
+            {
+                card.NameAdjective = adjective;   
+            }
+        }
+
+        return card;
+    }
+
     public static void ResetCardGeneratorSettings()
     {
         DirAccess.MakeDirRecursiveAbsolute(Constants.UserDataDirectory);
@@ -308,7 +381,7 @@ public static class CardGenerator
         {
             adjectiveLevel = 0;
         }
-        else if (rarity == CardRarity.Common || rarity == CardRarity.Uncommon)
+        else if (rarity == CardRarity.Common)
         {
             adjectiveLevel = 1;
         }

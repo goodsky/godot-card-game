@@ -69,6 +69,10 @@ public static class AIGenerator
         public int? MaxLevel { get; set; }
         [JsonPropertyName("difficulty_override")]
         public LevelDifficulty? DifficultyOverride { get; set; }
+        [JsonPropertyName("noun_override")]
+        public string NounOverride { get; set; }
+        [JsonPropertyName("adjective_override")]
+        public string AdjectiveOverride { get; set; }
         [JsonPropertyName("scripted_moves")]
         public GeneratorScriptedMove[] ScriptedMoves { get; set; }
     }
@@ -77,6 +81,10 @@ public static class AIGenerator
     {
         [JsonPropertyName("turn")]
         public int Turn { get; set; }
+        [JsonPropertyName("min_level")]
+        public int? MinLevel { get; set; }
+        [JsonPropertyName("max_level")]
+        public int? MaxLevel { get; set; }
         [JsonPropertyName("lane")]
         public int? Lane { get; set; }
         [JsonPropertyName("attack")]
@@ -122,7 +130,8 @@ public static class AIGenerator
             .ToArray();
 
         int useTemplateProbability = GetValueFromArray(level, aiData.Levels.TemplateProbability);
-        if (levelTemplates.Length > 0 && rnd.Next(100) < useTemplateProbability)
+        bool useTemplate = rnd.Next(100) < useTemplateProbability;
+        if (useTemplate && levelTemplates.Length > 0)
         {
             AITemplate selectedLevelTemplate = rnd.SelectRandomOdds(
                 levelTemplates,
@@ -131,7 +140,7 @@ public static class AIGenerator
             GD.Print($"Generating AI using Template. {levelTemplates.Length} templates available. Selected '{selectedLevelTemplate.Name}'.");
             EnemyAI templateAi = GenerateTemplateEnemyAI(
                 cardPool,
-                selectedLevelTemplate.ScriptedMoves,
+                selectedLevelTemplate,
                 level,
                 rndParams,
                 rnd);
@@ -143,17 +152,35 @@ public static class AIGenerator
         return (randomAi, null);
     }
 
-    public static EnemyAI GenerateTemplateEnemyAI(CardPool cardPool, GeneratorScriptedMove[] moves, int level, RandomAIParameters rndParams, RandomGenerator rnd)
+    public static EnemyAI GenerateTemplateEnemyAI(CardPool cardPool, AITemplate template, int level, RandomAIParameters rndParams, RandomGenerator rnd)
     {
-        var scriptedMoves = new List<ScriptedMove>();
-        foreach (var move in moves)
+        if (!string.IsNullOrEmpty(template.NounOverride) || !string.IsNullOrEmpty(template.AdjectiveOverride))
         {
+            GD.Print($"Overriding card pool with Noun='{template.NounOverride}' and Adjective='{template.AdjectiveOverride}'");
+            cardPool = CardGenerator.OverrideCardPool(cardPool, rnd, level, template.NounOverride, template.AdjectiveOverride);
+        }
+
+        if (template.ScriptedMoves == null || template.ScriptedMoves.Length == 0)
+        {
+            GD.PushError("Template has no scripted moves!");
+            return GenerateRandomEnemyAI(cardPool, level, rnd, rndParams, log: false);
+        }
+
+        var scriptedMoves = new List<ScriptedMove>();
+        foreach (var move in template.ScriptedMoves)
+        {
+            if ((move.MinLevel != null && level < move.MinLevel) ||
+                (move.MaxLevel != null && level > move.MaxLevel))
+            {
+                continue;
+            }
+
             // If the blood cost is not specified, then match the curve for randomly generated AIs
             if (move.BloodCost == null)
             {
                 int oneCostProbability = GetValueFromArray(move.Turn, rndParams.PlayOneCostProbability);
-                int twoCostProbability = GetValueFromArray(move.Turn, rndParams.PlayOneCostProbability);
-                int threeCostProbability = GetValueFromArray(move.Turn, rndParams.PlayOneCostProbability);
+                int twoCostProbability = GetValueFromArray(move.Turn, rndParams.PlayTwoCostProbability);
+                int threeCostProbability = GetValueFromArray(move.Turn, rndParams.PlayThreeCostProbability);
                 int zeroCostProbability = 100 - oneCostProbability - twoCostProbability - threeCostProbability;
                 move.BloodCost = rnd.SelectRandomOdds(
                     new[] { CardBloodCost.Zero, CardBloodCost.One, CardBloodCost.Two, CardBloodCost.Three },

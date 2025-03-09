@@ -82,6 +82,16 @@
     },
     "ai_templates": [
         {
+            "name": "Noun Override",
+            "min_level": 1,
+            "noun_override": "*"
+        },
+        {
+            "name": "Adjective Override",
+            "min_level": 5,
+            "adjective_override": "*"
+        },
+        {
             "name": "Defender then attacker in same lane",
             "min_level": 1,
             "max_level": 4,
@@ -133,7 +143,7 @@
             "max_level": 4,
             "scripted_moves": [
                 {
-                    "turn": 0
+                    "turn": 1
                 },
                 {
                     "turn": 3
@@ -142,13 +152,13 @@
                     "turn": 3
                 },
                 {
-                    "turn": 8
+                    "turn": 6
                 },
                 {
-                    "turn": 8
+                    "turn": 6
                 },
                 {
-                    "turn": 8
+                    "turn": 6
                 }
             ]
         },
@@ -184,9 +194,7 @@
             ]
         },
         {
-            "name": "Zerg Rush - 1",
-            "min_level": 1,
-            "max_level": 2,
+            "name": "Zerg Rush",
             "scripted_moves": [
                 {
                     "turn": 0,
@@ -201,28 +209,9 @@
                     "attack": 1
                 },
                 {
-                    "turn": 2,
-                    "cost": "One",
-                    "rarity": "Common",
-                    "attack": 1
-                }
-            ]
-        },
-        {
-            "name": "Zerg Rush - 2",
-            "min_level": 3,
-            "max_level": 4,
-            "scripted_moves": [
-                {
-                    "turn": 0,
-                    "cost": "One",
-                    "rarity": "Common",
-                    "attack": 1
-                },
-                {
                     "turn": 1,
+                    "min_level": 7,
                     "cost": "One",
-                    "rarity": "Common",
                     "attack": 1
                 },
                 {
@@ -235,38 +224,28 @@
                     "turn": 3,
                     "cost": "One",
                     "attack": 1
-                }
-            ]
-        },
-        {
-            "name": "Zerg Rush - 3",
-            "min_level": 5,
-            "scripted_moves": [
-                {
-                    "turn": 0,
-                    "cost": "One",
-                    "rarity": "Common",
-                    "attack": 1
-                },
-                {
-                    "turn": 1,
-                    "cost": "One",
-                    "rarity": "Common",
-                    "attack": 1
-                },
-                {
-                    "turn": 2,
-                    "cost": "One",
-                    "rarity": "Common",
-                    "attack": 1
                 },
                 {
                     "turn": 3,
+                    "min_level": 4,
                     "cost": "One",
                     "attack": 1
                 },
                 {
                     "turn": 4,
+                    "cost": "One",
+                    "rarity": "Common",
+                    "attack": 1
+                },
+                {
+                    "turn": 5,
+                    "min_level": 4,
+                    "cost": "One",
+                    "attack": 1
+                },
+                {
+                    "turn": 6,
+                    "min_level": 4,
                     "cost": "One",
                     "attack": 1
                 }
@@ -285,15 +264,21 @@
                     "ability": "Lethal"
                 },
                 {
-                    "turn": 4,
+                    "turn": 2,
+                    "min_level": 4,
+                    "ability": "Lethal",
+                    "rarity": "Uncommon"
+                },
+                {
+                    "turn": 3,
                     "ability": "Lethal"
                 },
                 {
-                    "turn": 7,
+                    "turn": 5,
                     "ability": "Lethal"
                 },
                 {
-                    "turn": 10,
+                    "turn": 6,
                     "ability": "Lethal"
                 }
             ]
@@ -307,19 +292,25 @@
                     "ability": "Flying"
                 },
                 {
-                    "turn": 4,
+                    "turn": 1,
+                    "min_level": 5,
                     "ability": "Flying"
                 },
                 {
-                    "turn": 4,
+                    "turn": 1,
+                    "min_level": 7,
                     "ability": "Flying"
                 },
                 {
-                    "turn": 8,
+                    "turn": 3,
                     "ability": "Flying"
                 },
                 {
-                    "turn": 8,
+                    "turn": 5,
+                    "ability": "Flying"
+                },
+                {
+                    "turn": 6,
                     "ability": "Flying"
                 }
             ]
@@ -334,7 +325,8 @@
                     "rarity": "Common"
                 },
                 {
-                    "turn": 5,
+                    "turn": 4,
+                    "min_level": 7,
                     "cost": "Three"
                 },
                 {
@@ -342,7 +334,16 @@
                     "cost": "Three"
                 },
                 {
-                    "turn": 7,
+                    "turn": 5,
+                    "cost": "Three"
+                },
+                {
+                    "turn": 5,
+                    "min_level": 9,
+                    "cost": "Three"
+                },
+                {
+                    "turn": 6,
                     "cost": "Three"
                 },
                 {
@@ -382,6 +383,18 @@
                     "attack": 0
                 },
                 {
+                    "turn": 1,
+                    "min_level": 7
+                },
+                {
+                    "turn": 1,
+                    "min_level": 7
+                },
+                {
+                    "turn": 2,
+                    "min_level": 5
+                },
+                {
                     "turn": 3
                 },
                 {
@@ -391,7 +404,7 @@
                     "turn": 5
                 },
                 {
-                    "turn": 9,
+                    "turn": 6,
                     "rarity": "Rare"
                 }
             ]
@@ -415,25 +428,25 @@
                     "attack": 0
                 },
                 {
-                    "turn": 3,
+                    "turn": 2,
                     "lane": 0,
                     "rarity": "Common",
                     "attack": 2
                 },
                 {
-                    "turn": 3,
+                    "turn": 2,
                     "lane": 3,
                     "rarity": "Common",
                     "attack": 2
                 },
                 {
-                    "turn": 5,
+                    "turn": 4,
                     "lane": 1,
                     "rarity": "Uncommon",
                     "attack": 3
                 },
                 {
-                    "turn": 6,
+                    "turn": 5,
                     "lane": 2,
                     "rarity": "Uncommon",
                     "attack": 3
@@ -462,7 +475,7 @@
                     "rarity": "Uncommon"
                 },
                 {
-                    "turn": 6,
+                    "turn": 5,
                     "rarity": "Rare"
                 },
                 {

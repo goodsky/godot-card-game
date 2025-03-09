@@ -238,7 +238,7 @@ public partial class TestBench : Node2D
 						{
 							var rnd = new RandomGenerator(rootRnd.Next());
 							var fakeProgress = GameAnalyzer.GenerateSimulatedProgress(cardPool, level, rnd);
-							var ai = AIGenerator.GenerateTemplateEnemyAI(cardPool, template.ScriptedMoves, level, aiData.RandomParameters, rnd);
+							var ai = AIGenerator.GenerateTemplateEnemyAI(cardPool, template, level, aiData.RandomParameters, rnd);
 							(var difficulty, string guardrailReason) = AIGenerator.CalculateLevelDifficulty(fakeProgress.DeckCards, ai, level, fakeProgress.HandSize, rnd.Next(), useGuardrails: false);
 							difficultyCounts[(int)difficulty]++;
 							if (!string.IsNullOrEmpty(guardrailReason))
