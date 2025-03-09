@@ -11,12 +11,20 @@ public partial class AudioManager : Node
     private float _musicVolume = 1f;
     private Queue<AudioStreamPlayer> _channels = new Queue<AudioStreamPlayer>();
     private Dictionary<AudioStreamPlayer, PlayingAudio> _activeChannels = new Dictionary<AudioStreamPlayer, PlayingAudio>();
+    private AudioStreamPlayer _musicChannel;
 
     public static AudioManager Instance { get; private set; }
 
     public override void _Ready()
     {
         Instance = this;
+        ProcessMode = ProcessModeEnum.Always; // always process audio
+
+        _musicChannel = new AudioStreamPlayer();
+        _musicChannel.Name = "music_channel";
+        _musicChannel.Bus = "Music";
+        AddChild(_musicChannel);
+
         for (int i = 0; i < ChannelCount; i++)
         {
             AudioStreamPlayer channel = new AudioStreamPlayer();
@@ -113,6 +121,22 @@ public partial class AudioManager : Node
                 player.Stop();
             }
         }
+    }
+
+    public void PlayMusic(AudioStream audio)
+    {
+        _musicChannel.Stream = audio;
+        _musicChannel.Play();
+    }
+
+    public void StopMusic()
+    {
+        _musicChannel.Stop();
+    }
+    
+    public void UpdateMusicVolume(float volume)
+    {
+        _musicChannel.VolumeDb = Mathf.LinearToDb(volume);
     }
 
     private void OnStreamFinished(AudioStreamPlayer channel)

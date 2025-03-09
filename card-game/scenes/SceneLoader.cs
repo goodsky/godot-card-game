@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public partial class SceneLoader : Node2D
@@ -15,6 +16,8 @@ public partial class SceneLoader : Node2D
 		RemoveAllChildren();
 		var mainMenu = Constants.MainMenuScene.Instantiate<MainMenu>();
 		AddChild(mainMenu);
+
+		AudioManager.Instance.PlayMusic(Constants.Audio.Music_Lobby);
 	}
 
 	public void LoadGameLobby(bool startNewGame = false)
@@ -26,16 +29,23 @@ public partial class SceneLoader : Node2D
 		var gameLobby = Constants.GameLobbyScene.Instantiate<GameLobby>();
 		gameLobby.IsNewGame = startNewGame;
 		AddChild(gameLobby);
+
+		AudioManager.Instance.StopMusic();
 	}
 
 	public void LoadMainGame(Deck sacrifices, Deck creatures, GameLevel level)
 	{
 		RemoveAllChildren();
+
 		MainGame mainGame = Constants.MainGameScene.Instantiate<MainGame>();
 		mainGame.Sacrifices = sacrifices;
 		mainGame.Creatures = creatures;
 		mainGame.GameLevel = level;
 		AddChild(mainGame);
+
+		var musicOptions = new[] { Constants.Audio.Music_Game1, Constants.Audio.Music_Game2 };
+		var music = musicOptions[Random.Shared.Next(0, musicOptions.Length)];
+		AudioManager.Instance.PlayMusic(music);
 	}
 
 	public void LoadTestBench()
@@ -43,6 +53,8 @@ public partial class SceneLoader : Node2D
 		RemoveAllChildren();
 		TestBench testBench = Constants.TestBenchScene.Instantiate<TestBench>();
 		AddChild(testBench);
+
+		AudioManager.Instance.StopMusic();
 	}
 
 	public void LoadIsaacMode()
@@ -50,6 +62,8 @@ public partial class SceneLoader : Node2D
 		RemoveAllChildren();
 		MainGame mainGame = Constants.IsaaacModeScene.Instantiate<MainGame>();
 		AddChild(mainGame);
+		
+		AudioManager.Instance.StopMusic();
 	}
 
 	private void RemoveAllChildren()

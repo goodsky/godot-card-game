@@ -31,6 +31,9 @@ public static class Constants
 
 	public static class Audio
 	{
+		public static readonly AudioStream Music_Lobby = GD.Load<AudioStream>("res://assets/audio/music_card_game_menu.mp3");
+		public static readonly AudioStream Music_Game1 = GD.Load<AudioStream>("res://assets/audio/music_card_game_vib.mp3");
+		public static readonly AudioStream Music_Game2 = GD.Load<AudioStream>("res://assets/audio/music_card_game_alt.mp3");
 		public static readonly AudioStream BalloonSnap = GD.Load<AudioStream>("res://assets/audio/click-balloon-snap.mp3");
 		public static readonly AudioStream ClickSnap = GD.Load<AudioStream>("res://assets/audio/click-loose.mp3");
 		public static readonly AudioStream CardWhoosh = GD.Load<AudioStream>("res://assets/audio/woosh-6.ogg");

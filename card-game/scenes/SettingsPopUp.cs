@@ -65,7 +65,7 @@ public partial class SettingsPopUp : Control
 
 	private void UpdateMusicVolume(bool valueChanged)
 	{
-		// TODO: Add music
+		AudioManager.Instance.UpdateMusicVolume((float)MusicVolumeSlider.Value);
 	}
 
 	private void Click_MainMenu()
