@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json.Serialization;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -60,4 +61,36 @@ public struct CardInfo
 
     [JsonPropertyName("rarity")]
     public CardRarity Rarity { get; set; }
+}
+
+public static class CardInfoExtensions
+{
+    public static string GetCardSummary(this CardInfo cardInfo)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"[center][font_size=16]{cardInfo.Name}[/font_size][/center]");
+        sb.AppendLine($"[b]Rarity:[/b] {cardInfo.Rarity}");
+        sb.AppendLine($"[b]Cost:[/b] {cardInfo.BloodCost} Sacrifice{((int)cardInfo.BloodCost > 1 ? "s" : string.Empty)}");
+        sb.AppendLine($"[b]Attack:[/b] [color=red]{cardInfo.Attack}[/color]\t[b]Health:[/b] [color=blue]{cardInfo.Health}[/color]");
+        if (cardInfo.Abilities != null && cardInfo.Abilities.Count > 0)
+        {
+            var cardData = CardGenerator.LoadGeneratorData();
+            var abilityTooltips = cardData.Stats.AbilityTooltips;
+
+            sb.AppendLine(string.Empty);
+            foreach (var ability in cardInfo.Abilities)
+            {
+                if (abilityTooltips.TryGetValue(ability, out var tooltip))
+                {
+                    sb.AppendLine($"[u]{tooltip.Label}[/u]: {tooltip.Description}");
+                }
+                else
+                {
+                    sb.AppendLine($"[u]{ability}[/u]");
+                }
+            }
+        }
+
+        return sb.ToString();
+    }
 }

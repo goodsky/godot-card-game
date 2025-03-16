@@ -364,6 +364,7 @@ public partial class GameLobby : Control
                 continue;
 
             var card = Constants.CardButtonScene.Instantiate<CardButton>();
+            card.ShowTooltip = true;
             card.ShowCardBack = false;
             card.SetDisabled(true, fade: false);
             card.SetCard(cardInfo);
@@ -403,6 +404,7 @@ public partial class GameLobby : Control
         foreach (CardInfo cardInfo in newSacrificeCards)
         {
             var card = Constants.CardButtonScene.Instantiate<CardButton>();
+            card.ShowTooltip = false;
             card.ShowCardBack = false;
             card.SetDisabled(true, fade: false);
             card.SetCard(cardInfo);
@@ -465,6 +467,7 @@ public partial class GameLobby : Control
         foreach (CardInfo cardInfo in candidateCards)
         {
             var card = Constants.CardButtonScene.Instantiate<CardButton>();
+            card.ShowTooltip = true;
             card.ShowCardBack = false;
             card.SetCard(cardInfo);
             card.Pressed += () => DraftCard(cardInfo);
@@ -500,6 +503,7 @@ public partial class GameLobby : Control
         foreach (CardInfo cardInfo in candidateCards)
         {
             var card = Constants.CardButtonScene.Instantiate<CardButton>();
+            card.ShowTooltip = true;
             card.ShowCardBack = false;
             card.SetCard(cardInfo);
             card.Pressed += () => RemoveCard(cardInfo);

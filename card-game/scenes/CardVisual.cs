@@ -90,16 +90,23 @@ public partial class CardVisual : Node2D
 
 		for (int i = 0; i < AbilityLabels.Length; i++)
 		{
-			if (cardInfo.Abilities == null ||
-				i >= cardInfo.Abilities.Count ||
-				cardInfo.Abilities[i] == CardAbilities.None)
-			{
-				AbilityLabels[i].Text = string.Empty;
-			}
-			else
-			{
-				AbilityLabels[i].Text = cardInfo.Abilities[i].ToString();
-			}
+			var cardAbility = cardInfo.Abilities == null || i >= cardInfo.Abilities.Count
+				? CardAbilities.None
+				: cardInfo.Abilities[i];
+
+			AbilityLabels[i].Text = GetAbilityName(cardAbility);
 		}
+	}
+
+	private string GetAbilityName(CardAbilities ability)
+	{
+		var cardData = CardGenerator.LoadGeneratorData();
+		var abilityTooltips = cardData.Stats.AbilityTooltips;
+		if (abilityTooltips.TryGetValue(ability, out var tooltip))
+		{
+			return tooltip.Label;
+		}
+
+		return string.Empty;
 	}
 }

@@ -58,8 +58,19 @@ public static class CardGenerator
         [JsonPropertyName("ability_costs")]
         public Dictionary<string, int> AbilityCosts { get; set; }
 
+        [JsonPropertyName("ability_tooltips")]
+        public Dictionary<CardAbilities, AbilityTooltip> AbilityTooltips { get; set; }
+
         [JsonPropertyName("card_templates")]
         public CardTemplates Templates { get; set; }
+
+        public class AbilityTooltip
+        {
+            [JsonPropertyName("label")]
+            public string Label { get; set; }
+            [JsonPropertyName("description")]
+            public string Description { get; set; }
+        }
 
         public class CardTemplates
         {

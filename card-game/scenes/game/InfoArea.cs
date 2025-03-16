@@ -155,14 +155,8 @@ public partial class InfoArea : Node2D
 
 	public void SetCardInfo(CardInfo cardInfo, object owner = null)
 	{
-		var infoStr = new StringBuilder();
-		infoStr.AppendLine($"[center][font_size=16]{cardInfo.Name}[/font_size][/center]");
-		infoStr.AppendLine("");
-		infoStr.AppendLine($"Attack: {cardInfo.Attack}");
-		infoStr.AppendLine($"Defense: {cardInfo.Health}");
-		infoStr.AppendLine($"Cost: {cardInfo.BloodCost}");
-		infoStr.AppendLine($"Rarity: {cardInfo.Rarity}");
-		SetInfoBar(infoStr.ToString(), owner);
+		string cardSummary = cardInfo.GetCardSummary();
+		SetInfoBar(cardSummary, owner);
 	}
 
 	public void ResetInfoBar(object owner = null)

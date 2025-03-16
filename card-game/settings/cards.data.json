@@ -33,6 +33,20 @@
          "health": 1,
          "lethal": 3
       },
+      "ability_tooltips": {
+         "Flying": {
+            "label": "Flying",
+            "description": "attacks the opponent directly, bypassing any blocking cards."
+         },
+         "Tall": {
+            "label": "Tall",
+            "description": "can block attacks from flying cards."
+         },
+         "Lethal": { 
+            "label": "Lethal",
+            "description": "any attack damage will kill a blocking card."
+         }
+      },
       "card_templates": {
          "sacrifice": {
             "attack": 0,
