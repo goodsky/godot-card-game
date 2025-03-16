@@ -81,7 +81,7 @@ texture = ExtResource("9_ub7tx")
 
 [node name="Ability1" parent="CardFront" instance=ExtResource("2_1lmow")]
 position = Vector2(-25, 32)
-Text = "Guard"
+Text = "Ability1"
 MaxFontSize = 12
 TextBoxSize = Vector2(50, 17)
 Font = ExtResource("3_w7sdl")
@@ -90,7 +90,7 @@ VerticalAlignment = 1
 
 [node name="Ability2" parent="CardFront" instance=ExtResource("2_1lmow")]
 position = Vector2(-25, 45)
-Text = "Counter"
+Text = "Ability2"
 MaxFontSize = 12
 TextBoxSize = Vector2(50, 17)
 Font = ExtResource("3_w7sdl")

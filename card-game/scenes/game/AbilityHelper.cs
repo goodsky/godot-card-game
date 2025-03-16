@@ -1,6 +1,6 @@
 using System;
 
-public static class CombatHelper
+public static class AbilityHelper
 {
     public static bool IsAttacking(CardInfo? attacker, CardInfo? defender)
     {

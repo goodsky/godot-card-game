@@ -269,10 +269,10 @@ public class GameSimulator
             {
                 if (playerCard != null)
                 {
-                    int damage = CombatHelper.CardDamage(playerCard.Card, enemyCard?.Card);
+                    int damage = AbilityHelper.CardDamage(playerCard.Card, enemyCard?.Card);
                     state.PlayerCardPerformanceSummary?.DamageDealt(playerCard.Card, damage);
 
-                    if (CombatHelper.IsBlocked(playerCard.Card, enemyCard?.Card))
+                    if (AbilityHelper.IsBlocked(playerCard.Card, enemyCard?.Card))
                     {
                         enemyCard.DamageReceived += damage;
                         state.EnemyCardPerformanceSummary?.DamageReceived(enemyCard.Card, damage);
@@ -295,10 +295,10 @@ public class GameSimulator
             {
                 if (enemyCard != null)
                 {
-                    int damage = CombatHelper.CardDamage(enemyCard.Card, playerCard?.Card);
+                    int damage = AbilityHelper.CardDamage(enemyCard.Card, playerCard?.Card);
                     state.EnemyCardPerformanceSummary?.DamageDealt(enemyCard.Card, damage);
 
-                    if (CombatHelper.IsBlocked(enemyCard.Card, playerCard?.Card))
+                    if (AbilityHelper.IsBlocked(enemyCard.Card, playerCard?.Card))
                     {
                         playerCard.DamageReceived += damage;
                         state.PlayerCardPerformanceSummary?.DamageReceived(playerCard.Card, damage);
@@ -871,8 +871,8 @@ public class GameSimulator
                 {
                     if (playerCard != null)
                     {
-                        int damage = CombatHelper.CardDamage(playerCard.Card, enemyCard?.Card);
-                        if (CombatHelper.IsBlocked(playerCard.Card, enemyCard?.Card))
+                        int damage = AbilityHelper.CardDamage(playerCard.Card, enemyCard?.Card);
+                        if (AbilityHelper.IsBlocked(playerCard.Card, enemyCard?.Card))
                         {
                             analysis.EnemyCardDamageReceived += damage;
 
@@ -898,8 +898,8 @@ public class GameSimulator
 
                     if (enemyCard != null)
                     {
-                        int damage = CombatHelper.CardDamage(enemyCard.Card, playerCard?.Card);
-                        if (CombatHelper.IsBlocked(enemyCard.Card, playerCard?.Card))
+                        int damage = AbilityHelper.CardDamage(enemyCard.Card, playerCard?.Card);
+                        if (AbilityHelper.IsBlocked(enemyCard.Card, playerCard?.Card))
                         {
                             analysis.PlayerCardDamageReceived += damage;
 

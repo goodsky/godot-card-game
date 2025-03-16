@@ -318,13 +318,13 @@ public partial class GameBoard : Node2D
 			Card attackingCard = lane[attackingIndex].Card;
 			Card defendingCard = lane[defendingIndex].Card;
 
-			if (CombatHelper.IsAttacking(attackingCard?.Info, defendingCard?.Info))
+			if (AbilityHelper.IsAttacking(attackingCard?.Info, defendingCard?.Info))
 			{
-				int damage = CombatHelper.CardDamage(attackingCard?.Info, defendingCard?.Info);
+				int damage = AbilityHelper.CardDamage(attackingCard?.Info, defendingCard?.Info);
 
 				attackingCard.ZIndex = 10;
 				Vector2 startPosition = attackingCard.GlobalPosition;
-				if (CombatHelper.IsBlocked(attackingCard?.Info, defendingCard?.Info))
+				if (AbilityHelper.IsBlocked(attackingCard?.Info, defendingCard?.Info))
 				{
 					yield return attackingCard.LerpGlobalPositionCoroutine(lane[defendingIndex].GlobalPosition + defendingCardOffset, 0.08f);
 					GD.Print($"Dealt {damage} damage to {defendingCard.Info.Name}!");
